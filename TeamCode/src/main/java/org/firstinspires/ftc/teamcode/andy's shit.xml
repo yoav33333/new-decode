@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<Robot type="FirstInspires-FTC">
+    <LynxUsbDevice name="Control Hub Portal" serialNumber="(embedded)" parentModuleAddress="173">
+        <LynxModule name="Expansion Hub 2" port="2">
+            <Motor name="Low shooter" port="0" />
+            <Motor name="High shooter" port="1" />
+            <Motor name="Transfer" port="2" />
+            <Motor name="Intake" port="3" />
+            <AnalogInput name="Abs spin" port="1"/>
+            <AnalogInput name="Abs turret" port="3"/>
+        </LynxModule>
+        <LynxModule name="Control Hub" port="173">
+            <Motor name="rb" port="0" />
+            <Motor name="rf" port="1" />
+            <Motor name="lf" port="2" />
+            <Motor name="lb" port="3" />
+            <CRServo name="spindex" port="0" />
+            <Servo name="turretServo1" port="1" />
+            <Servo name="turretServo2" port="2" />
+            <Servo name="Hood servo" port="3" />
+            <LynxEmbeddedIMU name="imu" port="0" bus="0" />
+            <ColorSensor name="Lcolor" port="0" bus="1" />
+            <ColorSensor name="Rcolor" port="1" bus="2" />
+        </LynxModule>
+    </LynxUsbDevice>
+</Robot>
