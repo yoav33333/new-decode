@@ -9,17 +9,19 @@ import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.ho
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.hoodTarget
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.shootPowLUT
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.targetVelocity
+import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.veloControl
 import org.firstinspires.ftc.teamcode.Util.VelocityPid
+import kotlin.math.abs
 
 object ShooterHardware: Component {
     val shooterMotor1 = lazy{MotorEx("High shooter")}
     val shooterMotor2 = lazy{MotorEx("Low shooter").reversed()}
     val hoodServo1 = lazy{ ServoEx("Hood servo")}
-    val controller = VelocityPid(
-        ShooterVars.p,
-        ShooterVars.i,
-        ShooterVars.d
-    )
+//    val controller = VelocityPid(
+//        ShooterVars.p,
+//        ShooterVars.i,
+//        ShooterVars.d
+//    )
     fun setHoodPosition(position: Double) {
         hoodServo1.value.position = position
     }
@@ -39,26 +41,27 @@ object ShooterHardware: Component {
 
     fun setVelocity(velocity: Double) {
         targetVelocity = velocity
-        controller.targetVelocity = velocity
+//        veloControl.targetVelocity = velocity
     }
     fun atTargetVelocity(): Boolean {
-        return controller.atSetpoint()
+        return deltaThreshold < abs(getVelocity()-targetVelocity)
     }
     fun shoot(distance: Double){
         setVelocity(shootPowLUT.get(distance))
         hoodTarget = hoodLUT.get(distance)
     }
 
-    override fun preInit() {
-        controller.reset()
-
-    }
+//    override fun preInit() {
+//        controller.reset()
+//
+//    }
     fun update(){
         setHoodPosition(hoodTarget)
-        controller.setTolerance(deltaThreshold)
-        controller.targetVelocity = targetVelocity
-        controller.setPID(ShooterVars.p, ShooterVars.i, ShooterVars.d)
-        setPower(controller.calculate(getVelocity()))
+//        controller.setTolerance(deltaThreshold)
+        setPower(veloControl.calculate(targetVelocity, getVelocity()))
+//        controller.targetVelocity = targetVelocity
+//        controller.setPID(ShooterVars.p, ShooterVars.i, ShooterVars.d)
+//        setPower(controller.calculate(getVelocity()))
     }
     override fun postUpdate() {
         update()

@@ -26,13 +26,8 @@ import org.firstinspires.ftc.teamcode.Util.LoopTimer
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.LoopingCommand
 
 @TeleOp(group = "tuning")
-class SpinsexerTuner: NextFTCOpMode() {
+class SpinsexerTuner: TunerOpMode(SpindexerHardware) {
     init {
-        addComponents(
-            BindingsComponent,
-            SpindexerHardware,
-            MyTelemetry
-        )
         Gamepads.gamepad2.rightBumper
             .whenBecomesTrue(rotate(1))
         Gamepads.gamepad2.leftBumper
@@ -40,6 +35,4 @@ class SpinsexerTuner: NextFTCOpMode() {
         Gamepads.gamepad2.a.whenBecomesTrue { runIntakeSeq }
         LoopingCommand(InstantCommand{getColorInIntake()}).schedule()
     }
-
-
 }
