@@ -2,8 +2,8 @@ package org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem
 
 //import PoseKalmanFilter
 import com.pedropathing.geometry.Pose
-import com.pedropathing.math.Vector
 import dev.nextftc.core.components.Component
+import org.firstinspires.ftc.teamcode.Pedro.Constants.localizer
 
 import org.firstinspires.ftc.teamcode.Pedro.Tuning.follower
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveVars.trustLL
@@ -22,17 +22,19 @@ object DriveHardware: Component {
     fun setPoseEstimate(pose: Pose) {
         follower.pose = pose
     }
-    fun updatePoseEstimate(aprilTagPose: Pose?) {
-        // Always run prediction from dead wheels
-        filter.predict(getPoseEstimate())
-
-        // Vision update only when valid pose exists
-        if (aprilTagPose != null) {
-            filter.update(aprilTagPose)
-        }
-
-        // Push fused pose into the follower
-        setPoseEstimate(filter.getPose())
+    fun updatePoseEstimate(aprilTagPose: Pose?, timeStamp: Double) {
+//        // Always run prediction from dead wheels
+//        filter.predict(getPoseEstimate())
+//
+//        // Vision update only when valid pose exists
+//        if (aprilTagPose != null) {
+//            filter.update(aprilTagPose)
+//        }
+//
+//        // Push fused pose into the follower
+//        setPoseEstimate(filter.getPose())
+        if (aprilTagPose == null)return
+        localizer.value.addMeasurement(aprilTagPose, (timeStamp*1_000_000).toLong())
     }
 
 
@@ -41,8 +43,10 @@ object DriveHardware: Component {
 
     }
     override fun postUpdate() {
-
-        updatePoseEstimate(LimeLight.getPose())
+        LimeLight.getRes().let { (pose, time) ->
+            updatePoseEstimate(pose, time)
+        }
+//        updatePoseEstimate(LimeLight.getRes())
         vectorFromTarget = getPoseEstimate().asVector.minus(RobotVars.goalPos)
 
     }

@@ -1,30 +1,33 @@
 package org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem
 
+import com.bylazar.configurables.annotations.Configurable
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor
-import dev.nextftc.control.KineticState
 import dev.nextftc.core.components.Component
 import dev.nextftc.ftc.ActiveOpMode.hardwareMap
 import dev.nextftc.hardware.impl.CRServoEx
+import dev.nextftc.hardware.impl.ServoEx
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.MyTelemetry
-import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.controller
-import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.gain
+
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.greenRange
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.intakeSlot
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.purpleRange
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.targetPosition
-import org.firstinspires.ftc.teamcode.Util.AnglePID
 import org.firstinspires.ftc.teamcode.Util.AxonEncoder
+import org.firstinspires.ftc.teamcode.Util.FilteredColorSensor
 import org.firstinspires.ftc.teamcode.Util.SpindexerSlotState
 import org.firstinspires.ftc.teamcode.Util.SpindexerTracker
 import org.firstinspires.ftc.teamcode.Util.Util
 import kotlin.math.abs
 
 //TODO: Tune PIDF values
-//TODO: add color sensor integration
+//TODO: try hsv
+//TODO: implement low pass filter
+@Configurable
 object SpindexerHardware: Component {
     val spindexerEncoder = lazy { AxonEncoder("Abs spin") }
-    val spindexerServo = lazy { CRServoEx("spindex") }
-    val colorSensor1 = lazy { hardwareMap.get(NormalizedColorSensor::class.java, "Lcolor") }
-    val colorSensor2 = lazy { hardwareMap.get(NormalizedColorSensor::class.java, "Rcolor") }
+    val spindexerServo = lazy { ServoEx("spindex") }
+    @JvmField var colorSensor1 = lazy { FilteredColorSensor(hardwareMap.get(NormalizedColorSensor::class.java, "Lcolor")) }
+    @JvmField var colorSensor2 = lazy { FilteredColorSensor(hardwareMap.get(NormalizedColorSensor::class.java, "Rcolor")) }
     val tracker = SpindexerTracker()
 //    val anglePID = AnglePID(SpindexerVars.p, SpindexerVars.i, SpindexerVars.d, SpindexerVars.f)
 //    override fun preInit() {
@@ -34,11 +37,11 @@ object SpindexerHardware: Component {
 //    override fun postStartButtonPressed() {
 //        colorSensor1.value.gain = 0.2.toFloat()
 //        colorSensor2.value.gain = 0.2.toFloat()
+////    }
+//    fun setGain(gain: Double){
+//        colorSensor1.value.gain = gain.toFloat()
+//        colorSensor2.value.gain = gain.toFloat()
 //    }
-    fun setGain(gain: Double){
-        colorSensor1.value.gain = gain.toFloat()
-        colorSensor2.value.gain = gain.toFloat()
-    }
     fun isFull(): Boolean {
         return tracker.isFull()
     }
@@ -47,31 +50,22 @@ object SpindexerHardware: Component {
     }
 
     fun getColorInIntake(): SpindexerSlotState {
-        var colors = colorSensor1.value.normalizedColors
-        var red = colors.red
-        var blue = colors.blue
-        var green = colors.green
-        MyTelemetry.addData("Intake Color Sensor 1 Red", red)
-        MyTelemetry.addData("Intake Color Sensor 1 Blue", blue)
-        MyTelemetry.addData("Intake Color Sensor 1 Green", green)
-        if (greenRange.inRange(red, green, blue)) {
+        var hsv = colorSensor1.value.getHSV()
+
+        MyTelemetry.addData("color sensor 1", hsv.toString())
+        if (purpleRange.inRange(hsv)) {
             MyTelemetry.addData("Intake Color Sensor 1", "Purple")
             return SpindexerSlotState.PURPLE
-        } else if (greenRange.inRange(red, green, blue)) {
+        } else if (greenRange.inRange(hsv)) {
             MyTelemetry.addData("Intake Color Sensor 1", "Green")
             return SpindexerSlotState.GREEN
         } else {
-            var colors = colorSensor2.value.normalizedColors
-            var red = colors.red
-            var blue = colors.blue
-            var green = colors.green
-            MyTelemetry.addData("Intake Color Sensor 2 Red", red)
-            MyTelemetry.addData("Intake Color Sensor 2 Blue", blue)
-            MyTelemetry.addData("Intake Color Sensor 2 Green", green)
-            if (greenRange.inRange(red, green, blue)) {
+            var hsv = colorSensor2.value.getHSV()
+            MyTelemetry.addData("color sensor 2", hsv.toString())
+            if (purpleRange.inRange(hsv)) {
                 MyTelemetry.addData("Intake Color Sensor 2", "Purple")
                 return SpindexerSlotState.PURPLE
-            } else if (greenRange.inRange(red, green, blue)) {
+            } else if (greenRange.inRange(hsv)) {
                 MyTelemetry.addData("Intake Color Sensor 2", "Green")
                 return SpindexerSlotState.GREEN
             } else {
@@ -88,11 +82,11 @@ object SpindexerHardware: Component {
         }
         return false
     }
-    fun setPower(power: Double) {
-        spindexerServo.value.power = power
+    fun setPosition(position: Double) {
+        spindexerServo.value.position = position
     }
-    fun getPower(): Double{
-        return spindexerServo.value.power
+    fun getTargetPosition(): Double{
+        return spindexerServo.value.position
     }
 
     fun getPosition(): Double {
@@ -119,24 +113,28 @@ object SpindexerHardware: Component {
     fun isAtTargetPosition(): Boolean {
         return abs(getPosition() - targetPosition) < 5
     }
-
-    fun updatePid() {
-
-        setPower(
-            controller.calculate(targetPosition, getPosition())
-        )
+    fun angleToServoPos(angle: Double): Double {
+        return angle/2 / SpindexerVars.maxRotation
     }
+
+//    fun updatePid() {
+//
+//        setPower(
+//            controller.calculate(targetPosition, getPosition())
+//        )
+//    }
     override fun postUpdate() {
-        updatePid()
-        setGain(gain)
+//        updatePid()
+//        setGain(gain)
+        setPosition(angleToServoPos(targetPosition))
         MyTelemetry.addData("Spindexer Position", getPosition())
         MyTelemetry.addData("Spindexer Vol", spindexerEncoder.value.getVoltage())
-        MyTelemetry.addData("Spindexer Target", targetPosition)
-        MyTelemetry.addData("Spindexer power", getPower())
+        MyTelemetry.addData("Spindexer Target angle", targetPosition)
+        MyTelemetry.addData("Spindexer target pos", getTargetPosition())
         MyTelemetry.addData("Spindexer state", tracker.toString())
-        MyTelemetry.addData("Spindexer pid",
-            controller.calculate(targetPosition, getPosition())
-        )
+//        MyTelemetry.addData("Spindexer pid",
+//            controller.calculate(targetPosition, getPosition())
+//        )
     }
 
 }

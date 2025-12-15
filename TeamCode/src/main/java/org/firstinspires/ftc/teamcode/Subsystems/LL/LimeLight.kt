@@ -26,7 +26,7 @@ object LimeLight: Component {
         ll.value.start()
     }
 
-    fun getPose(): Pose?{
+    fun getRes(): Pair<Pose?, Double> {
         ll.value.updateRobotOrientation(TurretHardware.getGlobalHeading());
         val result: LLResult? = ll.value.getLatestResult()
         if (result != null) {
@@ -35,10 +35,10 @@ object LimeLight: Component {
                 MyTelemetry.addData("LL Pose", llPose.toString())
                 val poseWithOffsets = addOffsets(llPose)
                 MyTelemetry.addData("LL Pose with Offsets", poseWithOffsets.toString())
-                return poseWithOffsets
+                return Pair(poseWithOffsets, result.timestamp)
             }
         }
-        return null
+        return Pair(null,0.0)
     }
     fun addOffsets(pose: Pose): Pose {
         return rotationOffset(pose, TurretHardware.getEncoderPosition())
