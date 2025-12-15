@@ -51,22 +51,22 @@ public class Constants {
             .yVelocity(52.539635081616076)
             .useBrakeModeInTeleOp(true)
             .useVoltageCompensation(true)
-            .nominalVoltage(11);
+            .nominalVoltage(12);
 
     public static TwoWheelConstants deadWheelLocalizerConstants =
             new TwoWheelConstants()
                     .IMU_HardwareMapName("imu")
                     .IMU_Orientation(
                             new RevHubOrientationOnRobot(
-                                    RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
-                                    RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
+                                    RevHubOrientationOnRobot.LogoFacingDirection.BACKWARD,
+                                    RevHubOrientationOnRobot.UsbFacingDirection.DOWN
                             )
                     )
                     .forwardTicksToInches((2 * PI) / 8192)
                     .strafeTicksToInches((2 * PI) / 8192)
                     .forwardPodY(4.5)
                     .strafePodX(5.02)
-                    .strafeEncoder_HardwareMapName("rr")
+                    .strafeEncoder_HardwareMapName("rb")
                     .forwardEncoder_HardwareMapName("rf")
                     .strafeEncoderDirection(Encoder.REVERSE)
                     .forwardEncoderDirection(Encoder.REVERSE);
@@ -95,7 +95,8 @@ public class Constants {
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .mecanumDrivetrain(driveConstants)
-                .setLocalizer(localizer.getValue())
+//                .setLocalizer(localizer.getValue())
+                .twoWheelLocalizer(deadWheelLocalizerConstants)
                 .pathConstraints(pathConstraints)
                 .build();
     }

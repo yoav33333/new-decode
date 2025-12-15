@@ -22,6 +22,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHar
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.isFull
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.runTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.stopTransfer
+import org.firstinspires.ftc.teamcode.Util.UtilCommands.LoopingCommand
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.ParallelDeadlineGroupKill
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.ParallelRaceGroupKill
 import kotlin.time.Duration.Companion.seconds
@@ -30,7 +31,7 @@ object RobotCommands {
     val intakeCommand =
         SequentialGroup(
         ParallelRaceGroupKill(
-            IntakeCommands.intake,
+            LoopingCommand(IntakeCommands.intake),
             runIntakeSeq
             ),
             IfElseCommand(

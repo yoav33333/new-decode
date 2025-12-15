@@ -9,20 +9,22 @@ import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.intakeComma
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.shootingCommand
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterCommands
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.lockOnGoal
+import org.firstinspires.ftc.teamcode.Util.UtilCommands.LoopingCommand
 
 @TeleOp
 class ShittyTeleopRed: MegiddoOpMode(AllianceColor.RED) {
     init {
-        Gamepads.gamepad2.leftBumper
-            .whenBecomesTrue(intakeCommand)
+        Gamepads.gamepad1.leftBumper
+//            .whenBecomesTrue(intakeCommand)
             .whenBecomesFalse(IntakeCommands.stopIntake)
-        Gamepads.gamepad2.rightBumper
-            .whenBecomesTrue(shootingCommand)
+            .whenBecomesTrue(LoopingCommand(IntakeCommands.intake))
+//        Gamepads.gamepad2.rightBumper
+//            .whenBecomesTrue(shootingCommand)
 
 
     }
     override fun onStartButtonPressed() {
         DriveCommands.driverControlled.schedule()
-        lockOnGoal.schedule()
+//        lockOnGoal.schedule()
     }
 }

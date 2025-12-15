@@ -28,12 +28,12 @@ open class MegiddoOpMode(allianceColor: AllianceColor): NextFTCOpMode() {
             MyTelemetry,
             PedroComponent(Constants::createFollower),
             IntakeHardware,
-            TransferHardware,
-            SpindexerHardware,
-            ShooterHardware,
-            TurretHardware,
-            LimeLight,
-            Antony
+//            TransferHardware,
+//            SpindexerHardware,
+//            ShooterHardware,
+//            TurretHardware,
+//            LimeLight,
+//            Antony
         )
     }
 }

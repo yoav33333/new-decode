@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem
 
 import com.bylazar.configurables.annotations.Configurable
+import com.qualcomm.robotcore.hardware.ColorRangeSensor
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor
 import dev.nextftc.core.components.Component
 import dev.nextftc.ftc.ActiveOpMode.hardwareMap
@@ -26,8 +27,8 @@ import kotlin.math.abs
 object SpindexerHardware: Component {
     val spindexerEncoder = lazy { AxonEncoder("Abs spin") }
     val spindexerServo = lazy { ServoEx("spindex") }
-    @JvmField var colorSensor1 = lazy { FilteredColorSensor(hardwareMap.get(NormalizedColorSensor::class.java, "Lcolor")) }
-    @JvmField var colorSensor2 = lazy { FilteredColorSensor(hardwareMap.get(NormalizedColorSensor::class.java, "Rcolor")) }
+    @JvmField var colorSensor1 = lazy { FilteredColorSensor(hardwareMap.get(ColorRangeSensor::class.java, "Lcolor")) }
+    @JvmField var colorSensor2 = lazy { FilteredColorSensor(hardwareMap.get(ColorRangeSensor::class.java, "Rcolor")) }
     val tracker = SpindexerTracker()
 //    val anglePID = AnglePID(SpindexerVars.p, SpindexerVars.i, SpindexerVars.d, SpindexerVars.f)
 //    override fun preInit() {
