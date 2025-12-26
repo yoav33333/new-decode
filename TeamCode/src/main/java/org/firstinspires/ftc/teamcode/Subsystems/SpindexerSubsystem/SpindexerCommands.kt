@@ -13,6 +13,8 @@ import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHar
 import org.firstinspires.ftc.teamcode.Util.SpindexerSlotState
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.LoopingCommand
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.ParallelDeadlineGroupKill
+import org.firstinspires.ftc.teamcode.Util.UtilCommands.RepeatCommand
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 object SpindexerCommands {
@@ -46,13 +48,14 @@ object SpindexerCommands {
 
     val runIntakeCycle =
         ParallelGroup(
-            moveToIntakePosition,
             checkColorAndUpdate,
+            moveToIntakePosition,
+            Delay(0.4.seconds)
         )
     val runIntakeSeq=
         ParallelDeadlineGroupKill(
-            WaitUntil{isFull()},
-            LoopingCommand(runIntakeCycle),
+//            WaitUntil{isFull()},
+            RepeatCommand(runIntakeCycle, { !isFull() }),
         ).setRequirements(SpindexerHardware)
     val transferAll =
         SequentialGroup(

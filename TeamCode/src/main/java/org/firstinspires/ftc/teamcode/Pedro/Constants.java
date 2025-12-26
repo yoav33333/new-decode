@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Pedro;
 
+import static org.firstinspires.ftc.teamcode.Util.Util.mmToInches;
 import static java.lang.Math.PI;
 
 import com.pedropathing.control.FilteredPIDFCoefficients;
@@ -62,13 +63,13 @@ public class Constants {
                                     RevHubOrientationOnRobot.UsbFacingDirection.DOWN
                             )
                     )
-                    .forwardTicksToInches((2 * PI) / 8192)
-                    .strafeTicksToInches((2 * PI) / 8192)
-                    .forwardPodY(4.5)
-                    .strafePodX(5.02)
-                    .strafeEncoder_HardwareMapName("rb")
-                    .forwardEncoder_HardwareMapName("rf")
-                    .strafeEncoderDirection(Encoder.REVERSE)
+                    .forwardTicksToInches((mmToInches(35) * PI) / 8192)
+                    .strafeTicksToInches((mmToInches(35) * PI) / 8192)
+                    .forwardPodY(-mmToInches(210.0-42.5))
+                    .strafePodX(mmToInches(182.3-32))
+                    .strafeEncoder_HardwareMapName("lf")
+                    .forwardEncoder_HardwareMapName("lb")
+                    .strafeEncoderDirection(Encoder.FORWARD)
                     .forwardEncoderDirection(Encoder.REVERSE);
 //    public static FusionLocalizer createFusionLocalize(HardwareMap hardwareMap) {
 //        return new FusionLocalizer(

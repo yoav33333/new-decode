@@ -14,7 +14,8 @@ import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeCommands
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeHardware
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLight
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.MyTelemetry
-import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.shootingCommand
+import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.intakeCommand
+//import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.shootingCommand
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.rotate
@@ -30,6 +31,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware
 import org.firstinspires.ftc.teamcode.Util.LoopTimer
 import org.firstinspires.ftc.teamcode.Util.SpindexerSlotState
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.LoopingCommand
+import org.firstinspires.ftc.teamcode.Util.UtilCommands.RepeatCommand
 
 @TeleOp(group = "tuning")
 class SpinsexerTuner: TunerOpMode(SpindexerHardware) {
@@ -38,29 +40,31 @@ class SpinsexerTuner: TunerOpMode(SpindexerHardware) {
             .whenBecomesTrue(rotate(1))
         Gamepads.gamepad2.leftBumper
             .whenBecomesTrue(rotate(-1))
-        Gamepads.gamepad2.a.whenBecomesTrue { runIntakeSeq }
-        LoopingCommand(InstantCommand{getColorInIntake()}).schedule()
-        Gamepads.gamepad2.dpadUp.whenBecomesTrue { LoopingCommand(IntakeCommands.intake)}
+        Gamepads.gamepad2.a.whenBecomesTrue (intakeCommand )
+        RepeatCommand(InstantCommand{getColorInIntake()}).schedule()
+        Gamepads.gamepad2.dpadUp.whenBecomesTrue ( (IntakeCommands.intake))
+            .whenBecomesFalse(IntakeCommands.stopIntake)
+
 
     }
 
     override fun onUpdate() {
-        var hsv = colorSensor2.value.getHSV()
-        MyTelemetry.addData("color sensor 2", hsv.toString())
-        if (purpleRange.inRange(hsv)) {
-            MyTelemetry.addData("Intake Color Sensor 2", "Purple")
-//            return SpindexerSlotState.PURPLE
-        } else if (greenRange.inRange(hsv)) {
-            MyTelemetry.addData("Intake Color Sensor 2", "Green")
-//            return SpindexerSlotState.GREEN
-        } else {
-            MyTelemetry.addData("Intake Color Sensor 2", "Empty")
-//            return SpindexerSlotState.EMPTY
-        }
-        hsv = colorSensor2.value.getHSV()
-        MyTelemetry.addData("color sensor 2", hsv.toString())
-        hsv = colorSensor1.value.getHSV()
-
-        MyTelemetry.addData("color sensor 1", hsv.toString())
+//        var hsv = colorSensor2.value.getHSV()
+//        MyTelemetry.addData("color sensor 2", hsv.toString())
+//        if (purpleRange.inRange(hsv)) {
+//            MyTelemetry.addData("Intake Color Sensor 2", "Purple")
+////            return SpindexerSlotState.PURPLE
+//        } else if (greenRange.inRange(hsv)) {
+//            MyTelemetry.addData("Intake Color Sensor 2", "Green")
+////            return SpindexerSlotState.GREEN
+//        } else {
+//            MyTelemetry.addData("Intake Color Sensor 2", "Empty")
+////            return SpindexerSlotState.EMPTY
+//        }
+//        hsv = colorSensor2.value.getHSV()
+//        MyTelemetry.addData("color sensor 2", hsv.toString())
+//        hsv = colorSensor1.value.getHSV()
+//
+//        MyTelemetry.addData("color sensor 1", hsv.toString())
     }
 }

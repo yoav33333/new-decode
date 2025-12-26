@@ -8,6 +8,7 @@ import dev.nextftc.ftc.ActiveOpMode.hardwareMap
 import dev.nextftc.hardware.impl.CRServoEx
 import dev.nextftc.hardware.impl.ServoEx
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.MyTelemetry
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars
 
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.greenRange
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.intakeSlot
@@ -98,24 +99,29 @@ object SpindexerHardware: Component {
         val steps = tracker.stepsToState(color, pos)
         if (steps == null) return false
         rotate(steps)
+        colorSensor1.value.resetFilter()
+        colorSensor2.value.resetFilter()
         return true
     }
 
     fun moveEmptyToIntakePosition(): Boolean {
+
         return moveStateToPosition(SpindexerSlotState.EMPTY, SpindexerVars.intakeSlot)
     }
     fun moveColorToTransferPosition(color: SpindexerSlotState): Boolean {
         return moveStateToPosition(color, SpindexerVars.transferSlot)
     }
     fun rotate(steps: Int) {
-        targetPosition = Util.wrap360(steps * SpindexerVars.degreesPerSlot + targetPosition)
+        SpindexerVars.steps = (((SpindexerVars.steps + steps) % 5) + 5) % 5
+//        SpindexerVars.steps = (SpindexerVars.steps + steps)%5
+        targetPosition = Util.wrap360(SpindexerVars.steps * SpindexerVars.degreesPerSlot + SpindexerVars.offset)
         tracker.rotate(steps)
     }
     fun isAtTargetPosition(): Boolean {
         return abs(getPosition() - targetPosition) < 5
     }
     fun angleToServoPos(angle: Double): Double {
-        return angle/2 / SpindexerVars.maxRotation
+        return angle/ SpindexerVars.maxRotation
     }
 
 //    fun updatePid() {

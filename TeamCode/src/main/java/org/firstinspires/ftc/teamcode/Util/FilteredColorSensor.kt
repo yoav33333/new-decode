@@ -24,5 +24,10 @@ class FilteredColorSensor(val colorSensor: ColorRangeSensor)  {
             filterS.estimate(hsv[1].toDouble()),
             filterV.estimate(hsv[2].toDouble()))
     }
+    public fun resetFilter(){
+        filterH = MyLowPassFilter(hGain)
+        filterS = MyLowPassFilter(sGain)
+        filterV = MyLowPassFilter(vGain)
+    }
 
 }

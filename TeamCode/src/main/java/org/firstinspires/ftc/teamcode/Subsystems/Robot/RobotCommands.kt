@@ -25,42 +25,43 @@ import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferComma
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.LoopingCommand
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.ParallelDeadlineGroupKill
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.ParallelRaceGroupKill
+import org.firstinspires.ftc.teamcode.Util.UtilCommands.RepeatCommand
 import kotlin.time.Duration.Companion.seconds
 
 object RobotCommands {
     val intakeCommand =
         SequentialGroup(
         ParallelRaceGroupKill(
-            LoopingCommand(IntakeCommands.intake),
+            IntakeCommands.intake,
             runIntakeSeq
             ),
-            IfElseCommand(
-                {isFull()},
+//            IfElseCommand(
+//                {isFull()},
                 SequentialGroup(
                     outtake,
-                    Delay(.8.seconds),
+                    Delay(.5.seconds),
                     stopIntake
                 ),
-                NullCommand()
-            )
+//                NullCommand()
+//            )
         )
-    val shootingCommand =
-        ParallelDeadlineGroupKill(
-            SequentialGroup(
-                WaitUntil{isEmpty()},
-                Delay(0.5)
-            ),
-            SequentialGroup(
-                shoot(vectorFromTarget.magnitude),
-                IfElseCommand(
-                    { atTargetVelocity() },
-                    ParallelGroup(
-                        transferAll,
-                        runTransfer
-                    ),
-                    stopTransfer
-                )
-            )
-        )
+//    val shootingCommand =
+//        ParallelDeadlineGroupKill(
+//            SequentialGroup(
+//                WaitUntil{isEmpty()},
+//                Delay(0.5)
+//            ),
+//            SequentialGroup(
+//                shoot(vectorFromTarget.magnitude),
+//                IfElseCommand(
+//                    { atTargetVelocity() },
+//                    ParallelGroup(
+//                        transferAll,
+//                        runTransfer
+//                    ),
+//                    stopTransfer
+//                )
+//            )
+//        )
 
 }
