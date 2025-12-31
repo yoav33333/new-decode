@@ -33,7 +33,7 @@ object ShooterHardware: Component {
         shooterMotor2.value.power = power
     }
     fun getVelocity(): Double {
-        return shooterMotor1.value.velocity
+        return -shooterMotor1.value.velocity
     }
     fun getPosition(): Double {
         return shooterMotor1.value.currentPosition.toDouble()
@@ -44,11 +44,15 @@ object ShooterHardware: Component {
 //        veloControl.targetVelocity = velocity
     }
     fun atTargetVelocity(): Boolean {
-        return deltaThreshold < abs(getVelocity()-targetVelocity)
+        return deltaThreshold > abs(getVelocity()-targetVelocity)
     }
     fun shoot(distance: Double){
-        setVelocity(shootPowLUT.get(distance))
-        hoodTarget = hoodLUT.get(distance)
+//        setVelocity(shootPowLUT.get(distance))
+//        hoodTarget = hoodLUT.get(distance)
+        setVelocity(1200.0)
+    }
+    fun stopShooting(){
+        setVelocity(0.0)
     }
 
 //    override fun preInit() {
@@ -68,6 +72,7 @@ object ShooterHardware: Component {
 
         MyTelemetry.addData("Shooter position", getPosition())
         MyTelemetry.addData("Shooter velocity", getVelocity())
+        MyTelemetry.addData("Shooter target", targetVelocity)
         MyTelemetry.addData("Hood position", getHoodPosition())
     }
 

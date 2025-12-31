@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem
 import dev.nextftc.core.commands.utility.InstantCommand
 import dev.nextftc.extensions.pedro.PedroDriverControlled
 import dev.nextftc.ftc.Gamepads
-import org.firstinspires.ftc.teamcode.Pedro.Tuning.follower
+import dev.nextftc.extensions.pedro.PedroComponent.Companion.follower
 
 object DriveCommands {
     val driverControlled = PedroDriverControlled(
@@ -12,5 +12,5 @@ object DriveCommands {
         -Gamepads.gamepad1.rightStickX,
         false
     ).setRequirements(DriveHardware)
-    val resetIMU = InstantCommand{follower}
+    val resetIMU = InstantCommand{follower.pose = follower.pose.setHeading(0.0)}
 }

@@ -11,12 +11,13 @@ import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.offs
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.servoRange
 import org.firstinspires.ftc.teamcode.Util.AxonEncoder
 import org.firstinspires.ftc.teamcode.Util.Util.wrap360
+import java.lang.Math.toRadians
 import kotlin.math.atan
 
 object TurretHardware: Component {
     val servo1 = lazy { ServoEx("turretServo1") }
-    val servo2 = lazy { ServoEx("Abs turret") }
-    val turretEncoder = lazy { AxonEncoder("turretEnc") }
+    val servo2 = lazy { ServoEx("turretServo1") }
+    val turretEncoder = lazy { AxonEncoder("Abs turret") }
     fun setTargetPosition(position: Double) {
         servo1.value.position = position
         servo2.value.position = position
@@ -28,20 +29,21 @@ object TurretHardware: Component {
         return turretEncoder.value.getPosition() + offset
     }
     fun setTargetPositionFromDegrees(degrees: Double) {
-        var degrees = wrap360(degrees + offset)
-        if (degrees > servoRange){
-            degrees = if(degrees-servoRange > 5) servoRange else 0.0
-        }
-        val position = degrees / 360.0
+//        var degrees = wrap360(degrees + offset)
+//        if (degrees > servoRange){
+//            degrees = if(degrees-servoRange > 5) servoRange else 0.0
+//        }
+        var degrees=((degrees % servoRange) + servoRange) % servoRange
+        val position = degrees / servoRange
         setTargetPosition(position)
     }
     fun setTargetPositionFromGlobalDegrees(globalDegrees: Double) {
-        val baseHeading = DriveHardware.getPoseEstimate().heading
+        val baseHeading = toRadians(DriveHardware.getPoseEstimate().heading)
         val turretDegrees = wrap360(globalDegrees - baseHeading)
         setTargetPositionFromDegrees(turretDegrees)
     }
     fun getGlobalHeading(): Double {
-        val baseHeading = DriveHardware.getPoseEstimate().heading
+        val baseHeading = toRadians(DriveHardware.getPoseEstimate().heading)
         val turretHeading = getEncoderPosition()
         return baseHeading + turretHeading
     }
@@ -51,6 +53,7 @@ object TurretHardware: Component {
 
     override fun postUpdate() {
         MyTelemetry.addData("Turret Position", getPosition())
+        MyTelemetry.addData("Turret Vol", turretEncoder.value.getVoltage())
         MyTelemetry.addData("Turret Encoder Position", getEncoderPosition())
         MyTelemetry.addData("Turret Global Heading", getGlobalHeading())
     }

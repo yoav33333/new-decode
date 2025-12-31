@@ -14,4 +14,6 @@ import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHar
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.LoopingCommand
 
 @TeleOp(group = "tuning")
-class ShooterTuner: TunerOpMode(ShooterHardware) {}
+class ShooterTuner: TunerOpMode(ShooterHardware) {
+
+}

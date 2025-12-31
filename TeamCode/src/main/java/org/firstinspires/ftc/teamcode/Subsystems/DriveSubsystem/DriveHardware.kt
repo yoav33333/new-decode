@@ -5,7 +5,7 @@ import com.pedropathing.geometry.Pose
 import dev.nextftc.core.components.Component
 import org.firstinspires.ftc.teamcode.Pedro.Constants.localizer
 
-import org.firstinspires.ftc.teamcode.Pedro.Tuning.follower
+import dev.nextftc.extensions.pedro.PedroComponent.Companion.follower
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveVars.trustLL
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLight
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars

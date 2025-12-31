@@ -6,6 +6,7 @@ import dev.nextftc.core.commands.delays.WaitUntil
 import dev.nextftc.core.commands.groups.ParallelGroup
 import dev.nextftc.core.commands.groups.ParallelRaceGroup
 import dev.nextftc.core.commands.groups.SequentialGroup
+import dev.nextftc.core.commands.utility.InstantCommand
 import dev.nextftc.core.commands.utility.LambdaCommand
 import dev.nextftc.core.commands.utility.NullCommand
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeCommands
@@ -15,11 +16,13 @@ import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeHardware
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.vectorFromTarget
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterCommands.shoot
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware.atTargetVelocity
+import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware.stopShooting
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.runIntakeSeq
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.transferAll
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.getColorInIntake
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.isEmpty
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.isFull
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.resetSpindexer
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.runTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.stopTransfer
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.LoopingCommand
@@ -31,37 +34,40 @@ import kotlin.time.Duration.Companion.seconds
 object RobotCommands {
     val intakeCommand =
         SequentialGroup(
-        ParallelRaceGroupKill(
-            IntakeCommands.intake,
-            runIntakeSeq
+            ParallelDeadlineGroupKill(
+                WaitUntil { isFull() },
+                IntakeCommands.intake,
+                InstantCommand { resetSpindexer() },
+                RepeatCommand(runIntakeSeq)
             ),
 //            IfElseCommand(
 //                {isFull()},
-                SequentialGroup(
-                    outtake,
-                    Delay(.5.seconds),
-                    stopIntake
-                ),
+            SequentialGroup(
+                outtake,
+                Delay(.5.seconds),
+                InstantCommand { resetSpindexer() },
+                stopIntake
+            ),
 //                NullCommand()
 //            )
         )
-//    val shootingCommand =
-//        ParallelDeadlineGroupKill(
-//            SequentialGroup(
-//                WaitUntil{isEmpty()},
-//                Delay(0.5)
-//            ),
-//            SequentialGroup(
-//                shoot(vectorFromTarget.magnitude),
+    val shootingCommand =
+        ParallelDeadlineGroupKill(
+            SequentialGroup(
+                WaitUntil { isEmpty() },
+                Delay(0.5)
+            ),
+            SequentialGroup(
+                shoot(vectorFromTarget.magnitude),
 //                IfElseCommand(
-//                    { atTargetVelocity() },
-//                    ParallelGroup(
-//                        transferAll,
-//                        runTransfer
-//                    ),
-//                    stopTransfer
-//                )
-//            )
-//        )
+                WaitUntil { atTargetVelocity() },
+                ParallelGroup(
+                    transferAll,
+                    runTransfer
+                ),
+                stopTransfer,
+                InstantCommand { stopShooting() }
+            )
+        )
 
 }

@@ -40,23 +40,24 @@ object SpindexerCommands {
                 }
             }
         }
-        .setIsDone { SpindexerHardware.isAtTargetPosition()  }
+//        .setIsDone { SpindexerHardware.isAtTargetPosition()  }
         .setRequirements(SpindexerHardware)
     val checkColorAndUpdate = LambdaCommand()
         .setIsDone { checkIntakeColorAndUpdate() }
 
 
     val runIntakeCycle =
-        ParallelGroup(
+        SequentialGroup(
             checkColorAndUpdate,
             moveToIntakePosition,
-            Delay(0.4.seconds)
+//            Delay(0.05.seconds)\\\\
         )
     val runIntakeSeq=
-        ParallelDeadlineGroupKill(
+//        ParallelDeadlineGroupKill(
 //            WaitUntil{isFull()},
-            RepeatCommand(runIntakeCycle, { !isFull() }),
-        ).setRequirements(SpindexerHardware)
+            runIntakeCycle
+
+    //        ).setRequirements(SpindexerHardware)
     val transferAll =
         SequentialGroup(
             moveToTransferPositionLocking(RobotVars.randomization.value[0]),
@@ -65,5 +66,5 @@ object SpindexerCommands {
             Delay(SpindexerVars.spinDelay.seconds),
             moveToTransferPositionLocking(RobotVars.randomization.value[2]),
             Delay(SpindexerVars.spinDelay.seconds),
-        ).setRequirements(SpindexerHardware)
+        )
 }

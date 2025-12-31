@@ -1,85 +1,108 @@
 package org.firstinspires.ftc.teamcode.Util
 
+import kotlin.math.abs
+
 public enum class SpindexerSlotState {
     EMPTY,
     PURPLE,
     GREEN,
 }
-//0-2
+
 class SpindexerTracker {
-    private val data = Array<SpindexerSlotState>(3) { SpindexerSlotState.EMPTY }
-    private var offset = 0  // which physical chamber is "logical slot 0"
+    // HARDWARE CONSTANTS
+    private val TOTAL_SLOTS = 3
+    // The servo can only move between these absolute steps relative to startup (0)
+    private val MIN_LIMIT =0
+    private val MAX_LIMIT = 5
+
+    // Stores the state of the PHYSICAL slots (these don't move in the array, only the head moves)
+    private val data = Array<SpindexerSlotState>(TOTAL_SLOTS) { SpindexerSlotState.EMPTY }
+
+    // Tracks where the "intake head" is relative to the physical slots.
+    // 0 = Center, positive = CW, negative = CCW
+    private var currentHeadPos = 0
 
     val size get() = data.size
 
-    // Read logical slot
-    operator fun get(i: Int): SpindexerSlotState =
-        data[(i + offset).mod(size)]
-
-    // Write logical slot
-    operator fun set(i: Int, value: SpindexerSlotState) {
-        data[(i + offset).mod(size)] = value
+    // ACCESS LOGIC:
+    // We map a "relative" index (like 0 for the one in front of us) to the actual physical slot
+    private fun getPhysicalIndex(relativeIndex: Int): Int {
+        // We use modulo to wrap around the array, regardless of absolute position
+        return (currentHeadPos + relativeIndex).mod(size)
     }
 
-    // Rotate +1 = CW, -1 = CCW
-    fun rotate(steps: Int) {
-        offset = (offset + steps).mod(size)
+    // Get state relative to the current head position
+    operator fun get(relativeIndex: Int): SpindexerSlotState =
+        data[getPhysicalIndex(relativeIndex)]
+
+    // Set state relative to the current head position
+    operator fun set(relativeIndex: Int, value: SpindexerSlotState) {
+        data[getPhysicalIndex(relativeIndex)] = value
     }
-    fun isFull(): Boolean {
-        for (i in 0 until size) {
-            if (this[i] == SpindexerSlotState.EMPTY) {
-                return false
-            }
+
+    /**
+     * Updates the tracker with a physical move.
+     * @param steps Positive (CW) or Negative (CCW) movement.
+     */
+    fun move(steps: Int) {
+        val newPos = currentHeadPos + steps
+        // Safety clamp (though your hardware class should also prevent this)
+        if (newPos in MIN_LIMIT..MAX_LIMIT) {
+            currentHeadPos = newPos
         }
-        return true
     }
-    fun isEmpty(): Boolean {
-        for (i in 0 until size) {
-            if (this[i] != SpindexerSlotState.EMPTY) {
-                return false
-            }
+
+    fun setPose(pose: Int){
+        if (pose in MIN_LIMIT..MAX_LIMIT) {
+            currentHeadPos = pose
         }
-        return true
     }
-    // How many steps to get to the nearest slot with the given state
-    fun stepsToState(state: SpindexerSlotState, pos: Int): Int? {
-        var bestSteps: Int? = null
 
-        for (i in 0 until size) {
-            if (this[i] == state) {
-                // distance from pos to i in both directions
-                val cw  = (i - pos).mod(size)        // clockwise steps
-                val ccw = cw - size                  // counterclockwise steps (negative)
+    fun isFull(): Boolean = data.all { it != SpindexerSlotState.EMPTY }
+    fun isEmpty(): Boolean = data.all { it == SpindexerSlotState.EMPTY }
 
-                // pick the shorter of the two
-                val steps = if (kotlin.math.abs(ccw) < cw) ccw else cw
+    /**
+     * Finds the best VALID move to get a specific state to the target position.
+     * Unlike the old version, this respects the -2 to +2 limit.
+     */
+    fun stepsToState(state: SpindexerSlotState, targetRelativePos: Int): Int? {
+        var bestMove: Int? = null
 
-                // track the best solution
-                if (bestSteps == null || kotlin.math.abs(steps) < kotlin.math.abs(bestSteps)) {
-                    bestSteps = steps
+        // Iterate through all physical slots to find ones that match the requested state
+        for (physicalIndex in 0 until size) {
+            if (data[physicalIndex] == state) {
+
+                // We found a slot with the right color. Now we need to see if we can reach it.
+                // We need a 'move' such that:
+                // (currentHeadPos + move + targetRelativePos) wraps to physicalIndex
+
+                // We test every possible valid absolute position (-2 to 2)
+                for (possibleAbsPos in MIN_LIMIT..MAX_LIMIT) {
+
+                    // Does this absolute position align the head correctly?
+                    if ((possibleAbsPos + targetRelativePos).mod(size) == physicalIndex) {
+
+                        // It aligns! Now, what is the move required?
+                        val requiredMove = possibleAbsPos - currentHeadPos
+
+                        // Pick the shortest move if multiple valid options exist
+                        if (bestMove == null || abs(requiredMove) < abs(bestMove!!)) {
+                            bestMove = requiredMove
+                        }
+                    }
                 }
             }
         }
-
-        return bestSteps
+        return bestMove
     }
-
-
-    // Convenience helpers:
-    fun logicalToPhysical(i: Int): Int =
-        (i + offset).mod(size)
-
-    fun physicalToLogical(p: Int): Int =
-        (p - offset).mod(size)
 
     // Debug print
     override fun toString(): String {
-        return (0 until size).joinToString(prefix = "[", postfix = "]") {
-            when (this[it]) {
-                SpindexerSlotState.EMPTY -> "Empty"
-                SpindexerSlotState.PURPLE -> "Purple"
-                SpindexerSlotState.GREEN -> "Green"
-            }
+        return "Head:$currentHeadPos " + (0 until size).joinToString(prefix = "[", postfix = "]") {
+            // Display purely based on physical slots for debugging clarity
+            val state = data[it]
+            val marker = if (it == getPhysicalIndex(0)) "*" else "" // Mark current head
+            "$marker${state.name.take(1)}"
         }
     }
 }

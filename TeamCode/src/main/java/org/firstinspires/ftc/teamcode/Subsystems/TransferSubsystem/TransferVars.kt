@@ -4,5 +4,5 @@ import com.bylazar.configurables.annotations.Configurable
 
 @Configurable
 object TransferVars {
-    @JvmField var transferPower = 1.0
+    @JvmField var transferPower = -1.0
 }

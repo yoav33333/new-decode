@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.OpModes.tuners
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
+import dev.nextftc.core.commands.groups.ParallelGroup
 import dev.nextftc.core.commands.utility.InstantCommand
 import dev.nextftc.core.components.BindingsComponent
 import dev.nextftc.extensions.pedro.PedroComponent
@@ -19,17 +20,23 @@ import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.intakeComma
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.rotate
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.runIntakeCycle
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.runIntakeSeq
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.transferAll
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.colorSensor1
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.colorSensor2
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.getColorInIntake
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.tracker
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.greenRange
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.purpleRange
+import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.runTransfer
+import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.stopTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferHardware
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware
 import org.firstinspires.ftc.teamcode.Util.LoopTimer
 import org.firstinspires.ftc.teamcode.Util.SpindexerSlotState
+import org.firstinspires.ftc.teamcode.Util.SpindexerTracker
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.LoopingCommand
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.RepeatCommand
 
@@ -41,9 +48,16 @@ class SpinsexerTuner: TunerOpMode(SpindexerHardware) {
         Gamepads.gamepad2.leftBumper
             .whenBecomesTrue(rotate(-1))
         Gamepads.gamepad2.a.whenBecomesTrue (intakeCommand )
-        RepeatCommand(InstantCommand{getColorInIntake()}).schedule()
-        Gamepads.gamepad2.dpadUp.whenBecomesTrue ( (IntakeCommands.intake))
-            .whenBecomesFalse(IntakeCommands.stopIntake)
+        Gamepads.gamepad2.b.whenBecomesTrue (runIntakeCycle )
+        Gamepads.gamepad2.leftStickButton.whenBecomesTrue{tracker = SpindexerTracker()}
+        Gamepads.gamepad2.dpadDown.whenBecomesTrue(
+            ParallelGroup(
+                        transferAll,
+                        runTransfer
+                    ).then(stopTransfer))
+        RepeatCommand(InstantCommand { getColorInIntake() }).schedule()
+                        Gamepads . gamepad2 . dpadUp . whenBecomesTrue ((IntakeCommands.intake))
+                    .whenBecomesFalse(IntakeCommands.stopIntake)
 
 
     }
