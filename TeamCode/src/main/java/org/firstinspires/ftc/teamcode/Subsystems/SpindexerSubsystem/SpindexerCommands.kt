@@ -51,7 +51,7 @@ object SpindexerCommands {
             checkColorAndUpdate,
             moveToIntakePosition,
 //            Delay(0.05.seconds)\\\\
-        )
+        ).setRequirements(SpindexerHardware)
     val runIntakeSeq=
 //        ParallelDeadlineGroupKill(
 //            WaitUntil{isFull()},

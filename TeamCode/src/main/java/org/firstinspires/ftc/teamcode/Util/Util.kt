@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.Util
 
+import com.pedropathing.ftc.FTCCoordinates
 import com.pedropathing.ftc.InvertedFTCCoordinates
+import com.pedropathing.geometry.PedroCoordinates
 import com.pedropathing.geometry.Pose
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D
 
@@ -13,7 +15,7 @@ object Util {
         return ((angle % 360) + 360) % 360
     }
     fun pose3dToPose(pose3d: Pose3D): Pose {
-        return InvertedFTCCoordinates.INSTANCE.convertToPedro(Pose(pose3d.position.x, pose3d.position.y, pose3d.orientation.yaw))
+        return Pose(pose3d.position.x,pose3d.position.y,pose3d.orientation.yaw, FTCCoordinates.INSTANCE).getAsCoordinateSystem(PedroCoordinates.INSTANCE);
     }
     @JvmStatic fun mmToInches(mm: Double): Double {
         return mm / 25.4

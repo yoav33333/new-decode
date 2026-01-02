@@ -61,10 +61,11 @@ object RobotCommands {
                 shoot(vectorFromTarget.magnitude),
 //                IfElseCommand(
                 WaitUntil { atTargetVelocity() },
-                ParallelGroup(
+                runTransfer,
+//                ParallelGroup(
                     transferAll,
-                    runTransfer
-                ),
+
+//                ),
                 stopTransfer,
                 InstantCommand { stopShooting() }
             )

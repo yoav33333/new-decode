@@ -1,53 +1,227 @@
 package org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem
 
-//import PoseKalmanFilter
+import com.pedropathing.follower.Follower
 import com.pedropathing.geometry.Pose
+import com.pedropathing.paths.Path
+import com.pedropathing.paths.PathChain
+import com.pedropathing.util.PoseHistory
 import dev.nextftc.core.components.Component
-import org.firstinspires.ftc.teamcode.Pedro.Constants.localizer
-
 import dev.nextftc.extensions.pedro.PedroComponent.Companion.follower
-import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveVars.trustLL
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLight
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.vectorFromTarget
 import org.firstinspires.ftc.teamcode.Util.PoseKalmanFilter
+import org.firstinspires.ftc.teamcode.Util.Util.mmToInches
+import com.bylazar.field.PanelsField.field
+import com.bylazar.field.PanelsField.presets
+import com.bylazar.field.Style
+import kotlin.math.abs
 
-object DriveHardware: Component {
-    val filter = PoseKalmanFilter(Pose(0.0, 0.0, 0.0),
-        trustLL)
+object DriveHardware : Component {
+    val filter = PoseKalmanFilter(
+        initialPose = Pose(0.0, 0.0, 0.0),
+        processNoiseX = mmToInches(0.2),
+        processNoiseY = mmToInches(0.2),
+        processNoiseTheta = 0.005,
+        measurementNoiseX = mmToInches(15.0),
+        measurementNoiseY = mmToInches(15.0),
+        measurementNoiseTheta = 0.2 // Trusting vision heading more than your previous 2.0
+    )
 
-    fun getPoseEstimate(): Pose {
-        return follower.pose
-    }
+    fun getPoseEstimate(): Pose = follower.pose
+
     fun setPoseEstimate(pose: Pose) {
         follower.pose = pose
     }
-    fun updatePoseEstimate(aprilTagPose: Pose?, timeStamp: Double) {
-//        // Always run prediction from dead wheels
-//        filter.predict(getPoseEstimate())
-//
-//        // Vision update only when valid pose exists
-//        if (aprilTagPose != null) {
-//            filter.update(aprilTagPose)
-//        }
-//
-//        // Push fused pose into the follower
-//        setPoseEstimate(filter.getPose())
-        if (aprilTagPose == null)return
-        localizer.value.addMeasurement(aprilTagPose, (timeStamp*1_000_000).toLong())
+
+    @JvmStatic
+    fun updatePoseEstimate(aprilTagPose: Pose?, totalLatency: Double, dev: DoubleArray) {
+        val currentTime = System.currentTimeMillis()
+
+        // 1. Predict based on current movement
+        filter.predict(getPoseEstimate(), currentTime)
+
+        // 2. Update with AprilTag when available using latency look-back
+        if (aprilTagPose != null) {
+            // totalLatency is (capture + pipeline) in ms
+            val captureTime = (currentTime - totalLatency).toLong()
+
+            // Adjust trust based on Limelight's dev array [x, y, z, roll, pitch, yaw]
+            filter.updateMeasurementNoise(dev[0], dev[1], dev[5])
+
+            filter.updateWithLatency(aprilTagPose, captureTime)
+        }
+
+        // 3. Update the follower with the fused result
+        setPoseEstimate(filter.getPose())
     }
-
-
 
     override fun postInit() {
-
+        Drawing.init()
+        filter.reset(getPoseEstimate())
     }
-    override fun postUpdate() {
-        LimeLight.getRes().let { (pose, time) ->
-            updatePoseEstimate(pose, time)
-        }
-//        updatePoseEstimate(LimeLight.getRes())
-        vectorFromTarget = getPoseEstimate().asVector.minus(RobotVars.goalPos)
 
+    override fun postUpdate() {
+        // Fetch Limelight data and pass to our update method
+//        LimeLight.getRes().let { (pose, latency, dev) ->
+//            updatePoseEstimate(pose, latency, dev)
+//        }
+
+        Drawing.drawDebug(follower)
+
+        // Update target vector for automated scoring
+        vectorFromTarget = getPoseEstimate().asVector.minus(RobotVars.goalPos)
+    }
+}
+
+internal object Drawing {
+    const val ROBOT_RADIUS: Double = 9.0 // woah
+    private val panelsField = field
+
+    private val robotLook = Style(
+        "", "#3F51B5", 0.75
+    )
+    private val historyLook = Style(
+        "", "#4CAF50", 0.75
+    )
+
+    /**
+     * This prepares Panels Field for using Pedro Offsets
+     */
+    fun init() {
+        panelsField.setOffsets(presets.PEDRO_PATHING)
+    }
+
+    /**
+     * This draws everything that will be used in the Follower's telemetryDebug() method. This takes
+     * a Follower as an input, so an instance of the DashbaordDrawingHandler class is not needed.
+     *
+     * @param follower Pedro Follower instance.
+     */
+    fun drawDebug(follower: Follower) {
+        if (follower.getCurrentPath() != null) {
+            drawPath(follower.getCurrentPath(), robotLook)
+            val closestPoint =
+                follower.getPointFromPath(follower.getCurrentPath().getClosestPointTValue())
+            drawRobot(
+                Pose(
+                    closestPoint.getX(),
+                    closestPoint.getY(),
+                    follower.getCurrentPath()
+                        .getHeadingGoal(follower.getCurrentPath().getClosestPointTValue())
+                ), robotLook
+            )
+        }
+        drawPoseHistory(follower.getPoseHistory(), historyLook)
+        drawRobot(follower.getPose(), historyLook)
+
+        sendPacket()
+    }
+
+    /**
+     * This draws a robot at a specified Pose with a specified
+     * look. The heading is represented as a line.
+     *
+     * @param pose  the Pose to draw the robot at
+     * @param style the parameters used to draw the robot with
+     */
+    /**
+     * This draws a robot at a specified Pose. The heading is represented as a line.
+     *
+     * @param pose the Pose to draw the robot at
+     */
+    @JvmOverloads
+    fun drawRobot(pose: Pose?, style: Style = robotLook) {
+        if (pose == null || java.lang.Double.isNaN(pose.getX()) || java.lang.Double.isNaN(pose.getY()) || java.lang.Double.isNaN(
+                pose.getHeading()
+            )
+        ) {
+            return
+        }
+
+        panelsField.setStyle(style)
+        panelsField.moveCursor(pose.getX(), pose.getY())
+        panelsField.circle(ROBOT_RADIUS)
+
+        val v = pose.getHeadingAsUnitVector()
+        v.setMagnitude(v.getMagnitude() * ROBOT_RADIUS)
+        val x1 = pose.getX() + v.getXComponent() / 2
+        val y1 = pose.getY() + v.getYComponent() / 2
+        val x2 = pose.getX() + v.getXComponent()
+        val y2 = pose.getY() + v.getYComponent()
+
+        panelsField.setStyle(style)
+        panelsField.moveCursor(x1, y1)
+        panelsField.line(x2, y2)
+    }
+
+    /**
+     * This draws a Path with a specified look.
+     *
+     * @param path  the Path to draw
+     * @param style the parameters used to draw the Path with
+     */
+    fun drawPath(path: Path, style: Style) {
+        val points = path.getPanelsDrawingPoints()
+
+        for (i in points[0]!!.indices) {
+            for (j in points.indices) {
+                if (java.lang.Double.isNaN(points[j]!![i])) {
+                    points[j]!![i] = 0.0
+                }
+            }
+        }
+
+        panelsField.setStyle(style)
+        panelsField.moveCursor(points[0]!![0], points[0]!![1])
+        panelsField.line(points[1]!![0], points[1]!![1])
+    }
+
+    /**
+     * This draws all the Paths in a PathChain with a
+     * specified look.
+     *
+     * @param pathChain the PathChain to draw
+     * @param style     the parameters used to draw the PathChain with
+     */
+    fun drawPath(pathChain: PathChain, style: Style) {
+        for (i in 0..<pathChain.size()) {
+            drawPath(pathChain.getPath(i), style)
+        }
+    }
+
+    /**
+     * This draws the pose history of the robot.
+     *
+     * @param poseTracker the PoseHistory to get the pose history from
+     * @param style       the parameters used to draw the pose history with
+     */
+    /**
+     * This draws the pose history of the robot.
+     *
+     * @param poseTracker the PoseHistory to get the pose history from
+     */
+    @JvmOverloads
+    fun drawPoseHistory(poseTracker: PoseHistory, style: Style = historyLook) {
+        panelsField.setStyle(style)
+
+        val size = poseTracker.getXPositionsArray().size
+        for (i in 0..<size - 1) {
+            panelsField.moveCursor(
+                poseTracker.getXPositionsArray()[i],
+                poseTracker.getYPositionsArray()[i]
+            )
+            panelsField.line(
+                poseTracker.getXPositionsArray()[i + 1],
+                poseTracker.getYPositionsArray()[i + 1]
+            )
+        }
+    }
+
+    /**
+     * This tries to send the current packet to FTControl Panels.
+     */
+    fun sendPacket() {
+        panelsField.update()
     }
 }

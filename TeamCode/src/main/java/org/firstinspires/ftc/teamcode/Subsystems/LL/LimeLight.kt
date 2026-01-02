@@ -26,23 +26,24 @@ object LimeLight: Component {
         ll.value.start()
     }
 
-    fun getRes(): Pair<Pose?, Double> {
-        ll.value.updateRobotOrientation(TurretHardware.getGlobalHeading());
+    fun getRes(): Triple<Pose?, Double, DoubleArray> {
+//        ll.value.updateRobotOrientation(TurretHardware.getGlobalHeading());
         val result: LLResult? = ll.value.getLatestResult()
-        if (result != null) {
+        if (result != null && result.isValid()) {
             if (result.isValid()) {
                 val llPose = pose3dToPose(result.botpose)
                 MyTelemetry.addData("LL Pose", llPose.toString())
                 val poseWithOffsets = addOffsets(llPose)
                 MyTelemetry.addData("LL Pose with Offsets", poseWithOffsets.toString())
-                return Pair(poseWithOffsets, result.timestamp)
+                return Triple(poseWithOffsets, result.timestamp, result.stddevMt1)
             }
         }
-        return Pair(null,0.0)
+        return Triple(null,0.0, doubleArrayOf())
     }
     fun addOffsets(pose: Pose): Pose {
-        return rotationOffset(pose, TurretHardware.getEncoderPosition())
-            .plus(LimeLightVars.centerOfRotationOffset).plus(Pose())
+        return pose
+//        return rotationOffset(pose, 0.0)
+//            .plus(LimeLightVars.centerOfRotationOffset).plus(Pose())
     }
     fun rotationOffset(pose:Pose, theta: Double): Pose {
         val offsetX = offsetFromAxis * cos(theta)

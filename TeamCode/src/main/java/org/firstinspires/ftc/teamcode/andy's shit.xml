@@ -14,12 +14,12 @@
             <Motor name="rf" port="1" />
             <Motor name="lf" port="2" />
             <Motor name="lb" port="3" />
-            <CRServo name="spindex" port="0" />
+            <Servo name="spindex" port="0" />
             <Servo name="turretServo1" port="1" />
             <Servo name="turretServo2" port="2" />
             <Servo name="Hood servo" port="3" />
             <LynxEmbeddedIMU name="imu" port="0" bus="0" />
-            <ColorSensor name="Lcolor" port="0" bus="1" />
+            <ColorSensor name="Lcolor" port="2" bus="1" />
             <ColorSensor name="Rcolor" port="1" bus="2" />
         </LynxModule>
     </LynxUsbDevice>

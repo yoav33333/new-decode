@@ -62,6 +62,10 @@ object ShooterHardware: Component {
     fun update(){
         setHoodPosition(hoodTarget)
 //        controller.setTolerance(deltaThreshold)
+    if (atTargetVelocity()&& targetVelocity.toInt() ==0) {
+        setPower(0.0)
+        return
+    }
         setPower(veloControl.calculate(targetVelocity, getVelocity()))
 //        controller.targetVelocity = targetVelocity
 //        controller.setPID(ShooterVars.p, ShooterVars.i, ShooterVars.d)

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem
 
+import androidx.core.math.MathUtils.clamp
 import com.pedropathing.geometry.Pose
 import com.pedropathing.math.Vector
 import dev.nextftc.core.components.Component
@@ -16,7 +17,7 @@ import kotlin.math.atan
 
 object TurretHardware: Component {
     val servo1 = lazy { ServoEx("turretServo1") }
-    val servo2 = lazy { ServoEx("turretServo1") }
+    val servo2 = lazy { ServoEx("turretServo2") }
     val turretEncoder = lazy { AxonEncoder("Abs turret") }
     fun setTargetPosition(position: Double) {
         servo1.value.position = position
@@ -33,7 +34,7 @@ object TurretHardware: Component {
 //        if (degrees > servoRange){
 //            degrees = if(degrees-servoRange > 5) servoRange else 0.0
 //        }
-        var degrees=((degrees % servoRange) + servoRange) % servoRange
+        var degrees=clamp(degrees, 0.0, servoRange)
         val position = degrees / servoRange
         setTargetPosition(position)
     }

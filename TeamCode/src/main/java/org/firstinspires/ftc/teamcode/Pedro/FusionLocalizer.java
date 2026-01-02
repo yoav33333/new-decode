@@ -14,7 +14,7 @@ public class FusionLocalizer implements Localizer {
     private Pose currentPosition;
     private Pose currentVelocity;
     private Matrix P;      // Covariance
-    private final Matrix Q; // Process noise
+    private Matrix Q; // Process noise
     private final Matrix R; // Measurement noise
     private long lastUpdateTime = -1;
 
@@ -164,6 +164,14 @@ public class FusionLocalizer implements Localizer {
                 MathFunctions.normalizeAngle(previousPose.getHeading() + dTheta)
         );
     }
+    public void updateProcessNoise(double[] processStdDevs) {
+        this.Q = MatrixUtil.diagonal3(
+                processStdDevs[0]*processStdDevs[0],
+                processStdDevs[1]*processStdDevs[1],
+                processStdDevs[2]*processStdDevs[2]
+        );
+
+    }
 
     @Override
     public Pose getPose() { return currentPosition; }
@@ -184,9 +192,13 @@ public class FusionLocalizer implements Localizer {
     @Override
     public void setPose(Pose setPose) {
         currentPosition = setPose.copy();
-        deadReckoning.setPose(setPose);
-        poseHistory.lastEntry().setValue(setPose.copy());
+        deadReckoning.setPose(setPose);// FIX: Do not use setValue() on the entry.
+        // Instead, get the key of the last entry and put the new value back into the map.
+        if (!poseHistory.isEmpty()) {
+            poseHistory.put(poseHistory.lastKey(), setPose.copy());
+        }
     }
+
 
     @Override
     public double getTotalHeading() { return currentPosition.getHeading(); }

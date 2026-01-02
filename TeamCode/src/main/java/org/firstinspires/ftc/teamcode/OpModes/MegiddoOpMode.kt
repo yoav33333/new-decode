@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeHardware
 import org.firstinspires.ftc.teamcode.Pedro.Constants
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.MyTelemetry
 import org.firstinspires.ftc.teamcode.Subsystems.Antony
+import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveHardware
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLight
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.AllianceColor
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars
@@ -31,8 +32,9 @@ open class MegiddoOpMode(allianceColor: AllianceColor): NextFTCOpMode() {
             TransferHardware,
             SpindexerHardware,
             ShooterHardware,
-//            TurretHardware,
-//            LimeLight,
+            DriveHardware,
+            TurretHardware,
+            LimeLight,
 //            Antony
         )
     }

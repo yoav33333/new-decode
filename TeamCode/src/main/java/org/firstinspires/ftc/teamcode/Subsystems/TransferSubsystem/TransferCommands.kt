@@ -5,7 +5,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferHardw
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferVars.transferPower
 
 object TransferCommands {
-    val runTransfer = InstantCommand { setPower(transferPower) }.setRequirements(TransferHardware)
-    val stopTransfer = InstantCommand { setPower(0.0) }.setRequirements(TransferHardware)
+    val runTransfer = InstantCommand { setPower(transferPower) }
+    val stopTransfer = InstantCommand { setPower(0.0) }
 
 }

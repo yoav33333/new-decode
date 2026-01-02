@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.OpModes
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
+import dev.nextftc.core.commands.CommandManager
 import dev.nextftc.ftc.Gamepads
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveCommands
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveCommands.resetIMU
@@ -14,6 +15,8 @@ import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCom
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.runIntakeCycle
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.tracker
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.lockOnGoal
+import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.moveToAngle
+import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.setTargetPositionFromDegrees
 import org.firstinspires.ftc.teamcode.Util.SpindexerTracker
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.LoopingCommand
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.RepeatCommand
@@ -35,13 +38,25 @@ class ShittyTeleopRed: MegiddoOpMode(AllianceColor.RED) {
         Gamepads.gamepad1.b.whenBecomesTrue (shootingCommand )
         Gamepads.gamepad1.dpadDown.whenBecomesTrue (resetIMU )
 //        Gamepads.gamepad2.b.whenBecomesTrue (runIntakeCycle )
+//        Gamepads.gamepad2.y.whenBecomesTrue ()
+//        moveToAngle(270.0).schedule()
         Gamepads.gamepad2.leftStickButton.whenBecomesTrue{tracker = SpindexerTracker()}
 
 
 
     }
     override fun onStartButtonPressed() {
+//        setTargetPositionFromDegrees(0.0)
+
         DriveCommands.driverControlled.schedule()
 //        lockOnGoal.schedule()
+    }
+
+    override fun onInit() {
+        moveToAngle(270.0).schedule()
+    }
+
+    override fun onStop() {
+        CommandManager.cancelAll()
     }
 }

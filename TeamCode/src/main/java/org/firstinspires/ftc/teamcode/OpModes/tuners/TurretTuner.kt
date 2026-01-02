@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware
 class TurretTuner :TunerOpMode(TurretHardware,PedroComponent(Constants::createFollower),){
     init {
         Gamepads.gamepad2.a.whenBecomesTrue (moveToAngle(0.0))
+        Gamepads.gamepad2.y.whenBecomesTrue (moveToAngle(270.0))
         Gamepads.gamepad2.b.whenTrue (moveToGlobalAngle(0.0))
         Gamepads.gamepad2.dpadDown.whenBecomesTrue (resetIMU )
 

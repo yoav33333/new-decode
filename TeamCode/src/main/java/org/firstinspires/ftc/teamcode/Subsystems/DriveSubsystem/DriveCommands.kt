@@ -12,5 +12,5 @@ object DriveCommands {
         -Gamepads.gamepad1.rightStickX,
         false
     ).setRequirements(DriveHardware)
-    val resetIMU = InstantCommand{follower.pose = follower.pose.setHeading(0.0)}
+    val resetIMU = InstantCommand{follower.heading = 0.0}
 }

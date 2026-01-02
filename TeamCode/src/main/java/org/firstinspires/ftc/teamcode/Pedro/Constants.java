@@ -78,12 +78,12 @@ public class Constants {
 //                new double[]{1, 1, Math.toRadians(5)},
 //                5);
 //    }
-    public static Lazy<FusionLocalizer> localizer = kotlin.LazyKt.lazy(
-            ()-> new FusionLocalizer(
-                new TwoWheelLocalizer(ActiveOpMode.hardwareMap(), deadWheelLocalizerConstants),
-                new double[]{0.05, 0.05, Math.toRadians(0.05)},
-            new double[]{1, 1, Math.toRadians(5)},
-            5));
+//    public static Lazy<FusionLocalizer> localizer = kotlin.LazyKt.lazy(
+//            ()-> new FusionLocalizer(
+//                new TwoWheelLocalizer(ActiveOpMode.hardwareMap(), deadWheelLocalizerConstants),
+//                new double[]{0.05, 0.05, Math.toRadians(0.05)},
+//            new double[]{1, 1, Math.toRadians(5)},
+//            5));
 
 
     public static PathConstraints pathConstraints = new PathConstraints(
