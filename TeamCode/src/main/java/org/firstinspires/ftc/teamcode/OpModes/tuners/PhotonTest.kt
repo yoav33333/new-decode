@@ -20,7 +20,7 @@ import org.firstinspires.ftc.teamcode.Util.SpindexerTracker
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.RepeatCommand
 
 @TeleOp(group = "tuning")
-class SpinsexerTuner: TunerOpMode(SpindexerHardware, Photon) {
+class PhotonTest: TunerOpMode(SpindexerHardware, Photon) {
     init {
         Gamepads.gamepad2.rightBumper
             .whenBecomesTrue(rotate(1))
@@ -31,33 +31,16 @@ class SpinsexerTuner: TunerOpMode(SpindexerHardware, Photon) {
         Gamepads.gamepad2.leftStickButton.whenBecomesTrue{tracker = SpindexerTracker()}
         Gamepads.gamepad2.dpadDown.whenBecomesTrue(
             ParallelGroup(
-                        transferAll,
-                        runTransfer
-                    ).then(stopTransfer))
+                transferAll,
+                runTransfer
+            ).then(stopTransfer))
         RepeatCommand(InstantCommand { getColorInIntake() }).schedule()
-                        Gamepads . gamepad2 . dpadUp . whenBecomesTrue ((IntakeCommands.intake))
-                    .whenBecomesFalse(IntakeCommands.stopIntake)
+        Gamepads . gamepad2 . dpadUp . whenBecomesTrue ((IntakeCommands.intake))
+            .whenBecomesFalse(IntakeCommands.stopIntake)
 
 
     }
 
     override fun onUpdate() {
-//        var hsv = colorSensor2.value.getHSV()
-//        MyTelemetry.addData("color sensor 2", hsv.toString())
-//        if (purpleRange.inRange(hsv)) {
-//            MyTelemetry.addData("Intake Color Sensor 2", "Purple")
-////            return SpindexerSlotState.PURPLE
-//        } else if (greenRange.inRange(hsv)) {
-//            MyTelemetry.addData("Intake Color Sensor 2", "Green")
-////            return SpindexerSlotState.GREEN
-//        } else {
-//            MyTelemetry.addData("Intake Color Sensor 2", "Empty")
-////            return SpindexerSlotState.EMPTY
-//        }
-//        hsv = colorSensor2.value.getHSV()
-//        MyTelemetry.addData("color sensor 2", hsv.toString())
-//        hsv = colorSensor1.value.getHSV()
-//
-//        MyTelemetry.addData("color sensor 1", hsv.toString())
     }
 }
