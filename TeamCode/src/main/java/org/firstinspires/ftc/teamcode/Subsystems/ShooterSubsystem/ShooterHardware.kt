@@ -5,6 +5,7 @@ import dev.nextftc.hardware.impl.MotorEx
 import dev.nextftc.hardware.impl.ServoEx
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.MyTelemetry
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.deltaThreshold
+import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.f
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.hoodLUT
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.hoodTarget
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.shootPowLUT
@@ -62,14 +63,18 @@ object ShooterHardware: Component {
     fun update(){
         setHoodPosition(hoodTarget)
 //        controller.setTolerance(deltaThreshold)
-    if (atTargetVelocity()&& targetVelocity.toInt() ==0) {
+    if (targetVelocity.toInt() ==0) {
         setPower(0.0)
         return
     }
-        setPower(veloControl.calculate(targetVelocity, getVelocity()))
+        setPower(veloControl.calculate(targetVelocity, getVelocity())+f)
 //        controller.targetVelocity = targetVelocity
 //        controller.setPID(ShooterVars.p, ShooterVars.i, ShooterVars.d)
 //        setPower(controller.calculate(getVelocity()))
+    }
+
+    override fun preInit() {
+        setPower(0.0)
     }
     override fun postUpdate() {
         update()
@@ -78,6 +83,7 @@ object ShooterHardware: Component {
         MyTelemetry.addData("Shooter velocity", getVelocity())
         MyTelemetry.addData("Shooter target", targetVelocity)
         MyTelemetry.addData("Hood position", getHoodPosition())
+        MyTelemetry.addData("at target vel", atTargetVelocity())
     }
 
 }

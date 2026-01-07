@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Util
 
 import android.graphics.Color
 import com.ThermalEquilibrium.homeostasis.Filters.FilterAlgorithms.LowPassFilter
+import com.qualcomm.hardware.rev.RevColorSensorV3
 import com.qualcomm.robotcore.hardware.ColorRangeSensor
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor
 class HSV(var h: Double, var s: Double, var v: Double){
@@ -9,7 +10,7 @@ class HSV(var h: Double, var s: Double, var v: Double){
         return "H: $h, S: $s, V: $v"
     }
 }
-class FilteredColorSensor(val colorSensor: ColorRangeSensor)  {
+class FilteredColorSensor(val colorSensor: RevColorSensorV3)  {
     var hGain = 0.99
     var sGain = 0.99
     var vGain = 0.99
@@ -20,9 +21,9 @@ class FilteredColorSensor(val colorSensor: ColorRangeSensor)  {
     fun getHSV(): HSV {
 //        colorSensor.
         Color.colorToHSV(colorSensor.normalizedColors.toColor(), hsv)
-        return HSV(filterH.estimate(hsv[0].toDouble()),
-            filterS.estimate(hsv[1].toDouble()),
-            filterV.estimate(hsv[2].toDouble()))
+        return HSV(hsv[0].toDouble(),
+            hsv[1].toDouble(),
+            hsv[2].toDouble())
     }
     public fun resetFilter(){
         filterH = MyLowPassFilter(hGain)

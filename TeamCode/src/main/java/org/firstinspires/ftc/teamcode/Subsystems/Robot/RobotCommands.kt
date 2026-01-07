@@ -51,6 +51,7 @@ object RobotCommands {
 //                NullCommand()
 //            )
         )
+
     val shootingCommand =
         ParallelDeadlineGroupKill(
             SequentialGroup(
@@ -58,12 +59,19 @@ object RobotCommands {
                 Delay(0.5)
             ),
             SequentialGroup(
+                stopTransfer,
+
+
                 shoot(vectorFromTarget.magnitude),
 //                IfElseCommand(
+                transferAll(
+                    SequentialGroup(
                 WaitUntil { atTargetVelocity() },
-                runTransfer,
+                        runTransfer
+                    )
+                ),
 //                ParallelGroup(
-                    transferAll,
+
 
 //                ),
                 stopTransfer,

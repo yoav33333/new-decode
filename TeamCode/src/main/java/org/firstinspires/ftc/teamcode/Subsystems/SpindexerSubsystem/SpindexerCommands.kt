@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem
 
+import androidx.core.util.Supplier
+import dev.nextftc.core.commands.Command
 import dev.nextftc.core.commands.delays.Delay
 import dev.nextftc.core.commands.delays.WaitUntil
 import dev.nextftc.core.commands.groups.ParallelDeadlineGroup
@@ -10,6 +12,7 @@ import dev.nextftc.core.commands.utility.LambdaCommand
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.checkIntakeColorAndUpdate
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.isFull
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.delayMul
 import org.firstinspires.ftc.teamcode.Util.SpindexerSlotState
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.LoopingCommand
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.ParallelDeadlineGroupKill
@@ -50,6 +53,7 @@ object SpindexerCommands {
         SequentialGroup(
             checkColorAndUpdate,
             moveToIntakePosition,
+            Delay(0.3.seconds),
 //            Delay(0.05.seconds)\\\\
         ).setRequirements(SpindexerHardware)
     val runIntakeSeq=
@@ -58,13 +62,18 @@ object SpindexerCommands {
             runIntakeCycle
 
     //        ).setRequirements(SpindexerHardware)
-    val transferAll =
+    fun transferAll(startWhen: Command) =
         SequentialGroup(
+
             moveToTransferPositionLocking(RobotVars.randomization.value[0]),
+            startWhen,
             Delay(SpindexerVars.spinDelay.seconds),
             moveToTransferPositionLocking(RobotVars.randomization.value[1]),
-            Delay(SpindexerVars.spinDelay.seconds),
+            Delay(SpindexerVars.spinDelay.seconds*delayMul),
             moveToTransferPositionLocking(RobotVars.randomization.value[2]),
-            Delay(SpindexerVars.spinDelay.seconds),
+            Delay(1.seconds),
+//            Delay(SpindexerVars.spinDelay.seconds),
+//            Delay(SpindexerVars.spinDelay.seconds),
+//            Delay(SpindexerVars.spinDelay.seconds),
         )
 }

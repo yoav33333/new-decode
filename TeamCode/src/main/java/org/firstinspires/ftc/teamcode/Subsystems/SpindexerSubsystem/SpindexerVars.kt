@@ -23,10 +23,11 @@ object SpindexerVars {
     @JvmField var degreesPerSlot = 65
     @JvmField var intakeSlot = 0
     @JvmField var transferSlot = 1
-    @JvmField var spinDelay = 0.8
-    @JvmField var offset = 5.0
-    @JvmField var purpleRange = HSVRange(140.0,1000.0,0.0,1000.0,0.0,1000.0)
-    @JvmField var greenRange = HSVRange(80.0,140.0,0.0,1000.0,0.0,1000.0)
+    @JvmField var spinDelay = 0.4
+    @JvmField var delayMul = 1.0
+    @JvmField var offset = 19.5
+    @JvmField var purpleRange = HSVRange(190.0,1000.0,0.0,1000.0,0.0,1000.0)
+    @JvmField var greenRange = HSVRange(125.0,190.0,0.0,1000.0,0.0,1000.0)
 //    @JvmField var distThreshold = 30
     @JvmField var defaultColor = SpindexerSlotState.PURPLE
 

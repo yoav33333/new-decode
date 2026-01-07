@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Subsystems.Robot
 
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
+import dev.nextftc.core.commands.CommandManager
 import dev.nextftc.core.components.Component
 import dev.nextftc.ftc.ActiveOpMode
 import java.util.Objects
@@ -13,6 +14,10 @@ object MyTelemetry : Component{
         data[key] = value
     }
 
+    override fun preInit() {
+        CommandManager.cancelAll()
+
+    }
     override fun postWaitForStart() {
         update()
     }

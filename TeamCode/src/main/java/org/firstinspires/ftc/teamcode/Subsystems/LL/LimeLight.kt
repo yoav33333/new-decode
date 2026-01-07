@@ -32,6 +32,7 @@ object LimeLight: Component {
         if (result != null && result.isValid()) {
             if (result.isValid()) {
                 val llPose = pose3dToPose(result.botpose)
+                MyTelemetry.addData("LL Pose TRUE", result.botpose)
                 MyTelemetry.addData("LL Pose", llPose.toString())
                 val poseWithOffsets = addOffsets(llPose)
                 MyTelemetry.addData("LL Pose with Offsets", poseWithOffsets.toString())

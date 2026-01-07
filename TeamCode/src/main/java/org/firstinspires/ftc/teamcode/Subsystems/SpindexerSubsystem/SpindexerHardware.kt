@@ -1,11 +1,13 @@
 package org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem
 
 import com.bylazar.configurables.annotations.Configurable
+import com.qualcomm.hardware.rev.RevColorSensorV3
 import com.qualcomm.robotcore.hardware.ColorRangeSensor
 import dev.nextftc.core.components.Component
 import dev.nextftc.ftc.ActiveOpMode.hardwareMap
 import dev.nextftc.hardware.impl.ServoEx
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.MyTelemetry
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.delayMul
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.greenRange
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.intakeSlot
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.purpleRange
@@ -16,13 +18,14 @@ import org.firstinspires.ftc.teamcode.Util.SpindexerSlotState
 import org.firstinspires.ftc.teamcode.Util.SpindexerTracker
 import org.firstinspires.ftc.teamcode.Util.Util
 import kotlin.math.abs
+import kotlin.math.max
 
 @Configurable
 object SpindexerHardware: Component {
     val spindexerEncoder = lazy { AxonEncoder("Abs spin") }
     val spindexerServo = lazy { ServoEx("spindex") }
-    @JvmField var colorSensor1 = lazy { FilteredColorSensor(hardwareMap.get(ColorRangeSensor::class.java, "Lcolor")) }
-    @JvmField var colorSensor2 = lazy { FilteredColorSensor(hardwareMap.get(ColorRangeSensor::class.java, "Rcolor")) }
+    @JvmField var colorSensor1 = lazy { FilteredColorSensor(hardwareMap.get(RevColorSensorV3::class.java, "Lcolor")) }
+    @JvmField var colorSensor2 = lazy { FilteredColorSensor(hardwareMap.get(RevColorSensorV3::class.java, "Rcolor")) }
 
     var tracker = SpindexerTracker()
 
@@ -92,7 +95,7 @@ object SpindexerHardware: Component {
             // or we simply can't perform the action.
             return false
         }
-
+        delayMul = max(1.0,steps/1.5)
         rotate(steps)
         colorSensor1.value.resetFilter()
         colorSensor2.value.resetFilter()
@@ -105,6 +108,13 @@ object SpindexerHardware: Component {
     fun moveColorToTransferPosition(color: SpindexerSlotState): Boolean {
         if(moveStateToPosition(color, SpindexerVars.transferSlot)){
             tracker[SpindexerVars.transferSlot] = SpindexerSlotState.EMPTY
+            return true
+        }
+        return false
+    }
+    fun moveColorToTransferPositionOff(color: SpindexerSlotState): Boolean {
+        if(moveStateToPosition(color, SpindexerVars.transferSlot+1)){
+//            tracker[SpindexerVars.transferSlot] = SpindexerSlotState.EMPTY
             return true
         }
         return false
