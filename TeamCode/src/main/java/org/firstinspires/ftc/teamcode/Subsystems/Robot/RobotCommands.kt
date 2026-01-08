@@ -11,8 +11,13 @@ import dev.nextftc.core.commands.utility.LambdaCommand
 import dev.nextftc.core.commands.utility.NullCommand
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeCommands
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeCommands.outtake
+import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeCommands.smartIntake
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeCommands.stopIntake
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeHardware
+import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeHardware.getVel
+import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeHardware.setPower
+import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeVars.intakePower
+import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeVars.outtakeThreshold
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.vectorFromTarget
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterCommands.shoot
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware.atTargetVelocity
@@ -23,60 +28,60 @@ import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHar
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.isEmpty
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.isFull
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.resetSpindexer
+import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.reverseTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.runTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.stopTransfer
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.LoopingCommand
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.ParallelDeadlineGroupKill
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.ParallelRaceGroupKill
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.RepeatCommand
+import kotlin.math.abs
 import kotlin.time.Duration.Companion.seconds
 
 object RobotCommands {
     val intakeCommand =
         SequentialGroup(
+            IntakeCommands.stopIntake,
             ParallelDeadlineGroupKill(
                 WaitUntil { isFull() },
-                IntakeCommands.intake,
+//                smartIntake,
                 InstantCommand { resetSpindexer() },
-                RepeatCommand(runIntakeSeq)
+                RepeatCommand(runIntakeSeq),
+                RepeatCommand(InstantCommand{
+                    MyTelemetry.addData("running","")
+                    if (abs(getVel()) <outtakeThreshold) setPower(-intakePower)
+                else setPower(intakePower)})
             ),
-//            IfElseCommand(
-//                {isFull()},
             SequentialGroup(
+                InstantCommand{smartIntake.cancel()},
                 outtake,
                 Delay(.5.seconds),
                 InstantCommand { resetSpindexer() },
                 stopIntake
             ),
-//                NullCommand()
-//            )
         )
 
     val shootingCommand =
         ParallelDeadlineGroupKill(
             SequentialGroup(
                 WaitUntil { isEmpty() },
-                Delay(0.5)
+                Delay(0.5),
+                InstantCommand { stopShooting() }
             ),
             SequentialGroup(
                 stopTransfer,
-
-
                 shoot(vectorFromTarget.magnitude),
-//                IfElseCommand(
                 transferAll(
                     SequentialGroup(
                 WaitUntil { atTargetVelocity() },
                         runTransfer
                     )
                 ),
-//                ParallelGroup(
-
-
-//                ),
+                InstantCommand { stopShooting() },
+                reverseTransfer,
+                Delay(0.2),
                 stopTransfer,
-                InstantCommand { stopShooting() }
             )
-        )
+        ).then(InstantCommand { stopShooting() })
 
 }

@@ -24,12 +24,7 @@ import org.firstinspires.ftc.teamcode.Util.UtilCommands.RepeatCommand
 @TeleOp
 class ShittyTeleopRed: MegiddoOpMode(AllianceColor.RED) {
     init {
-//        Gamepads.gamepad1.leftBumper
-////            .whenBecomesTrue(intakeCommand)
-//            .whenBecomesFalse(IntakeCommands.stopIntake)
-//            .whenBecomesTrue(RepeatCommand(IntakeCommands.intake))
-//        Gamepads.gamepad2.rightBumper
-//            .whenBecomesTrue(shootingCommand)
+
         Gamepads.gamepad2.rightBumper
             .whenBecomesTrue(rotate(1))
         Gamepads.gamepad2.leftBumper
@@ -37,10 +32,6 @@ class ShittyTeleopRed: MegiddoOpMode(AllianceColor.RED) {
         Gamepads.gamepad1.a.whenBecomesTrue (intakeCommand )
         Gamepads.gamepad1.b.whenBecomesTrue (shootingCommand )
         Gamepads.gamepad1.dpadDown.whenBecomesTrue (resetIMU )
-//        Gamepads.gamepad2.b.whenBecomesTrue (runIntakeCycle )
-//        Gamepads.gamepad2.y.whenBecomesTrue ()
-//        moveToAngle(270.0).schedule()
-        Gamepads.gamepad2.leftStickButton.whenBecomesTrue{tracker = SpindexerTracker()}
 
 
 

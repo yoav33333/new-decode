@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem
 
 import androidx.core.util.Supplier
 import dev.nextftc.core.commands.Command
+import dev.nextftc.core.commands.conditionals.IfElseCommand
 import dev.nextftc.core.commands.delays.Delay
 import dev.nextftc.core.commands.delays.WaitUntil
 import dev.nextftc.core.commands.groups.ParallelDeadlineGroup
@@ -9,6 +10,10 @@ import dev.nextftc.core.commands.groups.ParallelGroup
 import dev.nextftc.core.commands.groups.SequentialGroup
 import dev.nextftc.core.commands.utility.InstantCommand
 import dev.nextftc.core.commands.utility.LambdaCommand
+import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeCommands.intake
+import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeCommands.outtake
+import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeCommands.smartIntake
+import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeHardware
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.checkIntakeColorAndUpdate
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.isFull
@@ -53,7 +58,10 @@ object SpindexerCommands {
         SequentialGroup(
             checkColorAndUpdate,
             moveToIntakePosition,
-            Delay(0.3.seconds),
+//            IfElseCommand({ IntakeHardware.getVel()<400 }
+//                ,outtake, intake),
+//            smartIntake,
+            Delay(0.5.seconds),
 //            Delay(0.05.seconds)\\\\
         ).setRequirements(SpindexerHardware)
     val runIntakeSeq=

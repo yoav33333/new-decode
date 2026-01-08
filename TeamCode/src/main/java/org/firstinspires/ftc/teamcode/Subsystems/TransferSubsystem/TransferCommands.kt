@@ -6,6 +6,6 @@ import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferVars.
 
 object TransferCommands {
     val runTransfer = InstantCommand { setPower(transferPower) }
+    val reverseTransfer = InstantCommand { setPower(-transferPower) }
     val stopTransfer = InstantCommand { setPower(0.0) }
-
 }

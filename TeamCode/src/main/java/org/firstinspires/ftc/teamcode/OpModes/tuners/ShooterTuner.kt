@@ -5,6 +5,4 @@ import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardwar
 //import org.firstinspires.ftc.teamcode.Subsystems.Robot.Photon
 
 @TeleOp(group = "tuning")
-class ShooterTuner: TunerOpMode(ShooterHardware) {
-
-}
+class ShooterTuner: TunerOpMode(ShooterHardware) {}
