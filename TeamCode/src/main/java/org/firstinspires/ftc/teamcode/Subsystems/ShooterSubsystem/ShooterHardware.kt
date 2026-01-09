@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem
 
+import androidx.core.math.MathUtils.clamp
 import dev.nextftc.core.components.Component
 import dev.nextftc.hardware.impl.MotorEx
 import dev.nextftc.hardware.impl.ServoEx
@@ -24,7 +25,7 @@ object ShooterHardware: Component {
 //        ShooterVars.d
 //    )
     fun setHoodPosition(position: Double) {
-        hoodServo1.value.position = position
+        hoodServo1.value.position = clamp(position,0.0,0.52)
     }
     fun getHoodPosition(): Double {
         return hoodServo1.value.position
@@ -48,9 +49,10 @@ object ShooterHardware: Component {
         return deltaThreshold > abs(getVelocity()-targetVelocity)
     }
     fun shoot(distance: Double){
-//        setVelocity(shootPowLUT.get(distance))
-//        hoodTarget = hoodLUT.get(distance)
-        setVelocity(1200.0)
+        val distance = clamp(distance, 66.8, 156.4)
+        setVelocity(shootPowLUT.get(distance))
+        hoodTarget = hoodLUT.get(distance)
+//        setVelocity(1200.0)
     }
     fun stopShooting(){
         setVelocity(0.0)

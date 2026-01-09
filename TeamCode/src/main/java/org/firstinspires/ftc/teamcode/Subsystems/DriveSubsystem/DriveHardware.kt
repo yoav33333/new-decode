@@ -67,7 +67,7 @@ object DriveHardware : Component {
 //            updatePoseEstimate(pose, latency, dev)
 //        }
 
-        Drawing.drawDebug(follower)
+//        Drawing.drawDebug(follower)
 
         // Update target vector for automated scoring
         vectorFromTarget = getPoseEstimate().asVector.minus(RobotVars.goalPos)

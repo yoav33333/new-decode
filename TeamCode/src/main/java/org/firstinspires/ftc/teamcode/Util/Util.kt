@@ -14,9 +14,16 @@ object Util {
     fun wrap360(angle: Int): Int {
         return ((angle % 360) + 360) % 360
     }
-    fun pose3dToPose(pose3d: Pose3D): Pose {
-        return Pose(pose3d.position.x,pose3d.position.y,pose3d.orientation.yaw, FTCCoordinates.INSTANCE).getAsCoordinateSystem(PedroCoordinates.INSTANCE);
+    fun pose3dToPose(pose3d: Pose): Pose {
+        return Pose(pose3d.y+72,144-(pose3d.x+72),pose3d.heading)
     }
+    fun pose3DMetersToInches(pose3d: Pose3D): Pose {
+        return Pose(pose3d.position.x * 39.3701,
+            pose3d.position.y * 39.3701,
+            pose3d.orientation.yaw,
+            FTCCoordinates.INSTANCE)
+    }
+
     @JvmStatic fun mmToInches(mm: Double): Double {
         return mm / 25.4
     }

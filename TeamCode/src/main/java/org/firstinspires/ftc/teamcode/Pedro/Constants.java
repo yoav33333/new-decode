@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Pedro;
 
+import static org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveVars.measurementVariance;
+import static org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveVars.processVariance;
 import static org.firstinspires.ftc.teamcode.Util.Util.mmToInches;
 import static java.lang.Math.PI;
 
@@ -17,6 +19,8 @@ import com.pedropathing.paths.PathConstraints;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+
+import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveVars;
 
 import dev.nextftc.ftc.ActiveOpMode;
 import kotlin.Lazy;
@@ -78,12 +82,14 @@ public class Constants {
 //                new double[]{1, 1, Math.toRadians(5)},
 //                5);
 //    }
-//    public static Lazy<FusionLocalizer> localizer = kotlin.LazyKt.lazy(
-//            ()-> new FusionLocalizer(
-//                new TwoWheelLocalizer(ActiveOpMode.hardwareMap(), deadWheelLocalizerConstants),
-//                new double[]{0.05, 0.05, Math.toRadians(0.05)},
-//            new double[]{1, 1, Math.toRadians(5)},
-//            5));
+    public static Lazy<FusionLocalizer> localizer = kotlin.LazyKt.lazy(
+            ()-> new FusionLocalizer(
+                new TwoWheelLocalizer(ActiveOpMode.hardwareMap(), deadWheelLocalizerConstants),
+                DriveVars.P,
+            processVariance,
+                    measurementVariance,
+                    500
+            ));
 
 
     public static PathConstraints pathConstraints = new PathConstraints(
@@ -96,8 +102,8 @@ public class Constants {
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .mecanumDrivetrain(driveConstants)
-//                .setLocalizer(localizer.getValue())
-                .twoWheelLocalizer(deadWheelLocalizerConstants)
+                .setLocalizer(localizer.getValue())
+//                .twoWheelLocalizer(deadWheelLocalizerConstants)
                 .pathConstraints(pathConstraints)
                 .build();
     }

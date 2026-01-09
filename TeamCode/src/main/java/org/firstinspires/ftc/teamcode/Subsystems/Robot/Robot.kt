@@ -8,13 +8,13 @@ import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.goalPosRed
 object Robot: Component {
     override fun preInit() {
         RobotVars.goalPos =( if (allianceColor == AllianceColor.RED) goalPosRed else goalPosBlue)
-        RobotVars.goalPos =( goalPosBlue)
+//        RobotVars.goalPos =( goalPosBlue)
     }
 
     override fun preUpdate() {
         MyTelemetry.addData("Goal Pos", RobotVars.goalPos)
         MyTelemetry.addData("Alliance Color", allianceColor)
-        MyTelemetry.addData("distance from goal", RobotVars.vectorFromTarget.magnitude)
+//        MyTelemetry.addData("distance from goal", RobotVars.vectorFromTarget.magnitude)
     }
 
 }

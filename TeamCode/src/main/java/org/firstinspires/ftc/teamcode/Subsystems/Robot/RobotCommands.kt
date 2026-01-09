@@ -18,6 +18,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeHardware.
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeHardware.setPower
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeVars.intakePower
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeVars.outtakeThreshold
+import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.vectorFromTarget
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterCommands.shoot
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware.atTargetVelocity
@@ -70,7 +71,7 @@ object RobotCommands {
             ),
             SequentialGroup(
                 stopTransfer,
-                shoot(vectorFromTarget.magnitude),
+                shoot{LimeLightVars.smartDist},
                 transferAll(
                     SequentialGroup(
                 WaitUntil { atTargetVelocity() },

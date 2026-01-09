@@ -16,13 +16,13 @@ import kotlin.math.sqrt
 class PoseKalmanFilter(
     initialPose: Pose,
     // Process noise - trust in dead wheels (inches and radians)
-    private var processNoiseX: Double = 0.01,
-    private var processNoiseY: Double = 0.01,
-    private var processNoiseTheta: Double = 0.005,
+    public var processNoiseX: Double = 0.01,
+    public var processNoiseY: Double = 0.01,
+    public var processNoiseTheta: Double = 0.005,
     // Measurement noise - uncertainty in AprilTag (inches and radians)
-    private var measurementNoiseX: Double = 0.5,
-    private var measurementNoiseY: Double = 0.5,
-    private var measurementNoiseTheta: Double = 0.02
+    public var measurementNoiseX: Double = 0.5,
+    public var measurementNoiseY: Double = 0.5,
+    public var measurementNoiseTheta: Double = 0.02
 ) {
     // State estimate [x, y, theta]
     private var state = doubleArrayOf(initialPose.x, initialPose.y, initialPose.heading)
@@ -50,6 +50,12 @@ class PoseKalmanFilter(
         updateMeasurementNoise(measurementNoiseX, measurementNoiseY, measurementNoiseTheta)
     }
 
+    fun isOutlier(pose:Pose, threshold: Double): Boolean{
+        val deltaX = abs(pose.x - state[0])
+        val deltaY = abs(pose.y - state[1])
+//        val deltaTheta = abs(normalizeAngle(pose.heading - state[2]))
+        return sqrt(deltaX * deltaX + deltaY * deltaY)>threshold
+    }
     /**
      * Prediction step using dead wheel odometry.
      * @param currentOdoPose The current pose from the localizer
