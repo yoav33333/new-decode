@@ -4,11 +4,13 @@ import androidx.core.math.MathUtils.clamp
 import dev.nextftc.core.components.Component
 import dev.nextftc.hardware.impl.MotorEx
 import dev.nextftc.hardware.impl.ServoEx
+import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.MyTelemetry
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.deltaThreshold
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.f
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.hoodLUT
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.hoodTarget
+import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.runShooter
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.shootPowLUT
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.targetVelocity
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.veloControl
@@ -43,36 +45,34 @@ object ShooterHardware: Component {
 
     fun setVelocity(velocity: Double) {
         targetVelocity = velocity
-//        veloControl.targetVelocity = velocity
     }
+
     fun atTargetVelocity(): Boolean {
         return deltaThreshold > abs(getVelocity()-targetVelocity)
     }
     fun shoot(distance: Double){
+        if (ShooterVars.disableAutoShooter) return
         val distance = clamp(distance, 66.8, 156.4)
         setVelocity(shootPowLUT.get(distance))
         hoodTarget = hoodLUT.get(distance)
-//        setVelocity(1200.0)
     }
     fun stopShooting(){
-        setVelocity(0.0)
+        runShooter = false
     }
 
-//    override fun preInit() {
-//        controller.reset()
-//
-//    }
     fun update(){
+        if (runShooter){
+            shoot(LimeLightVars.smartDist)
+        }
+        else{
+            targetVelocity = 0.0
+        }
         setHoodPosition(hoodTarget)
-//        controller.setTolerance(deltaThreshold)
     if (targetVelocity.toInt() ==0) {
         setPower(0.0)
         return
     }
         setPower(veloControl.calculate(targetVelocity, getVelocity())+f)
-//        controller.targetVelocity = targetVelocity
-//        controller.setPID(ShooterVars.p, ShooterVars.i, ShooterVars.d)
-//        setPower(controller.calculate(getVelocity()))
     }
 
     override fun preInit() {
@@ -80,7 +80,6 @@ object ShooterHardware: Component {
     }
     override fun postUpdate() {
         update()
-
         MyTelemetry.addData("Shooter position", getPosition())
         MyTelemetry.addData("Shooter velocity", getVelocity())
         MyTelemetry.addData("Shooter target", targetVelocity)

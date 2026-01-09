@@ -14,6 +14,8 @@ import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterCommand
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.rotate
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.runIntakeCycle
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.tracker
+import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.runTransfer
+import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.stopTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.lockOnGoal
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.moveToAngle
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.setTargetPositionFromDegrees
@@ -24,11 +26,19 @@ import org.firstinspires.ftc.teamcode.Util.UtilCommands.RepeatCommand
 @TeleOp
 class ShittyTeleopRed: MegiddoOpMode(AllianceColor.RED) {
     init {
-
+        //Operator controls(Fail safes)
         Gamepads.gamepad2.rightBumper
             .whenBecomesTrue(rotate(1))
         Gamepads.gamepad2.leftBumper
             .whenBecomesTrue(rotate(-1))
+        Gamepads.gamepad2.dpadUp.whenBecomesTrue (runTransfer )
+            .whenBecomesFalse(stopTransfer )
+        Gamepads.gamepad2.leftStickButton.whenBecomesTrue{tracker = SpindexerTracker()}
+        Gamepads.gamepad2.dpadDown.whenBecomesTrue((IntakeCommands.intake))
+            .whenBecomesFalse(IntakeCommands.stopIntake)
+
+
+        //Driver controls
         Gamepads.gamepad1.a.whenBecomesTrue (intakeCommand )
         Gamepads.gamepad1.b.whenBecomesTrue (shootingCommand )
         Gamepads.gamepad1.dpadDown.whenBecomesTrue (resetIMU )
@@ -37,10 +47,7 @@ class ShittyTeleopRed: MegiddoOpMode(AllianceColor.RED) {
 
     }
     override fun onStartButtonPressed() {
-//        setTargetPositionFromDegrees(0.0)
-
         DriveCommands.driverControlled.schedule()
-//        lockOnGoal.schedule()
     }
 
     override fun onInit() {

@@ -10,8 +10,8 @@ import org.firstinspires.ftc.teamcode.Util.InterpLUT
 object ShooterVars {
     @JvmField var shootPowLUT = createShooterLut()
     @JvmField var hoodLUT = createHoodLUT()
-//    @JvmField var p = 0.0
-//    @JvmField var i = 0.0
+    @JvmField var runShooter = true
+    @JvmField var disableAutoShooter = false
     @JvmField var f = 0.62
     @JvmField var hoodTarget = 0.0
     @JvmField var targetVelocity = 0.0

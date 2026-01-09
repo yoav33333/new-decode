@@ -71,7 +71,7 @@ object RobotCommands {
             ),
             SequentialGroup(
                 stopTransfer,
-                shoot{LimeLightVars.smartDist},
+                shoot,
                 transferAll(
                     SequentialGroup(
                 WaitUntil { atTargetVelocity() },

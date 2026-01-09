@@ -43,6 +43,4 @@ class PhotonTest: TunerOpMode(SpindexerHardware, Photon) {
 
     }
 
-    override fun onUpdate() {
-    }
 }
