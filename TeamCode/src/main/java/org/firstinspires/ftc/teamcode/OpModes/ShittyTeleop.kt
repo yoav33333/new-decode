@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.intakeComma
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.shootingCommand
 //import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.shootingCommand
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterCommands
+import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterCommands.shoot
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.rotate
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.runIntakeCycle
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.tracker
@@ -39,8 +40,10 @@ class ShittyTeleopRed: MegiddoOpMode(AllianceColor.RED) {
 
 
         //Driver controls
-        Gamepads.gamepad1.a.whenBecomesTrue (intakeCommand )
-        Gamepads.gamepad1.b.whenBecomesTrue (shootingCommand )
+        Gamepads.gamepad1.rightBumper.whenBecomesTrue (intakeCommand )
+        Gamepads.gamepad1.leftBumper.whenBecomesTrue (shootingCommand )
+        //pre speed up
+        Gamepads.gamepad1.a.whenBecomesTrue (shoot )
         Gamepads.gamepad1.dpadDown.whenBecomesTrue (resetIMU )
 
 
