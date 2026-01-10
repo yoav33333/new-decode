@@ -65,6 +65,8 @@ object RobotCommands {
     val shootingCommand =
         ParallelDeadlineGroupKill(
             SequentialGroup(
+                InstantCommand{intakeCommand.cancel()},
+                stopIntake,
                 WaitUntil { isEmpty() },
                 Delay(0.5),
                 InstantCommand { stopShooting() }
