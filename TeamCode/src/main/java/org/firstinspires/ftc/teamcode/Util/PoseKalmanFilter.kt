@@ -1,161 +1,223 @@
 package org.firstinspires.ftc.teamcode.Util
 
 import com.pedropathing.geometry.Pose
-import java.util.TreeMap
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.sqrt
 
 /**
- * Kalman Filter for fusing dead wheel odometry with AprilTag vision.
- * Features:
- * 1. Delta-based prediction (prevents fighting raw odometry)
- * 2. Latency compensation (TreeMap buffer for historical look-back)
- * 3. Dynamic noise updates
+ * Kalman Filter for fusing dead wheel odometry with AprilTag vision
+ *
+ * Usage:
+ * ```
+ * val filter = KalmanFilter(
+ *     initialPose = Pose(0.0, 0.0, 0.0),
+ *     processNoiseX = 1.0,        // mm - tune based on dead wheel accuracy
+ *     processNoiseY = 1.0,        // mm
+ *     processNoiseTheta = 0.005,  // radians (~0.3 degrees)
+ *     measurementNoiseX = 10.0,   // mm - tune based on AprilTag accuracy
+ *     measurementNoiseY = 10.0,   // mm
+ *     measurementNoiseTheta = 0.02 // radians (~1 degree)
+ * )
+ *
+ * // In your control loop:
+ * fun loop() {
+ *     // Get current pose from dead wheels
+ *     val deadWheelPose = getDeadWheelPose() // your odometry calculation
+ *     filter.predict(deadWheelPose)
+ *
+ *     // Update with AprilTag when available
+ *     val aprilTagPose = getAprilTagPose() // may be null
+ *     if (aprilTagPose != null && !filter.isOutlier(aprilTagPose)) {
+ *         filter.update(aprilTagPose)
+ *     }
+ *
+ *     // Get fused pose - use this as your robot's position
+ *     val robotPose = filter.getPose()
+ * }
+ * ```
  */
 class PoseKalmanFilter(
     initialPose: Pose,
-    // Process noise - trust in dead wheels (inches and radians)
-    public var processNoiseX: Double = 0.01,
-    public var processNoiseY: Double = 0.01,
+    // Process noise - how much we trust the dead wheels (in mm and radians)
+    public var processNoiseX: Double = 1.0,
+    public var processNoiseY: Double = 1.0,
     public var processNoiseTheta: Double = 0.005,
-    // Measurement noise - uncertainty in AprilTag (inches and radians)
-    public var measurementNoiseX: Double = 0.5,
-    public var measurementNoiseY: Double = 0.5,
+    // Measurement noise - uncertainty in AprilTag measurements (in mm and radians)
+    public var measurementNoiseX: Double = 10.0,
+    public var measurementNoiseY: Double = 10.0,
     public var measurementNoiseTheta: Double = 0.02
 ) {
     // State estimate [x, y, theta]
     private var state = doubleArrayOf(initialPose.x, initialPose.y, initialPose.heading)
 
-    // Track previous odometry to calculate deltas
-    private var lastDeadWheelPose: Pose? = null
-
-    // Error covariance matrix (3x3)
+    // Error covariance matrix (3x3) - starts with high uncertainty
     private var P = Array(3) { i ->
-        DoubleArray(3) { j -> if (i == j) 1.0 else 0.0 }
-    }
-
-    // Buffer to store history: Key = Timestamp (ms), Value = Odometry Pose
-    private val poseHistory = TreeMap<Long, Pose>()
-    private val MAX_HISTORY_MS = 500 // Store 500ms of history
-
-    // Process noise covariance (Q)
-    private val Q = Array(3) { DoubleArray(3) }
-
-    // Measurement noise covariance (R)
-    private val R = Array(3) { DoubleArray(3) }
-
-    init {
-        updateProcessNoise(processNoiseX, processNoiseY, processNoiseTheta)
-        updateMeasurementNoise(measurementNoiseX, measurementNoiseY, measurementNoiseTheta)
-    }
-
-    fun isOutlier(pose:Pose, threshold: Double): Boolean{
-        val deltaX = abs(pose.x - state[0])
-        val deltaY = abs(pose.y - state[1])
-//        val deltaTheta = abs(normalizeAngle(pose.heading - state[2]))
-        return sqrt(deltaX * deltaX + deltaY * deltaY)>threshold
-    }
-    /**
-     * Prediction step using dead wheel odometry.
-     * @param currentOdoPose The current pose from the localizer
-     * @param timestamp The current system time in milliseconds
-     */
-    fun predict(currentOdoPose: Pose, timestamp: Long) {
-        if (lastDeadWheelPose == null) {
-            lastDeadWheelPose = currentOdoPose
+        DoubleArray(3) { j ->
+            if (i == j) 1.0 else 0.0
         }
+    }
 
-        // 1. Calculate the Delta (Change in Odometry)
-        val deltaX = currentOdoPose.x - lastDeadWheelPose!!.x
-        val deltaY = currentOdoPose.y - lastDeadWheelPose!!.y
-        val deltaTheta = normalizeAngle(currentOdoPose.heading - lastDeadWheelPose!!.heading)
+    // Process noise covariance
+    private val Q = Array(3) { i ->
+        DoubleArray(3) { j ->
+            when {
+                i == j && i == 0 -> processNoiseX
+                i == j && i == 1 -> processNoiseY
+                i == j && i == 2 -> processNoiseTheta
+                else -> 0.0
+            }
+        }
+    }
 
-        // 2. Apply Delta to our filtered state
-        state[0] += deltaX
-        state[1] += deltaY
-        state[2] = normalizeAngle(state[2] + deltaTheta)
+    // Measurement noise covariance
+    private val R = Array(3) { i ->
+        DoubleArray(3) { j ->
+            when {
+                i == j && i == 0 -> measurementNoiseX
+                i == j && i == 1 -> measurementNoiseY
+                i == j && i == 2 -> measurementNoiseTheta
+                else -> 0.0
+            }
+        }
+    }
 
-        // 3. Update error covariance: P = P + Q
+    /**
+     * Prediction step using dead wheel odometry pose
+     * Call this every loop iteration with the current pose from dead wheels
+     *
+     * @param deadWheelPose The current pose from your dead wheel odometry
+     */
+    fun predict(deadWheelPose: Pose) {
+        // Update state to dead wheel pose
+        state[0] = deadWheelPose.x
+        state[1] = deadWheelPose.y
+        state[2] = normalizeAngle(deadWheelPose.heading)
+
+        // Update error covariance: P = P + Q
+        // This increases uncertainty over time without vision corrections
         for (i in 0..2) {
-            P[i][i] += Q[i][i]
-        }
-
-        lastDeadWheelPose = currentOdoPose
-
-        // 4. Save this pose to history for future latency compensation
-        poseHistory[timestamp] = currentOdoPose
-
-        // Prune old entries
-        while (poseHistory.size > 0 && timestamp - poseHistory.firstKey() > MAX_HISTORY_MS) {
-            poseHistory.pollFirstEntry()
+            for (j in 0..2) {
+                P[i][j] += Q[i][j]
+            }
         }
     }
 
     /**
-     * Update step with Latency Compensation.
-     * @param visionPose The pose reported by Limelight/Vision
-     * @param captureTimestamp The timestamp when the image was actually taken
+     * Update step using AprilTag vision measurement
+     * Call this when you get a valid AprilTag pose measurement
+     *
+     * @param measurement The pose from AprilTag detection
+     * @param measurementQuality Optional quality factor (0-1), lower = less trust
      */
-    fun updateWithLatency(visionPose: Pose, captureTimestamp: Long) {
-        // Find the odometry pose closest to when the image was captured
-        val historicalEntry = poseHistory.floorEntry(captureTimestamp) ?: return
-        val historicalOdo = historicalEntry.value
+    fun update(measurement: Pose, measurementQuality: Double = 1.0) {
+        // Measurement vector
+        val z = doubleArrayOf(measurement.x, measurement.y, normalizeAngle(measurement.heading))
 
-        // Innovation (Residual): Difference between Vision and Odometry at capture time
-        val z = doubleArrayOf(visionPose.x, visionPose.y, normalizeAngle(visionPose.heading))
-        val h = doubleArrayOf(historicalOdo.x, historicalOdo.y, historicalOdo.heading)
-
+        // Innovation (measurement residual)
         val y = DoubleArray(3) { i ->
-            if (i == 2) normalizeAngle(z[i] - h[i]) else z[i] - h[i]
+            if (i == 2) {
+                // Handle angle wraparound
+                normalizeAngle(z[i] - state[i])
+            } else {
+                z[i] - state[i]
+            }
+        }
+
+        // Scale measurement noise by quality (lower quality = more noise)
+        val scaledR = Array(3) { i ->
+            DoubleArray(3) { j ->
+                R[i][j] / measurementQuality
+            }
         }
 
         // Innovation covariance: S = P + R
         val S = Array(3) { i ->
-            DoubleArray(3) { j -> P[i][j] + R[i][j] }
+            DoubleArray(3) { j ->
+                P[i][j] + scaledR[i][j]
+            }
         }
 
         // Kalman gain: K = P * S^-1
         val K = matrixMultiply(P, matrixInverse3x3(S))
 
-        // Update CURRENT state estimate using the historical error
+        // Update state estimate: state = state + K * y
         for (i in 0..2) {
             for (j in 0..2) {
                 state[i] += K[i][j] * y[j]
             }
         }
+
+        // Normalize angle
         state[2] = normalizeAngle(state[2])
 
         // Update error covariance: P = (I - K) * P
         val I = Array(3) { i -> DoubleArray(3) { j -> if (i == j) 1.0 else 0.0 } }
         val IminusK = Array(3) { i ->
-            DoubleArray(3) { j -> I[i][j] - K[i][j] }
+            DoubleArray(3) { j ->
+                I[i][j] - K[i][j]
+            }
         }
         P = matrixMultiply(IminusK, P)
     }
 
-    fun updateProcessNoise(x: Double, y: Double, theta: Double) {
-        Q[0][0] = x; Q[1][1] = y; Q[2][2] = theta
+    /**
+     * Get the current fused pose estimate
+     * This is your robot's best estimate of its position
+     */
+    fun getPose(): Pose {
+        return Pose(state[0], state[1], state[2])
     }
 
-    fun updateMeasurementNoise(x: Double, y: Double, theta: Double) {
-        R[0][0] = x; R[1][1] = y; R[2][2] = theta
+    /**
+     * Get the current uncertainty (standard deviations in mm and radians)
+     * Useful for debugging or adaptive behavior
+     */
+    fun getUncertainty(): Pose {
+        return Pose(sqrt(P[0][0]), sqrt(P[1][1]), sqrt(P[2][2]))
     }
 
-    fun getPose(): Pose = Pose(state[0], state[1], state[2])
+    /**
+     * Check if an AprilTag measurement is likely an outlier
+     * Returns true if measurement should be rejected
+     *
+     * @param measurement The pose to check
+     * @param threshold Number of standard deviations (default 3.0 = 99.7% confidence)
+     * @return true if the measurement is an outlier
+     */
+    fun isOutlier(measurement: Pose, threshold: Double = 20.0): Boolean {
+        val diff = Pose(
+            abs(measurement.x - state[0]),
+            abs(measurement.y - state[1]),
+            abs(normalizeAngle(measurement.heading - state[2]))
+        )
 
-    fun getUncertainty(): Pose = Pose(sqrt(P[0][0]), sqrt(P[1][1]), sqrt(P[2][2]))
+        val uncertainty = getUncertainty()
 
+        // Check if difference is more than threshold * standard deviation
+        return diff.x > threshold * uncertainty.x ||
+                diff.y > threshold * uncertainty.y ||
+                diff.heading > threshold * uncertainty.heading
+    }
+
+    /**
+     * Reset the filter to a new pose
+     * Useful when you have a known starting position
+     */
     fun reset(newPose: Pose) {
         state[0] = newPose.x
         state[1] = newPose.y
         state[2] = normalizeAngle(newPose.heading)
-        lastDeadWheelPose = null
-        poseHistory.clear()
-        P = Array(3) { i -> DoubleArray(3) { j -> if (i == j) 1.0 else 0.0 } }
+
+        // Reset covariance to initial uncertainty
+        P = Array(3) { i ->
+            DoubleArray(3) { j ->
+                if (i == j) 1.0 else 0.0
+            }
+        }
     }
 
-    // ==================== Matrix Math Helpers ====================
+    // ==================== Helper Functions ====================
 
     private fun normalizeAngle(angle: Double): Double {
         var a = angle
@@ -168,7 +230,10 @@ class PoseKalmanFilter(
         val result = Array(3) { DoubleArray(3) }
         for (i in 0..2) {
             for (j in 0..2) {
-                for (k in 0..2) result[i][j] += A[i][k] * B[k][j]
+                result[i][j] = 0.0
+                for (k in 0..2) {
+                    result[i][j] += A[i][k] * B[k][j]
+                }
             }
         }
         return result
@@ -179,7 +244,10 @@ class PoseKalmanFilter(
                 m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0]) +
                 m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0])
 
-        if (abs(det) < 1e-10) return Array(3) { i -> DoubleArray(3) { j -> if (i == j) 1.0 else 0.0 } }
+        if (abs(det) < 1e-10) {
+            // Matrix is singular, return identity
+            return Array(3) { i -> DoubleArray(3) { j -> if (i == j) 1.0 else 0.0 } }
+        }
 
         val inv = Array(3) { DoubleArray(3) }
         inv[0][0] = (m[1][1] * m[2][2] - m[1][2] * m[2][1]) / det
@@ -191,6 +259,7 @@ class PoseKalmanFilter(
         inv[2][0] = (m[1][0] * m[2][1] - m[1][1] * m[2][0]) / det
         inv[2][1] = (m[0][1] * m[2][0] - m[0][0] * m[2][1]) / det
         inv[2][2] = (m[0][0] * m[1][1] - m[0][1] * m[1][0]) / det
+
         return inv
     }
 }

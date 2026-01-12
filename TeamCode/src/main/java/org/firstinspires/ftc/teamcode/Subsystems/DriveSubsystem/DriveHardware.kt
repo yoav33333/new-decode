@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem
 
+import com.bylazar.configurables.annotations.Configurable
 import com.pedropathing.follower.Follower
 import com.pedropathing.geometry.Pose
 import com.pedropathing.paths.Path
@@ -16,15 +17,15 @@ import com.bylazar.field.PanelsField.field
 import com.bylazar.field.PanelsField.presets
 import com.bylazar.field.Style
 import kotlin.math.abs
-
+@Configurable
 object DriveHardware : Component {
-    val filter = PoseKalmanFilter(
-        initialPose = Pose(0.0, 0.0, 0.0),
-        processNoiseX = mmToInches(0.2),
-        processNoiseY = mmToInches(0.2),
+    @JvmField var filter = PoseKalmanFilter(
+        initialPose = Pose(72.0, 72.0, 0.0),
+        processNoiseX = mmToInches(0.3),
+        processNoiseY = mmToInches(0.3),
         processNoiseTheta = 0.005,
-        measurementNoiseX = mmToInches(15.0),
-        measurementNoiseY = mmToInches(15.0),
+        measurementNoiseX = 4.0,
+        measurementNoiseY = 4.0,
         measurementNoiseTheta = 0.2 // Trusting vision heading more than your previous 2.0
     )
 
@@ -36,36 +37,30 @@ object DriveHardware : Component {
 
     @JvmStatic
     fun updatePoseEstimate(aprilTagPose: Pose?, totalLatency: Double, dev: DoubleArray) {
-        val currentTime = System.currentTimeMillis()
+         val deadWheelPose = getPoseEstimate() // your odometry calculation
+         filter.predict(deadWheelPose)
 
-        // 1. Predict based on current movement
-        filter.predict(getPoseEstimate(), currentTime)
 
-        // 2. Update with AprilTag when available using latency look-back
-        if (aprilTagPose != null) {
-            // totalLatency is (capture + pipeline) in ms
-            val captureTime = (currentTime - totalLatency).toLong()
+         if (aprilTagPose != null) {
+             val quality = if (dev[0] > 0) 1.0 / (dev[0] + 1.0) else 1.0
+             filter.update(aprilTagPose, quality)
+         }
 
-            // Adjust trust based on Limelight's dev array [x, y, z, roll, pitch, yaw]
-            filter.updateMeasurementNoise(dev[0], dev[1], dev[5])
-
-            filter.updateWithLatency(aprilTagPose, captureTime)
-        }
-
-        // 3. Update the follower with the fused result
-        setPoseEstimate(filter.getPose())
+         // Get fused pose - use this as your robot's position
+         setPoseEstimate(filter.getPose().setHeading(getPoseEstimate().heading))
     }
 
     override fun postInit() {
+        setPoseEstimate(Pose(72.0,72.0,0.0))
         Drawing.init()
         filter.reset(getPoseEstimate())
     }
 
     override fun postUpdate() {
         // Fetch Limelight data and pass to our update method
-//        LimeLight.getRes().let { (pose, latency, dev) ->
-//            updatePoseEstimate(pose, latency, dev)
-//        }
+        LimeLight.getRes().let { (pose, latency, dev) ->
+            updatePoseEstimate(pose, latency, dev)
+        }
 
 //        Drawing.drawDebug(follower)
 

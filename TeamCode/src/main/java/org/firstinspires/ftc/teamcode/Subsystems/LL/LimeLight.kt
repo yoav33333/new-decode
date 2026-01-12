@@ -114,7 +114,7 @@ object LimeLight: Component {
             MyTelemetry.addData("stdDiv yaw: ", result.stddevMt1[5])
             MyTelemetry.addData("MT1 pose: ", pose)
             MyTelemetry.addData("MT1 field pose: ", pose3dToPose(pose))
-            Drawing.drawDebug(pose3dToPose(pose))
+//            Drawing.drawDebug(pose3dToPose(pose))
         }
     }
 

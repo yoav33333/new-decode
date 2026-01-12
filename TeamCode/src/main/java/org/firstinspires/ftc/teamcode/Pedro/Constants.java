@@ -102,8 +102,8 @@ public class Constants {
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .mecanumDrivetrain(driveConstants)
-                .setLocalizer(localizer.getValue())
-//                .twoWheelLocalizer(deadWheelLocalizerConstants)
+//                .setLocalizer(localizer.getValue())
+                .twoWheelLocalizer(deadWheelLocalizerConstants)
                 .pathConstraints(pathConstraints)
                 .build();
     }
