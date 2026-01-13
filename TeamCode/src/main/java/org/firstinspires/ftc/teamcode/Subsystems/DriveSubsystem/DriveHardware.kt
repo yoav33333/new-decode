@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.Util.Util.mmToInches
 import com.bylazar.field.PanelsField.field
 import com.bylazar.field.PanelsField.presets
 import com.bylazar.field.Style
+import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.llPose
 import kotlin.math.abs
 @Configurable
 object DriveHardware : Component {
@@ -62,8 +63,9 @@ object DriveHardware : Component {
             updatePoseEstimate(pose, latency, dev)
         }
 
+        Drawing.drawDebug(follower, llPose)
 //        Drawing.drawDebug(follower)
-
+//
         // Update target vector for automated scoring
         vectorFromTarget = getPoseEstimate().asVector.minus(RobotVars.goalPos)
     }
@@ -75,6 +77,9 @@ internal object Drawing {
 
     private val robotLook = Style(
         "", "#3F51B5", 0.75
+    )
+    private val llLook = Style(
+        "", "#FFBF00", 0.75
     )
     private val historyLook = Style(
         "", "#4CAF50", 0.75
@@ -107,6 +112,26 @@ internal object Drawing {
                 ), robotLook
             )
         }
+        drawPoseHistory(follower.getPoseHistory(), historyLook)
+        drawRobot(follower.getPose(), historyLook)
+
+        sendPacket()
+    }
+    fun drawDebug(follower: Follower, llPose: Pose) {
+        if (follower.getCurrentPath() != null) {
+            drawPath(follower.getCurrentPath(), robotLook)
+            val closestPoint =
+                follower.getPointFromPath(follower.getCurrentPath().getClosestPointTValue())
+            drawRobot(
+                Pose(
+                    closestPoint.getX(),
+                    closestPoint.getY(),
+                    follower.getCurrentPath()
+                        .getHeadingGoal(follower.getCurrentPath().getClosestPointTValue())
+                ), robotLook
+            )
+        }
+        drawRobot(llPose, llLook)
         drawPoseHistory(follower.getPoseHistory(), historyLook)
         drawRobot(follower.getPose(), historyLook)
 

@@ -27,14 +27,20 @@ object TurretHardware: Component {
         return servo1.value.position
     }
     fun getEncoderPosition(): Double {
-        return turretEncoder.value.getPosition() + offset
+        return wrap360(turretEncoder.value.getPosition() + offset)
     }
     fun setTargetPositionFromDegrees(degrees: Double) {
-//        var degrees = wrap360(degrees + offset)
-//        if (degrees > servoRange){
-//            degrees = if(degrees-servoRange > 5) servoRange else 0.0
-//        }
-        var degrees=clamp(degrees, 0.0, servoRange)
+        var degrees=degrees
+        if(degrees<0||degrees>servoRange){
+            //closest to any end
+            if((degrees-servoRange)<(360-servoRange)/2){
+                degrees=servoRange
+            }
+            else{
+                degrees=0.0
+            }
+        }
+//        var degrees=clamp(degrees, 0.0, servoRange)
         val position = degrees / servoRange
         setTargetPosition(position)
     }
@@ -46,14 +52,14 @@ object TurretHardware: Component {
     fun getGlobalHeading(): Double {
         val baseHeading = toRadians(DriveHardware.getPoseEstimate().heading)
         val turretHeading = getEncoderPosition()
-        return baseHeading + turretHeading
+        return wrap360(baseHeading + turretHeading)
     }
     fun calcGlobalHeadingToTarget(target: Vector): Double{
         return target.theta
     }
 
     override fun postUpdate() {
-        MyTelemetry.addData("Turret Position", getPosition())
+        MyTelemetry.addData("Turret Servo Position", getPosition())
         MyTelemetry.addData("Turret Vol", turretEncoder.value.getVoltage())
         MyTelemetry.addData("Turret Encoder Position", getEncoderPosition())
         MyTelemetry.addData("Turret Global Heading", getGlobalHeading())

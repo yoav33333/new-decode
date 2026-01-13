@@ -6,21 +6,23 @@
             <Motor name="High shooter" port="1" />
             <Motor name="Transfer" port="2" />
             <Motor name="Intake" port="3" />
-            <AnalogInput name="Abs spin" port="1"/>
-            <AnalogInput name="Abs turret" port="3"/>
+            <Servo name="spindex" port="0" />
+            <Servo name="turretServo1" port="2" />
+            <Servo name="turretServo2" port="3" />
+            <Servo name="Hood servo" port="5" />
+            <AnalogInput name="Abs spin" port="1" />
+            <AnalogInput name="Abs turret" port="3" />
         </LynxModule>
         <LynxModule name="Control Hub" port="173">
             <Motor name="rb" port="0" />
             <Motor name="rf" port="1" />
             <Motor name="lf" port="2" />
             <Motor name="lb" port="3" />
-            <Servo name="spindex" port="0" />
-            <Servo name="turretServo1" port="1" />
-            <Servo name="turretServo2" port="2" />
-            <Servo name="Hood servo" port="3" />
+
             <LynxEmbeddedIMU name="imu" port="0" bus="0" />
-            <ColorSensor name="Lcolor" port="2" bus="1" />
-            <ColorSensor name="Rcolor" port="1" bus="2" />
+            <RevColorSensorV3 name="Rcolor" port="1" bus="2" />
+            <RevColorSensorV3 name="Lcolor" port="2" bus="1" />
         </LynxModule>
     </LynxUsbDevice>
+    <EthernetDevice name="ll" serialNumber="EthernetOverUsb:eth0:172.29.0.28" name="ll" port="-1" ipAddress="172.29.0.1" />
 </Robot>

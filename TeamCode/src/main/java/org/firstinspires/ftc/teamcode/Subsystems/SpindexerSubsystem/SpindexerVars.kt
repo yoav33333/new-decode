@@ -23,7 +23,7 @@ object SpindexerVars {
     @JvmField var degreesPerSlot = 66
     @JvmField var intakeSlot = 0
     @JvmField var transferSlot = 1
-    @JvmField var spinDelay = 0.3
+    @JvmField var spinDelay = 0.25
     @JvmField var delayMul = 1.0
     @JvmField var offset = 4.5
     @JvmField var purpleRange = HSVRange(190.0,1000.0,0.0,1000.0,0.0,1000.0)

@@ -11,6 +11,7 @@ object LimeLightVars {
     @JvmField var result: LLResult? = null
     @JvmField var localizationPipeline = 0
     @JvmField var regularAprilTagPipeline = 1
+    @JvmField var llPose = Pose()
     @JvmField var dist = 0.0
     @JvmField var smartDist = 0.0
     @JvmField var distFilter = LowPassFilter(0.8)

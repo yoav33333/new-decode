@@ -51,9 +51,9 @@ class LLTest: TunerOpMode(LimeLight,
 
         // 3. Update Visuals & Telemetry
         MyTelemetry.addData("post Robot Pose", getPoseEstimate())
-        Drawing.drawDebug(follower)
+//        Drawing.drawDebug(follower)
 
         // 4. Update scoring vectors
-        vectorFromTarget = getPoseEstimate().asVector.minus(RobotVars.goalPos)
+//        vectorFromTarget = getPoseEstimate().asVector.minus(RobotVars.goalPos)
     }
 }

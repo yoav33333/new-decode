@@ -3,8 +3,8 @@ package org.firstinspires.ftc.teamcode.Subsystems.LL
 import com.bylazar.field.PanelsField.field
 import com.bylazar.field.PanelsField.presets
 import com.bylazar.field.Style
-import com.pedropathing.follower.Follower
 import com.pedropathing.geometry.Pose
+import com.pedropathing.math.Vector
 import com.pedropathing.paths.Path
 import com.pedropathing.paths.PathChain
 import com.pedropathing.util.PoseHistory
@@ -14,7 +14,6 @@ import dev.nextftc.core.components.Component
 import dev.nextftc.extensions.pedro.PedroComponent.Companion.follower
 import dev.nextftc.ftc.ActiveOpMode.hardwareMap
 //import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveHardware.filter
-import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveHardware.getPoseEstimate
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.dist
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.distFilter
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.goalHeightInches
@@ -24,12 +23,9 @@ import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.offsetFromAxis
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.result
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.smartDist
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.MyTelemetry
-import org.firstinspires.ftc.teamcode.Subsystems.Robot.Robot
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars
 import org.firstinspires.ftc.teamcode.Util.Util.pose3DMetersToInches
 import org.firstinspires.ftc.teamcode.Util.Util.pose3dToPose
-import kotlin.math.cos
-import kotlin.math.sin
 import kotlin.math.tan
 
 
@@ -65,6 +61,7 @@ object LimeLight: Component {
                 MyTelemetry.addData("LL Pose TRUE", result.botpose)
 //                MyTelemetry.addData("LL Pose", llPose.toString())
                 val poseWithOffsets = addOffsets(llPose)
+                LimeLightVars.llPose = poseWithOffsets
                 MyTelemetry.addData("LL Pose with Offsets", poseWithOffsets.toString())
                 return Triple(poseWithOffsets, result.timestamp, result.stddevMt1)
             }
@@ -72,15 +69,17 @@ object LimeLight: Component {
         return Triple(null,0.0, doubleArrayOf())
     }
     fun addOffsets(pose: Pose): Pose {
-        return pose
-//        return rotationOffset(pose, 0.0)
-//            .plus(LimeLightVars.centerOfRotationOffset).plus(Pose())
+//        return pose
+        return rotationOffset(pose, 0.0)
+            .plus(LimeLightVars.centerOfRotationOffset)
     }
     fun rotationOffset(pose:Pose, theta: Double): Pose {
-        val offsetX = offsetFromAxis * cos(theta)
-        val offsetY = offsetFromAxis * sin(theta)
-
-        return pose.plus(Pose(offsetX, offsetY, 0.0) )
+//        val offsetX = offsetFromAxis * cos(theta)
+//        val offsetY = offsetFromAxis * sin(theta)
+        val idoVector = Vector(offsetFromAxis, theta)
+        return pose.plus(
+        Pose(idoVector.xComponent, idoVector.yComponent, 0.0)
+        )
     }
     fun updateLL(){
         result = ll.value.getLatestResult()
@@ -97,7 +96,8 @@ object LimeLight: Component {
 //        MyTelemetry.addData("dist from tag", updateDistFormTag())
         if (result != null && result.isValid()) {
             var pose = pose3DMetersToInches(result.botpose)
-            smartDist = distFilter.estimate(pose3dToPose(pose).asVector.minus(RobotVars.goalPos).magnitude)
+            smartDist = distFilter.estimate(pose3dToPose(pose)
+                .asVector.minus(RobotVars.goalPos).magnitude)
         }
     }
 
