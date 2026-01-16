@@ -16,7 +16,7 @@ object TurretCommands {
     fun scan(stop: () -> Boolean, step: Double) =
         LambdaCommand()
             .setUpdate {
-                var currentAngle = TurretHardware.getEncoderPosition()
+                var currentAngle = TurretHardware.getPosition()
                 currentAngle += step
                 setTargetPositionFromDegrees(currentAngle)
             }

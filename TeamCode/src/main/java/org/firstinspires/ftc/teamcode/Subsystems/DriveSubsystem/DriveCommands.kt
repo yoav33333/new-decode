@@ -7,8 +7,8 @@ import dev.nextftc.extensions.pedro.PedroComponent.Companion.follower
 
 object DriveCommands {
     val driverControlled = PedroDriverControlled(
-        -Gamepads.gamepad1.leftStickY,
-        -Gamepads.gamepad1.leftStickX,
+        Gamepads.gamepad1.leftStickY,
+        Gamepads.gamepad1.leftStickX,
         -Gamepads.gamepad1.rightStickX,
         false
     ).setRequirements(DriveHardware)

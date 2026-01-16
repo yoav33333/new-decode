@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeCommands.
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeHardware
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware.atTargetVelocity
+import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.targetVelocity
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.checkIntakeColorAndUpdate
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.isFull
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.delayMul
@@ -77,6 +78,7 @@ object SpindexerCommands {
             moveToTransferPositionLocking(RobotVars.randomization.value[0]),
             startWhen,
 //            Delay(SpindexerVars.spinDelay.seconds),
+
             WaitUntil{atTargetVelocity()},
             moveToTransferPositionLocking(RobotVars.randomization.value[1]),
             Delay(SpindexerVars.spinDelay.seconds*delayMul),

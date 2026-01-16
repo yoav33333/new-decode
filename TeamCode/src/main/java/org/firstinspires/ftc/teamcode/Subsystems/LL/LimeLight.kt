@@ -13,6 +13,7 @@ import com.qualcomm.hardware.limelightvision.Limelight3A
 import dev.nextftc.core.components.Component
 import dev.nextftc.extensions.pedro.PedroComponent.Companion.follower
 import dev.nextftc.ftc.ActiveOpMode.hardwareMap
+import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.centerOfRotationOffset
 //import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveHardware.filter
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.dist
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.distFilter
@@ -70,15 +71,16 @@ object LimeLight: Component {
     }
     fun addOffsets(pose: Pose): Pose {
 //        return pose
-        return rotationOffset(pose, 0.0)
-            .plus(LimeLightVars.centerOfRotationOffset)
+        LimeLightVars.centerOfRotationOffset.rotateVector(pose.heading)
+        return rotationOffset(pose, 0.0+pose.heading)
+            .minus(Pose(centerOfRotationOffset.xComponent, centerOfRotationOffset.yComponent))
     }
     fun rotationOffset(pose:Pose, theta: Double): Pose {
 //        val offsetX = offsetFromAxis * cos(theta)
 //        val offsetY = offsetFromAxis * sin(theta)
         val idoVector = Vector(offsetFromAxis, theta)
-        return pose.plus(
-        Pose(idoVector.xComponent, idoVector.yComponent, 0.0)
+        return pose.minus(
+        Pose(idoVector.xComponent, idoVector.yComponent, theta)
         )
     }
     fun updateLL(){
@@ -88,7 +90,7 @@ object LimeLight: Component {
         setPipeline(LimeLightVars.localizationPipeline)
         ll.value.setPollRateHz(50)
         ll.value.start()
-        Drawing.init()
+//        Drawing.init()
     }
 
     fun updateSmartDist(){
@@ -119,154 +121,4 @@ object LimeLight: Component {
     }
 
 
-}
-internal object Drawing {
-    const val ROBOT_RADIUS: Double = 9.0 // woah
-    private val panelsField = field
-
-    private val robotLook = Style(
-        "", "#3F51B5", 0.75
-    )
-    private val historyLook = Style(
-        "", "#4CAF50", 0.75
-    )
-
-    /**
-     * This prepares Panels Field for using Pedro Offsets
-     */
-    fun init() {
-        panelsField.setOffsets(presets.PEDRO_PATHING)
-    }
-
-    /**
-     * This draws everything that will be used in the Follower's telemetryDebug() method. This takes
-     * a Follower as an input, so an instance of the DashbaordDrawingHandler class is not needed.
-     *
-     * @param follower Pedro Follower instance.
-     */
-    fun drawDebug(pose: Pose) {
-//        drawPath(follower.getCurrentPath(), robotLook)
-//        val closestPoint =
-//            follower.getPointFromPath(follower.getCurrentPath().getClosestPointTValue())
-        drawRobot(
-            Pose(
-                pose.x,
-                pose.y,
-                pose.heading
-//                    .getHeadingGoal(follower.getCurrentPath().getClosestPointTValue())
-            ), robotLook
-        )
-
-//        drawPoseHistory(follower.getPoseHistory(), historyLook)
-//        drawRobot(follower.getPose(), historyLook)
-
-        sendPacket()
-    }
-
-    /**
-     * This draws a robot at a specified Pose with a specified
-     * look. The heading is represented as a line.
-     *
-     * @param pose  the Pose to draw the robot at
-     * @param style the parameters used to draw the robot with
-     */
-    /**
-     * This draws a robot at a specified Pose. The heading is represented as a line.
-     *
-     * @param pose the Pose to draw the robot at
-     */
-    @JvmOverloads
-    fun drawRobot(pose: Pose?, style: Style = robotLook) {
-        if (pose == null || java.lang.Double.isNaN(pose.getX()) || java.lang.Double.isNaN(pose.getY()) || java.lang.Double.isNaN(
-                pose.getHeading()
-            )
-        ) {
-            return
-        }
-
-        panelsField.setStyle(style)
-        panelsField.moveCursor(pose.getX(), pose.getY())
-        panelsField.circle(ROBOT_RADIUS)
-
-        val v = pose.getHeadingAsUnitVector()
-        v.setMagnitude(v.getMagnitude() * ROBOT_RADIUS)
-        val x1 = pose.getX() + v.getXComponent() / 2
-        val y1 = pose.getY() + v.getYComponent() / 2
-        val x2 = pose.getX() + v.getXComponent()
-        val y2 = pose.getY() + v.getYComponent()
-
-        panelsField.setStyle(style)
-        panelsField.moveCursor(x1, y1)
-        panelsField.line(x2, y2)
-    }
-
-    /**
-     * This draws a Path with a specified look.
-     *
-     * @param path  the Path to draw
-     * @param style the parameters used to draw the Path with
-     */
-    fun drawPath(path: Path, style: Style) {
-        val points = path.getPanelsDrawingPoints()
-
-        for (i in points[0]!!.indices) {
-            for (j in points.indices) {
-                if (java.lang.Double.isNaN(points[j]!![i])) {
-                    points[j]!![i] = 0.0
-                }
-            }
-        }
-
-        panelsField.setStyle(style)
-        panelsField.moveCursor(points[0]!![0], points[0]!![1])
-        panelsField.line(points[1]!![0], points[1]!![1])
-    }
-
-    /**
-     * This draws all the Paths in a PathChain with a
-     * specified look.
-     *
-     * @param pathChain the PathChain to draw
-     * @param style     the parameters used to draw the PathChain with
-     */
-    fun drawPath(pathChain: PathChain, style: Style) {
-        for (i in 0..<pathChain.size()) {
-            drawPath(pathChain.getPath(i), style)
-        }
-    }
-
-    /**
-     * This draws the pose history of the robot.
-     *
-     * @param poseTracker the PoseHistory to get the pose history from
-     * @param style       the parameters used to draw the pose history with
-     */
-    /**
-     * This draws the pose history of the robot.
-     *
-     * @param poseTracker the PoseHistory to get the pose history from
-     */
-    @JvmOverloads
-    fun drawPoseHistory(poseTracker: PoseHistory, style: Style = historyLook) {
-        panelsField.setStyle(style)
-
-        val size = poseTracker.getXPositionsArray().size
-        for (i in 0..<size - 1) {
-            panelsField.moveCursor(
-                poseTracker.getXPositionsArray()[i],
-                poseTracker.getYPositionsArray()[i]
-            )
-            panelsField.line(
-                poseTracker.getXPositionsArray()[i + 1],
-                poseTracker.getYPositionsArray()[i + 1]
-            )
-        }
-    }
-
-    /**
-     * This tries to send the current packet to FTControl Panels.
-     */
-    fun sendPacket() {
-        panelsField.update()
-    }
 }

@@ -1,6 +1,9 @@
 package org.firstinspires.ftc.teamcode.Util
 
 import com.pedropathing.geometry.Pose
+import com.pedropathing.math.Vector
+import dev.nextftc.extensions.pedro.PedroComponent.Companion.follower
+import org.firstinspires.ftc.robotcore.external.matrices.VectorF
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.sqrt
@@ -110,7 +113,8 @@ class PoseKalmanFilter(
      * @param measurement The pose from AprilTag detection
      * @param measurementQuality Optional quality factor (0-1), lower = less trust
      */
-    fun update(measurement: Pose, measurementQuality: Double = 1.0) {
+    fun update(measurement: Pose, measurementQuality: DoubleArray =
+        doubleArrayOf(measurementNoiseX, measurementNoiseY, measurementNoiseTheta)) {
         // Measurement vector
         val z = doubleArrayOf(measurement.x, measurement.y, normalizeAngle(measurement.heading))
 
@@ -123,18 +127,28 @@ class PoseKalmanFilter(
                 z[i] - state[i]
             }
         }
-
-        // Scale measurement noise by quality (lower quality = more noise)
-        val scaledR = Array(3) { i ->
-            DoubleArray(3) { j ->
-                R[i][j] / measurementQuality
-            }
-        }
+//        val scaledR = Array(3) { i ->
+//            DoubleArray(3) { j ->
+//                when {
+//                    i == j && i == 0 -> measurementQuality[0]
+//                    i == j && i == 1 -> measurementQuality[1]
+//                    i == j && i == 2 -> measurementQuality[2]
+//                    else -> 0.0
+//                }
+//            }
+//        }
+//
+//        // Scale measurement noise by quality (lower quality = more noise)
+//        val scaledR = Array(3) { i ->
+//            DoubleArray(3) { j ->
+//                R[i][j] / measurementQuality
+//            }
+//        }
 
         // Innovation covariance: S = P + R
         val S = Array(3) { i ->
             DoubleArray(3) { j ->
-                P[i][j] + scaledR[i][j]
+                P[i][j] + R[i][j]
             }
         }
 
@@ -177,27 +191,19 @@ class PoseKalmanFilter(
         return Pose(sqrt(P[0][0]), sqrt(P[1][1]), sqrt(P[2][2]))
     }
 
-    /**
-     * Check if an AprilTag measurement is likely an outlier
-     * Returns true if measurement should be rejected
-     *
-     * @param measurement The pose to check
-     * @param threshold Number of standard deviations (default 3.0 = 99.7% confidence)
-     * @return true if the measurement is an outlier
-     */
-    fun isOutlier(measurement: Pose, threshold: Double = 20.0): Boolean {
-        val diff = Pose(
-            abs(measurement.x - state[0]),
-            abs(measurement.y - state[1]),
-            abs(normalizeAngle(measurement.heading - state[2]))
-        )
-
-        val uncertainty = getUncertainty()
+    fun isOutlier(base:Pose, measurement: Pose, threshold: Double = 15.0): Boolean {
+//        val diff = Pose(
+//            abs(measurement.x - state[0]),
+//            abs(measurement.y - state[1]),
+//            abs(normalizeAngle(measurement.heading - state[2]))
+//        )
+//
+//        val uncertainty = getUncertainty()
 
         // Check if difference is more than threshold * standard deviation
-        return diff.x > threshold * uncertainty.x ||
-                diff.y > threshold * uncertainty.y ||
-                diff.heading > threshold * uncertainty.heading
+        return Vector(measurement.x-base.x,
+            measurement.y-base.y)
+            .magnitude > threshold
     }
 
     /**

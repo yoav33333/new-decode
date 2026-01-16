@@ -38,8 +38,8 @@ class LLTest: TunerOpMode(LimeLight,
 //            MyTelemetry.addData("stdDiv y: ", result.stddevMt1[1]* 39.3701)
 //            MyTelemetry.addData("stdDiv yaw: ", result.stddevMt1[5])
 //            MyTelemetry.addData("MT1 pose: ", pose)
-            MyTelemetry.addData("MT1 field pose: ", pose3dToPose(pose))
-            updatePoseEstimate(pose3dToPose(pose), result.timestamp, DoubleArray(9))
+//            MyTelemetry.addData("MT1 field pose: ", pose3dToPose(pose))
+//            updatePoseEstimate(pose3dToPose(pose), result.timestamp.toLong(), DoubleArray(9))
 //            Drawing.drawDebug(pose3dToPose(pose))
         }
 

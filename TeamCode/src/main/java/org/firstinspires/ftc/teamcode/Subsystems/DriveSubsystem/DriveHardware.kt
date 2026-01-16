@@ -8,25 +8,30 @@ import com.pedropathing.paths.PathChain
 import com.pedropathing.util.PoseHistory
 import dev.nextftc.core.components.Component
 import dev.nextftc.extensions.pedro.PedroComponent.Companion.follower
-import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLight
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.vectorFromTarget
 import org.firstinspires.ftc.teamcode.Util.PoseKalmanFilter
-import org.firstinspires.ftc.teamcode.Util.Util.mmToInches
 import com.bylazar.field.PanelsField.field
 import com.bylazar.field.PanelsField.presets
 import com.bylazar.field.Style
+import com.pedropathing.math.Vector
+import com.qualcomm.hardware.limelightvision.LLResult
+import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLight.addOffsets
+import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.llPose
-import kotlin.math.abs
+import org.firstinspires.ftc.teamcode.Subsystems.Robot.MyTelemetry
+import org.firstinspires.ftc.teamcode.Util.Util.pose3DMetersToInches
+import org.firstinspires.ftc.teamcode.Util.Util.pose3dToPose
+
 @Configurable
 object DriveHardware : Component {
     @JvmField var filter = PoseKalmanFilter(
         initialPose = Pose(72.0, 72.0, 0.0),
-        processNoiseX = mmToInches(0.3),
-        processNoiseY = mmToInches(0.3),
+        processNoiseX = 0.01,
+        processNoiseY = 0.01,
         processNoiseTheta = 0.005,
-        measurementNoiseX = 4.0,
-        measurementNoiseY = 4.0,
+        measurementNoiseX = 8.5,
+        measurementNoiseY = 8.5,
         measurementNoiseTheta = 0.2 // Trusting vision heading more than your previous 2.0
     )
 
@@ -35,20 +40,44 @@ object DriveHardware : Component {
     fun setPoseEstimate(pose: Pose) {
         follower.pose = pose
     }
-
+    // In DriveHardware.kt
     @JvmStatic
     fun updatePoseEstimate(aprilTagPose: Pose?, totalLatency: Double, dev: DoubleArray) {
-         val deadWheelPose = getPoseEstimate() // your odometry calculation
-         filter.predict(deadWheelPose)
+        val deadWheelPose = getPoseEstimate()
+
+        // Pass the delta or just predict
+        filter.predict(deadWheelPose)
+        MyTelemetry.addData("vel", follower.velocity.magnitude)
+        if (aprilTagPose!=null) {
+            MyTelemetry.addData("outlier", filter.isOutlier(follower.pose, aprilTagPose))
+            MyTelemetry.addData("delta",
+                Vector(aprilTagPose.x-follower.pose.x,
+                    aprilTagPose.y-follower.pose.y)
+                    .magnitude
+            )
+        }
+        if (aprilTagPose != null && !filter.isOutlier(follower.pose, aprilTagPose)
+            && !(follower.velocity.magnitude>10)&&!(follower.angularVelocity>1)) {
+            // Use the actual standard deviation from Limelight if available
+            // result.stddevMt1[0] is X dev, [1] is Y dev
+
+//            val quality = if (dev[0] > 0) 1.0 / (dev[0] + 1.0) else 1.0
+            filter.update(aprilTagPose)
+        }
+        else{
+            filter.update(getPoseEstimate())
+        }
+        val fusedPose = filter.getPose().setHeading(getPoseEstimate().heading)
+        setPoseEstimate(fusedPose)
 
 
-         if (aprilTagPose != null) {
-             val quality = if (dev[0] > 0) 1.0 / (dev[0] + 1.0) else 1.0
-             filter.update(aprilTagPose, quality)
-         }
+        // IMPORTANT: Get the full fused pose including heading
 
-         // Get fused pose - use this as your robot's position
-         setPoseEstimate(filter.getPose().setHeading(getPoseEstimate().heading))
+
+        // Only update the follower if the correction is significant
+        // to avoid "fighting" the internal integration of Pedro Pathing
+//        if (aprilTagPose != null&& !filter.isOutlier(aprilTagPose)) {
+//        }
     }
 
     override fun postInit() {
@@ -58,13 +87,35 @@ object DriveHardware : Component {
     }
 
     override fun postUpdate() {
-        // Fetch Limelight data and pass to our update method
-        LimeLight.getRes().let { (pose, latency, dev) ->
-            updatePoseEstimate(pose, latency, dev)
-        }
-
-        Drawing.drawDebug(follower, llPose)
-//        Drawing.drawDebug(follower)
+//        // Fetch Limelight data and pass to our update method
+//        val result: LLResult? = LimeLightVars.result
+//        MyTelemetry.addData("pre Robot Pose", getPoseEstimate())
+////        var pose = pose3DMetersToInches(result.botpose)
+//
+////        MyTelemetry.addData("LL Pose with Offsets", poseWithOffsets.toString())
+//        if (result != null && result.isValid()) {
+//            var pose = pose3DMetersToInches(result.botpose)
+////            MyTelemetry.addData("stdDiv x: ", result.stddevMt1[0]* 39.3701)
+////            MyTelemetry.addData("stdDiv y: ", result.stddevMt1[1]* 39.3701)
+////            MyTelemetry.addData("stdDiv yaw: ", result.stddevMt1[5])
+////            MyTelemetry.addData("MT1 pose: ", pose)
+////            MyTelemetry.addData("MT1 field pose: ", pose3dToPose(pose))
+//            MyTelemetry.addData("MT1 pose: ", pose)
+//            val llPose = pose3dToPose(pose)
+////                val llPose = pose3dToPose(result.botpose)
+//            MyTelemetry.addData("LL Pose TRU E", result.botpose)
+////                MyTelemetry.addData("LL Pose", llPose.toString())
+//            val poseWithOffsets = addOffsets(llPose)
+//            LimeLightVars.llPose = poseWithOffsets
+//            MyTelemetry.addData("LL Pose with Offsets", poseWithOffsets.toString())
+//            updatePoseEstimate(poseWithOffsets, result.timestamp, result.stddevMt1)
+////            Drawing.drawDebug(pose3dToPose(pose))
+//        }
+//        else{
+//            updatePoseEstimate(null, 0.0, DoubleArray(6))
+//
+//        }
+        Drawing.drawDebug(follower)
 //
         // Update target vector for automated scoring
         vectorFromTarget = getPoseEstimate().asVector.minus(RobotVars.goalPos)

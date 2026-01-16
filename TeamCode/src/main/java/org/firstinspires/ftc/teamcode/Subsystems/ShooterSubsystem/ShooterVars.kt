@@ -12,7 +12,7 @@ object ShooterVars {
     @JvmField var hoodLUT = createHoodLUT()
     @JvmField var runShooter = false
     @JvmField var disableAutoShooter = false
-    @JvmField var f = 0.62
+    @JvmField var f = 0.785
     @JvmField var hoodTarget = 0.0
     @JvmField var targetVelocity = 0.0
     @JvmField var deltaThreshold = 100.0

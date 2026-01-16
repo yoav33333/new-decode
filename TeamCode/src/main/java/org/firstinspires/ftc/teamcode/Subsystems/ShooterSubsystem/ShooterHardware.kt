@@ -5,7 +5,9 @@ import dev.nextftc.core.components.Component
 import dev.nextftc.hardware.impl.MotorEx
 import dev.nextftc.hardware.impl.ServoEx
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars
+import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.smartDist
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.MyTelemetry
+import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.vectorFromTarget
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.deltaThreshold
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.f
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.hoodLUT
@@ -61,13 +63,13 @@ object ShooterHardware: Component {
     }
 
     fun update(){
-        if (runShooter){
-            shoot(LimeLightVars.smartDist)
-        }
-        else{
-            targetVelocity = 0.0
-        }
-        setHoodPosition(hoodTarget)
+    if (runShooter){
+        shoot(smartDist)
+    }
+    else{
+        targetVelocity = 0.0
+    }
+    setHoodPosition(hoodTarget)
     if (targetVelocity.toInt() ==0) {
         setPower(0.0)
         return
