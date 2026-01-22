@@ -24,6 +24,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterCommand
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware.atTargetVelocity
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware.stopShooting
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.runIntakeSeq
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.runIntakeSeqAuto
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.transferAll
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.getColorInIntake
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.isEmpty
@@ -47,6 +48,7 @@ object RobotCommands {
                 WaitUntil { isFull() },
 //                smartIntake,
                 InstantCommand { resetSpindexer() },
+                Delay(0.5),
                 RepeatCommand(runIntakeSeq),
                 RepeatCommand(InstantCommand{
                     MyTelemetry.addData("running","")
@@ -61,7 +63,16 @@ object RobotCommands {
                 stopIntake
             ),
         )
-
+    val scanCommand =
+        SequentialGroup(
+            ParallelDeadlineGroupKill(
+                WaitUntil { isFull() },
+//                smartIntake,
+                InstantCommand { resetSpindexer() },
+                Delay(0.5),
+                RepeatCommand(runIntakeSeqAuto),
+            ),
+        )
     val shootingCommand =
         ParallelDeadlineGroupKill(
             SequentialGroup(

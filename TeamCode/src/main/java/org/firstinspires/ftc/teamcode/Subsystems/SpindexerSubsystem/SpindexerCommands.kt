@@ -14,12 +14,15 @@ import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeCommands.
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeCommands.outtake
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeCommands.smartIntake
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeHardware
+import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.smartDist
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware.atTargetVelocity
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.targetVelocity
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.checkIntakeColorAndUpdate
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.checkIntakeColorAndUpdateAuto
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.isFull
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.delayMul
+import org.firstinspires.ftc.teamcode.Util.ActiveDelay
 import org.firstinspires.ftc.teamcode.Util.SpindexerSlotState
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.LoopingCommand
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.ParallelDeadlineGroupKill
@@ -54,22 +57,41 @@ object SpindexerCommands {
         .setRequirements(SpindexerHardware)
     val checkColorAndUpdate = LambdaCommand()
         .setIsDone { checkIntakeColorAndUpdate() }
+    val checkColorAndUpdateAuto = LambdaCommand()
+        .setIsDone { checkIntakeColorAndUpdateAuto() }
 
 
     val runIntakeCycle =
         SequentialGroup(
             checkColorAndUpdate,
+            Delay(0.1.seconds),
+
             moveToIntakePosition,
 //            IfElseCommand({ IntakeHardware.getVel()<400 }
 //                ,outtake, intake),
 //            smartIntake,
-            Delay(0.5.seconds),
+            Delay(0.3.seconds),
+//            Delay(0.05.seconds)\\\\
+        ).setRequirements(SpindexerHardware)
+    val runIntakeCycleAuto =
+        SequentialGroup(
+            checkColorAndUpdateAuto,
+            Delay(0.1.seconds),
+            moveToIntakePosition,
+//            IfElseCommand({ IntakeHardware.getVel()<400 }
+//                ,outtake, intake),
+//            smartIntake,
+            Delay(0.3.seconds),
 //            Delay(0.05.seconds)\\\\
         ).setRequirements(SpindexerHardware)
     val runIntakeSeq=
 //        ParallelDeadlineGroupKill(
 //            WaitUntil{isFull()},
             runIntakeCycle
+    val runIntakeSeqAuto=
+//        ParallelDeadlineGroupKill(
+//            WaitUntil{isFull()},
+        runIntakeCycleAuto
 
     //        ).setRequirements(SpindexerHardware)
     fun transferAll(startWhen: Command) =
@@ -80,8 +102,9 @@ object SpindexerCommands {
 //            Delay(SpindexerVars.spinDelay.seconds),
 
             WaitUntil{atTargetVelocity()},
+            ActiveDelay { SpindexerVars.spinDelay.seconds * delayMul*(smartDist*0.01)},
             moveToTransferPositionLocking(RobotVars.randomization.value[1]),
-            Delay(SpindexerVars.spinDelay.seconds*delayMul),
+            ActiveDelay { SpindexerVars.spinDelay.seconds * delayMul*(smartDist*0.01)},
             WaitUntil{atTargetVelocity()},
             moveToTransferPositionLocking(RobotVars.randomization.value[2]),
             Delay(1.seconds),

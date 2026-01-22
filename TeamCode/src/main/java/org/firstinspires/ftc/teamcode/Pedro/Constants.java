@@ -28,19 +28,19 @@ import kotlin.Lazy;
 public class Constants {
 
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(16)
-            .forwardZeroPowerAcceleration(-41.04315605123944)
-            .lateralZeroPowerAcceleration(-82.82592063867189)
+            .mass(10)
+            .forwardZeroPowerAcceleration(-36.9823349580575)
+            .lateralZeroPowerAcceleration(-74.28974372367291)
             .useSecondaryTranslationalPIDF(false)
             .useSecondaryHeadingPIDF(false)
             .useSecondaryDrivePIDF(false)
             .centripetalScaling(0.0004)
             .automaticHoldEnd(true)
             .turnHeadingErrorThreshold(0.01)
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.18, 0, 0.03, 0.025))
-            .headingPIDFCoefficients(new PIDFCoefficients(1.2, 0, 0.11, 0))
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.045, 0, 0.001, 0.045))
+            .headingPIDFCoefficients(new PIDFCoefficients(0.85, 0, 0.08, 0.06))
             .drivePIDFCoefficients(
-                    new FilteredPIDFCoefficients(0.029, 0, 0.03, 0.9, 0)
+                    new FilteredPIDFCoefficients(0.015, 0, 0.0035, 0.95, 0.05)
             );
 
     public static MecanumConstants driveConstants = new MecanumConstants()
@@ -52,8 +52,8 @@ public class Constants {
             .leftRearMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightRearMotorDirection(DcMotorSimple.Direction.REVERSE)
-            .xVelocity(68.21018109820824)
-            .yVelocity(52.539635081616076)
+            .xVelocity(69.04463900656683)
+            .yVelocity(52.52714724615654)
             .useBrakeModeInTeleOp(true)
             .useVoltageCompensation(true)
             .nominalVoltage(12);

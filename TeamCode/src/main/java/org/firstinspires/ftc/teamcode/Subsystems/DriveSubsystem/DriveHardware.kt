@@ -1,92 +1,129 @@
 package org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem
 
 import com.bylazar.configurables.annotations.Configurable
+import com.bylazar.field.PanelsField.field
+import com.bylazar.field.PanelsField.presets
+import com.bylazar.field.Style
 import com.pedropathing.follower.Follower
 import com.pedropathing.geometry.Pose
 import com.pedropathing.paths.Path
 import com.pedropathing.paths.PathChain
 import com.pedropathing.util.PoseHistory
+import com.qualcomm.hardware.limelightvision.LLResult
 import dev.nextftc.core.components.Component
 import dev.nextftc.extensions.pedro.PedroComponent.Companion.follower
+import dev.nextftc.ftc.ActiveOpMode.runtime
+import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveVars.startingPose
+import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLight.rotationOffset
+import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLight.updateLL
+import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars
+import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.centerOfRotationOffset
+import org.firstinspires.ftc.teamcode.Subsystems.Robot.MyTelemetry
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.vectorFromTarget
-import org.firstinspires.ftc.teamcode.Util.PoseKalmanFilter
-import com.bylazar.field.PanelsField.field
-import com.bylazar.field.PanelsField.presets
-import com.bylazar.field.Style
-import com.pedropathing.math.Vector
-import com.qualcomm.hardware.limelightvision.LLResult
-import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLight.addOffsets
-import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars
-import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.llPose
-import org.firstinspires.ftc.teamcode.Subsystems.Robot.MyTelemetry
+import org.firstinspires.ftc.teamcode.Util.DriftKalmanFilter
 import org.firstinspires.ftc.teamcode.Util.Util.pose3DMetersToInches
 import org.firstinspires.ftc.teamcode.Util.Util.pose3dToPose
 
 @Configurable
 object DriveHardware : Component {
-    @JvmField var filter = PoseKalmanFilter(
-        initialPose = Pose(72.0, 72.0, 0.0),
-        processNoiseX = 0.01,
-        processNoiseY = 0.01,
-        processNoiseTheta = 0.005,
-        measurementNoiseX = 8.5,
-        measurementNoiseY = 8.5,
-        measurementNoiseTheta = 0.2 // Trusting vision heading more than your previous 2.0
+    @JvmField var driftFilterX = DriftKalmanFilter(
+        0.0,
+        10.0,
+        0.1
     )
+    @JvmField var driftFilterY = DriftKalmanFilter(
+        0.0,
+        10.0,
+        0.1
+    )
+    var lastTime = 0.0
+
 
     fun getPoseEstimate(): Pose = follower.pose
 
     fun setPoseEstimate(pose: Pose) {
         follower.pose = pose
     }
+
+    /**
+     * Computes measured drift (bias) between odometry position and camera position.
+     *
+     * @param odoPose double[3] = {odoX, odoY, odoHeading}
+     * @param camPose double[3] = {camX, camY, camHeading}
+     * @return double[3] = {driftX, driftY, driftHeading}
+     */
+    fun computeMeasuredDrift(odoPose: Pose, camPose: Pose): DoubleArray {
+
+        val driftX = odoPose.x - camPose.x
+        val driftY = odoPose.y - camPose.y
+        val driftHeading = normalizeAngle(odoPose.heading - camPose.heading)
+
+        return doubleArrayOf(driftX, driftY, driftHeading)
+    }
+
+    /**
+     * Normalize an angle to the range [-pi, pi].
+     *
+     * @param angle Angle in radians.
+     * @return Equivalent angle normalized to [-pi, pi].
+     */
+    private fun normalizeAngle(angle: Double): Double {
+        var angle = angle
+        while (angle > Math.PI) angle -= 2.0 * Math.PI
+        while (angle < -Math.PI) angle += 2.0 * Math.PI
+        return angle
+    }
     // In DriveHardware.kt
     @JvmStatic
-    fun updatePoseEstimate(aprilTagPose: Pose?, totalLatency: Double, dev: DoubleArray) {
-        val deadWheelPose = getPoseEstimate()
+    fun updatePoseEstimate(result: LLResult?) {
+        var deadWheelPose = getPoseEstimate()
+        if (lastTime==0.0) lastTime = runtime
+        var now = runtime
+        var dt = now - lastTime
+        lastTime = now
 
-        // Pass the delta or just predict
-        filter.predict(deadWheelPose)
-        MyTelemetry.addData("vel", follower.velocity.magnitude)
-        if (aprilTagPose!=null) {
-            MyTelemetry.addData("outlier", filter.isOutlier(follower.pose, aprilTagPose))
-            MyTelemetry.addData("delta",
-                Vector(aprilTagPose.x-follower.pose.x,
-                    aprilTagPose.y-follower.pose.y)
-                    .magnitude
-            )
+        driftFilterX.predict(dt);
+        driftFilterY.predict(dt);
+
+        if (result != null && result.isValid) {
+            MyTelemetry.addData("MT2  X",result.botpose_MT2.position.x)
+            MyTelemetry.addData("MT2  Y",result.botpose_MT2.position.y)
+        val (measuredDriftX, measuredDriftY, _) = computeMeasuredDrift(
+            deadWheelPose,
+            pose3dToPose(pose3DMetersToInches(result.botpose_MT2)))
+        var (visionNoiseVarianceX,visionNoiseVarianceY) = result.stddevMt2.take(2)
+
+        // 3) Correct drift
+        driftFilterX.update(measuredDriftX, visionNoiseVarianceX)
+        driftFilterY.update(measuredDriftY, visionNoiseVarianceY)
         }
-        if (aprilTagPose != null && !filter.isOutlier(follower.pose, aprilTagPose)
-            && !(follower.velocity.magnitude>10)&&!(follower.angularVelocity>1)) {
-            // Use the actual standard deviation from Limelight if available
-            // result.stddevMt1[0] is X dev, [1] is Y dev
 
-//            val quality = if (dev[0] > 0) 1.0 / (dev[0] + 1.0) else 1.0
-            filter.update(aprilTagPose)
-        }
-        else{
-            filter.update(getPoseEstimate())
-        }
-        val fusedPose = filter.getPose().setHeading(getPoseEstimate().heading)
-        setPoseEstimate(fusedPose)
-
-
-        // IMPORTANT: Get the full fused pose including heading
-
-
-        // Only update the follower if the correction is significant
-        // to avoid "fighting" the internal integration of Pedro Pathing
-//        if (aprilTagPose != null&& !filter.isOutlier(aprilTagPose)) {
-//        }
+        follower.pose.plus(Pose(driftFilterX.driftEstimate,
+            driftFilterY.driftEstimate, follower.heading))
     }
 
     override fun postInit() {
-        setPoseEstimate(Pose(72.0,72.0,0.0))
+        setPoseEstimate(startingPose)
         Drawing.init()
-        filter.reset(getPoseEstimate())
+        driftFilterX.reset(0.0,3.0)
+        driftFilterY.reset(0.0,3.0)
     }
 
     override fun postUpdate() {
+//        updateLL()
+
+//        val result: LLResult? = LimeLightVars.result
+//        if (result != null && result.isValid){
+//            Drawing.drawDebug(follower, pose3dToPose(pose3DMetersToInches(result.botpose_MT2)))
+//            MyTelemetry.addData("Mt22", pose3dToPose(pose3DMetersToInches(result.botpose_MT2)))
+//        }
+//        else{
+            Drawing.drawDebug(follower)
+//        }
+//        MyTelemetry.addData("X", follower.pose.x)
+//        MyTelemetry.addData("Y", follower.pose.y)
+//        MyTelemetry.addData("heading", follower.heading)
 //        // Fetch Limelight data and pass to our update method
 //        val result: LLResult? = LimeLightVars.result
 //        MyTelemetry.addData("pre Robot Pose", getPoseEstimate())
@@ -115,10 +152,17 @@ object DriveHardware : Component {
 //            updatePoseEstimate(null, 0.0, DoubleArray(6))
 //
 //        }
-        Drawing.drawDebug(follower)
+//        updatePoseEstimate(LimeLightVars.result)
+
 //
         // Update target vector for automated scoring
         vectorFromTarget = getPoseEstimate().asVector.minus(RobotVars.goalPos)
+    }
+    fun addOffsets(pose: Pose): Pose {
+//        return pose
+        LimeLightVars.centerOfRotationOffset.rotateVector(pose.heading)
+        return pose
+            .minus(Pose(centerOfRotationOffset.xComponent, centerOfRotationOffset.yComponent))
     }
 }
 

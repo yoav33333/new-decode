@@ -74,6 +74,15 @@ object SpindexerHardware: Component {
         }
         return false
     }
+    fun checkIntakeColorAndUpdateAuto(): Boolean{
+        val color = getColorInIntake()
+        if (color != SpindexerSlotState.EMPTY){
+            tracker[intakeSlot] = color
+            return true
+        }
+        tracker[intakeSlot] = SpindexerSlotState.PURPLE
+        return false
+    }
 
     fun setPosition(position: Double) {
         spindexerServo.value.position = position

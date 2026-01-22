@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.OpModes
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import dev.nextftc.core.commands.CommandManager
+import dev.nextftc.core.commands.utility.InstantCommand
 import dev.nextftc.ftc.Gamepads
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveCommands
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveCommands.resetIMU
@@ -19,13 +20,16 @@ import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferComma
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.stopTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.lockOnGoal
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.moveToAngle
-import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.setTargetPositionFromDegrees
+import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.resetSeq
+import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.turretSeq
+import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.globalAngle
+//import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.setTargetPositionFromDegrees
 import org.firstinspires.ftc.teamcode.Util.SpindexerTracker
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.LoopingCommand
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.RepeatCommand
 
-@TeleOp
-class ShittyTeleopRed: MegiddoOpMode(AllianceColor.RED) {
+
+open class ShittyTeleop(color: AllianceColor): MegiddoOpMode(color) {
     init {
         //Operator controls(Fail safes)
         Gamepads.gamepad2.rightBumper
@@ -45,6 +49,8 @@ class ShittyTeleopRed: MegiddoOpMode(AllianceColor.RED) {
         //pre speed up
         Gamepads.gamepad1.a.whenBecomesTrue (shoot )
         Gamepads.gamepad1.dpadDown.whenBecomesTrue (resetIMU )
+        Gamepads.gamepad1.y.whenBecomesTrue (InstantCommand{globalAngle = false})
+            .whenBecomesFalse {  InstantCommand{globalAngle = true}}
 
 
 
@@ -54,7 +60,9 @@ class ShittyTeleopRed: MegiddoOpMode(AllianceColor.RED) {
     }
 
     override fun onInit() {
-        moveToAngle(270.0).schedule()
+        turretSeq().schedule()
+
+//        moveToAngle(270.0).schedule()
     }
 
     override fun onStop() {

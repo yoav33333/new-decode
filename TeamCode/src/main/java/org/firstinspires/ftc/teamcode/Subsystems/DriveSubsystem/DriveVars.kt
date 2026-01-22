@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem
 
 import com.bylazar.configurables.annotations.Configurable
+import com.pedropathing.geometry.Pose
 import org.firstinspires.ftc.teamcode.Pedro.FusionLocalizer
 
 @Configurable
@@ -15,5 +16,7 @@ object DriveVars {
 
     // R: How much you trust the camera (Decrease these to make the camera "stronger")
     @JvmField var measurementVariance: DoubleArray = doubleArrayOf(0.01, 0.01, 0.01)
+
+    @JvmField var startingPose = Pose(72.0,72.0,0.0)
 
 }

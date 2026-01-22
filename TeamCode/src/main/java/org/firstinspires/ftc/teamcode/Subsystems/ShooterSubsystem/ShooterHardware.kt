@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Robot.MyTelemetry
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.vectorFromTarget
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.deltaThreshold
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.f
+import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.hoodCorrectionMul
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.hoodLUT
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.hoodTarget
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.runShooter
@@ -56,19 +57,19 @@ object ShooterHardware: Component {
         if (ShooterVars.disableAutoShooter) return
         val distance = clamp(distance, 66.8, 156.4)
         setVelocity(shootPowLUT.get(distance))
-        hoodTarget = hoodLUT.get(distance)
+        hoodTarget = hoodLUT.get(distance)-abs(targetVelocity-getVelocity())*hoodCorrectionMul
     }
     fun stopShooting(){
         runShooter = false
     }
 
     fun update(){
-    if (runShooter){
-        shoot(smartDist)
-    }
-    else{
-        targetVelocity = 0.0
-    }
+//    if (runShooter){
+//        shoot(smartDist)
+//    }
+//    else{
+//        targetVelocity = 0.0
+//    }
     setHoodPosition(hoodTarget)
     if (targetVelocity.toInt() ==0) {
         setPower(0.0)

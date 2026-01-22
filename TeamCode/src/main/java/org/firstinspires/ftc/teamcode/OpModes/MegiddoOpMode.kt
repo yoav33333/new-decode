@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.OpModes
 
+import com.pedropathing.geometry.Pose
 import dev.nextftc.core.components.BindingsComponent
 import dev.nextftc.extensions.pedro.PedroComponent
 import dev.nextftc.ftc.NextFTCOpMode

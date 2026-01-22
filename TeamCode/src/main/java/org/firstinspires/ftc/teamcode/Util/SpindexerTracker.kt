@@ -13,7 +13,7 @@ class SpindexerTracker {
     private val TOTAL_SLOTS = 3
     // The servo can only move between these absolute steps relative to startup (0)
     private val MIN_LIMIT =0
-    private val MAX_LIMIT = 5
+    private val MAX_LIMIT = 4
 
     // Stores the state of the PHYSICAL slots (these don't move in the array, only the head moves)
     private val data = Array<SpindexerSlotState>(TOTAL_SLOTS) { SpindexerSlotState.EMPTY }
@@ -86,7 +86,7 @@ class SpindexerTracker {
                         val requiredMove = possibleAbsPos - currentHeadPos
 
                         // Pick the shortest move if multiple valid options exist
-                        if (bestMove == null || abs(requiredMove) < abs(bestMove!!)) {
+                        if (bestMove == null || abs(requiredMove) < abs(bestMove)) {
                             bestMove = requiredMove
                         }
                     }

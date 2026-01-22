@@ -13,6 +13,7 @@ import com.qualcomm.hardware.limelightvision.Limelight3A
 import dev.nextftc.core.components.Component
 import dev.nextftc.extensions.pedro.PedroComponent.Companion.follower
 import dev.nextftc.ftc.ActiveOpMode.hardwareMap
+import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.bluePipeline
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.centerOfRotationOffset
 //import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveHardware.filter
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.dist
@@ -21,8 +22,10 @@ import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.goalHeightInch
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.limelightLensHeightInches
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.limelightMountAngleDegrees
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.offsetFromAxis
+import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.redPipeline
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.result
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.smartDist
+import org.firstinspires.ftc.teamcode.Subsystems.Robot.AllianceColor
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.MyTelemetry
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars
 import org.firstinspires.ftc.teamcode.Util.Util.pose3DMetersToInches
@@ -84,11 +87,13 @@ object LimeLight: Component {
         )
     }
     fun updateLL(){
+        ll.value.updateRobotOrientation(360-(180-Math.toDegrees(follower.pose.heading)))
         result = ll.value.getLatestResult()
     }
     override fun postInit() {
-        setPipeline(LimeLightVars.localizationPipeline)
+        setPipeline(if (RobotVars.allianceColor == AllianceColor.RED) redPipeline else bluePipeline)
         ll.value.setPollRateHz(50)
+//        ll.value.latestResult.barcodeResults.size.
         ll.value.start()
 //        Drawing.init()
     }

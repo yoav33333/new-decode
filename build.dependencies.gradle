@@ -20,4 +20,3 @@ dependencies {
     implementation 'com.pedropathing:telemetry:1.0.0'
     implementation 'com.github.Thermal-Equilibrium:homeostasis-FTC:1.0.8'
 }
-
