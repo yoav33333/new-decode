@@ -33,6 +33,8 @@ import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHar
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.reverseTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.runTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.stopTransfer
+import org.firstinspires.ftc.teamcode.Util.UtilCommands.CommandGroupNoReq
+import org.firstinspires.ftc.teamcode.Util.UtilCommands.CommandSeqNoReq
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.LoopingCommand
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.ParallelDeadlineGroupKill
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.ParallelRaceGroupKill
@@ -44,6 +46,7 @@ object RobotCommands {
     val intakeCommand =
         SequentialGroup(
             IntakeCommands.stopIntake,
+            stopTransfer,
             ParallelDeadlineGroupKill(
                 WaitUntil { isFull() },
 //                smartIntake,
@@ -63,15 +66,13 @@ object RobotCommands {
                 stopIntake
             ),
         )
+
     val scanCommand =
         SequentialGroup(
-            ParallelDeadlineGroupKill(
-                WaitUntil { isFull() },
 //                smartIntake,
-                InstantCommand { resetSpindexer() },
-                Delay(0.5),
-                RepeatCommand(runIntakeSeqAuto),
-            ),
+            InstantCommand { resetSpindexer() },
+            Delay(0.5),
+            RepeatCommand(runIntakeSeqAuto) { isFull() },
         )
     val shootingCommand =
         ParallelDeadlineGroupKill(
@@ -97,5 +98,24 @@ object RobotCommands {
                 stopTransfer,
             )
         ).then(InstantCommand { stopShooting() })
+    val shootingCommandAuto =
+        CommandSeqNoReq(ParallelDeadlineGroupKill(
+            SequentialGroup(
+                WaitUntil { isEmpty() },
+                Delay(0.5),
+            ),
+            SequentialGroup(
+                stopTransfer,
+                transferAll(
+                    SequentialGroup(
+                WaitUntil { atTargetVelocity() },
+                        runTransfer
+                    )
+                ),
+                reverseTransfer,
+                Delay(0.2),
+                stopTransfer,
+            )
+        ))
 
 }

@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem
 import androidx.core.math.MathUtils.clamp
 import com.pedropathing.math.Vector
 import dev.nextftc.core.components.Component
+import dev.nextftc.core.units.deg
 import dev.nextftc.core.units.rad
 import dev.nextftc.extensions.pedro.PedroComponent.Companion.follower
 import dev.nextftc.hardware.impl.CRServoEx
@@ -18,6 +19,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.enco
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.offset
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.p
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.servoRange
+import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.state
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.targetPosition
 import org.firstinspires.ftc.teamcode.Util.LoopTimer.loopTime
 import org.firstinspires.ftc.teamcode.Util.Util.wrap360
@@ -40,7 +42,7 @@ object TurretHardware: Component {
         if (result== null || !result.isValid)return
         MyTelemetry.addData("new Target",getAngle()-(result.tx*p)-follower.angularVelocity/loopTime)
         MyTelemetry.addData("tx",result.tx)
-        setTargetPosition(getAngle()-(result.tx*p))
+        setTargetPosition(getAngle()-(result.tx*p)-follower.angularVelocity.deg.value/loopTime)
 //            (result.botposeAvgDist*distP))-follower.angularVelocity/loopTime
 //        /(smartDist*distP)
     }
@@ -50,7 +52,7 @@ object TurretHardware: Component {
 //            //closest to any end
 //            degrees = if (degrees>180) -servoRange/2 else servoRange/2
 //        }
-        targetPosition = clamp(position, -servoRange/2, servoRange/2)
+        targetPosition = clamp(position, -(servoRange/2-10), servoRange/2-10)
     }
     fun getPosition(): Double {
         return -(transferMotor.value.currentPosition-offset)
@@ -91,8 +93,8 @@ object TurretHardware: Component {
         return transferMotor.value.velocity
     }
     fun getGlobalHeading(): Double {
-        val baseHeading = toRadians(DriveHardware.getPoseEstimate().heading)
-        val turretHeading = getPosition()
+        val baseHeading = -Math.toDegrees(DriveHardware.getPoseEstimate().heading)
+        val turretHeading = getAngle()
         return wrap360(baseHeading + turretHeading)
     }
     fun calcGlobalHeadingToTarget(target: Vector): Double{
@@ -100,7 +102,15 @@ object TurretHardware: Component {
     }
 
     fun update(){
-        setAngle(clamp(targetPosition,-servoRange/2,servoRange/2))
+        when(state){
+            TurretState.TrackingAprilTags ->{
+                centerApriltag()
+                setAngle(clamp(targetPosition,-servoRange/2,servoRange/2))
+            }
+            TurretState.ResetEncoder->
+                setAngle(0.0)
+            TurretState.Disabled -> setAngle(0.0)
+        }
 //        setPower(angleControl.calculate(targetPosition, getAngle())-follower.angularVelocity/loopTime*Kv)
     }
 
@@ -118,6 +128,7 @@ object TurretHardware: Component {
         MyTelemetry.addData("Turret Servo vel", (getVel()))
 //        MyTelemetry.addData("Turret Vol", turretEncoder.value.getVoltage())
         MyTelemetry.addData("Turret Target Position", targetPosition)
+        MyTelemetry.addData("Turret state", state)
 //        MyTelemetry.addData("Turret vol", getEncoderPosition())
         MyTelemetry.addData("Turret Global Heading", getGlobalHeading())
     }

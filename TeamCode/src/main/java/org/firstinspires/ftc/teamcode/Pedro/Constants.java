@@ -90,10 +90,12 @@ public class Constants {
                     measurementVariance,
                     500
             ));
-
+    public static AcclTwoWheelLocalizer getLocalizer(HardwareMap hmap, TwoWheelConstants constants){
+        return new AcclTwoWheelLocalizer(hmap, constants);
+    }
 
     public static PathConstraints pathConstraints = new PathConstraints(
-            0.996,
+            0.99,
             10,
             1.75,
             1
@@ -103,6 +105,7 @@ public class Constants {
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .mecanumDrivetrain(driveConstants)
 //                .setLocalizer(localizer.getValue())
+//                .setLocalizer(getLocalizer(hardwareMap, deadWheelLocalizerConstants))
                 .twoWheelLocalizer(deadWheelLocalizerConstants)
                 .pathConstraints(pathConstraints)
                 .build();

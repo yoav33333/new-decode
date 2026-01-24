@@ -20,9 +20,8 @@ import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferComma
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.stopTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.lockOnGoal
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.moveToAngle
-import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.resetSeq
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.turretSeq
-import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.globalAngle
+import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.runTurret
 //import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.setTargetPositionFromDegrees
 import org.firstinspires.ftc.teamcode.Util.SpindexerTracker
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.LoopingCommand
@@ -49,8 +48,11 @@ open class ShittyTeleop(color: AllianceColor): MegiddoOpMode(color) {
         //pre speed up
         Gamepads.gamepad1.a.whenBecomesTrue (shoot )
         Gamepads.gamepad1.dpadDown.whenBecomesTrue (resetIMU )
-        Gamepads.gamepad1.y.whenBecomesTrue (InstantCommand{globalAngle = false})
-            .whenBecomesFalse {  InstantCommand{globalAngle = true}}
+        Gamepads.gamepad1.y.whenBecomesTrue (turretSeq())
+//            .whenBecomesFalse {  InstantCommand{globalAngle = true}}
+        Gamepads.gamepad1.b.whenBecomesTrue(InstantCommand {runTurret = false})
+            .whenBecomesFalse (InstantCommand{runTurret = true})
+
 
 
 

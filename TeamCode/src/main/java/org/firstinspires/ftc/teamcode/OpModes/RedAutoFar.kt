@@ -48,58 +48,51 @@ import kotlin.time.Duration.Companion.seconds
 
 @Autonomous
 @Configurable
-class RedAutoClose: MegiddoOpMode(AllianceColor.RED) {
+class RedAutoFar: MegiddoOpMode(AllianceColor.RED) {
 
-    @JvmField var startingPose = Pose(116.704, 131.789,Math.toRadians(216.0))
-    @JvmField var shootingPose = Pose(93.014, 92.282)
-    @JvmField var preIntakePose = Pose(94.239, 88.887)
-    @JvmField var preIntakePose2 = Pose(94.239, 88.887-24)
-    @JvmField var endIntakePose = Pose(115.634, 88.944)
-    @JvmField var endIntakePose2 = Pose(115.634, 88.944-24)
-    @JvmField var finishPose = Pose(119.775, 91.634)
-    var moveToShooting1 = PathChain()
+    @JvmField var startingPose = Pose(89.211, 8.254,Math.toRadians(270.0))
+//    @JvmField var shootingPose = Pose(93.014, 92.282)
+    @JvmField var preIntakePose = Pose(98.169, 34.479)
+    @JvmField var preIntakePose2 = Pose(115.986, 9.000)
+    @JvmField var endIntakePose = Pose(125.944, 34.789)
+    @JvmField var endIntakePose2 = Pose(130.986, 9.000)
+    @JvmField var finishPose = Pose(90.958, 38.408)
+//    var moveToShooting1 = PathChain()
     var moveToPreIntake = PathChain()
     var moveToEndIntake = PathChain()
-    var moveToShooting2 = PathChain()
+    var moveToShooting1 = PathChain()
     var moveToPreIntake2 = PathChain()
     var moveToEndIntake2 = PathChain()
-    var moveToShooting3 = PathChain()
+    var moveToShooting2 = PathChain()
     var moveToFinish = PathChain()
     init {
         DriveVars.startingPose = startingPose
     }
     override fun onInit(){
-        moveToShooting1 = follower.pathBuilder()
-            .addPath(BezierLine(startingPose, shootingPose))
-            .setConstantHeadingInterpolation(Math.toRadians(216.0))
-            .build()
         moveToPreIntake = follower.pathBuilder()
-            .addPath(BezierLine(shootingPose, preIntakePose))
-            .setLinearHeadingInterpolation(Math.toRadians(216.0), Math.toRadians(180.0))
+            .addPath(BezierLine(startingPose, preIntakePose))
+            .setLinearHeadingInterpolation(Math.toRadians(270.0), Math.toRadians(180.0))
             .build()
         moveToEndIntake = follower.pathBuilder()
             .addPath(BezierLine(preIntakePose, endIntakePose))
             .setConstantHeadingInterpolation(Math.toRadians(180.0))
             .build()
-        moveToShooting2 = follower.pathBuilder()
-            .addPath(BezierLine(endIntakePose, shootingPose))
-            .setLinearHeadingInterpolation(Math.toRadians(180.0), Math.toRadians(216.0))
+        moveToShooting1 = follower.pathBuilder()
+            .addPath(BezierLine(endIntakePose, startingPose))
+            .setLinearHeadingInterpolation(Math.toRadians(180.0), Math.toRadians(270.0))
             .build()
         moveToPreIntake2 = follower.pathBuilder()
-            .addPath(BezierLine(shootingPose, preIntakePose2))
-            .setLinearHeadingInterpolation(Math.toRadians(216.0), Math.toRadians(180.0))
+            .addPath(BezierLine(startingPose, preIntakePose2))
+            .setLinearHeadingInterpolation(Math.toRadians(270.0), Math.toRadians(180.0))
             .build()
         moveToEndIntake2 = follower.pathBuilder()
             .addPath(BezierLine(preIntakePose2, endIntakePose2))
             .setConstantHeadingInterpolation(Math.toRadians(180.0))
             .build()
-        moveToShooting3 = follower.pathBuilder()
-            .addPath(BezierLine(endIntakePose2, shootingPose))
-            .setLinearHeadingInterpolation(Math.toRadians(180.0), Math.toRadians(216.0))
-            .build()
+
         moveToFinish = follower.pathBuilder()
-            .addPath(BezierLine(shootingPose, finishPose))
-            .setLinearHeadingInterpolation(Math.toRadians(216.0), Math.toRadians(0.0))
+            .addPath(BezierLine(startingPose, finishPose))
+            .setLinearHeadingInterpolation(Math.toRadians(270.0), Math.toRadians(0.0))
             .build()
 //        scanCommand.schedule()
     }
@@ -112,7 +105,6 @@ class RedAutoClose: MegiddoOpMode(AllianceColor.RED) {
             ).schedule()
         },
         Delay(0.4),
-        FollowPath(moveToShooting1),
         Delay(0.9.seconds),
         transferAll(
             SequentialGroup(
@@ -125,7 +117,10 @@ class RedAutoClose: MegiddoOpMode(AllianceColor.RED) {
         stopTransfer,
         FollowPath(moveToPreIntake),
         IntakeCommands.stopIntake,
-        ParallelGroup(
+        ParallelDeadlineGroupKill(
+            Delay(0.6.seconds).then(FollowPath(
+                moveToEndIntake, holdEnd=false, maxPower = 0.35,
+            )),
             InstantCommand { resetSpindexer() },
             RepeatCommand(runIntakeSeqAuto){isFull()},
             RepeatCommand(InstantCommand{
@@ -133,11 +128,9 @@ class RedAutoClose: MegiddoOpMode(AllianceColor.RED) {
                 if (abs(getVel()) <outtakeThreshold) setPower(-intakePower)
                 else setPower(intakePower)}
             ){isFull()},
-            Delay(0.6.seconds).then(FollowPath(
-                moveToEndIntake, holdEnd=false, maxPower = 0.35,
-            )),
+
         ),
-        FollowPath(moveToShooting2),
+        FollowPath(moveToShooting1),
         InstantCommand{ turretSeq().schedule() },
         Delay(1.5.seconds),
         transferAll(
@@ -151,7 +144,10 @@ class RedAutoClose: MegiddoOpMode(AllianceColor.RED) {
         stopTransfer,
         FollowPath(moveToPreIntake2),
         IntakeCommands.stopIntake,
-        ParallelGroup(
+        ParallelDeadlineGroupKill(
+            Delay(0.6.seconds).then(FollowPath(
+                moveToEndIntake2, holdEnd=false, maxPower = 0.35,
+            )),
             InstantCommand { resetSpindexer() },
             RepeatCommand(runIntakeSeqAuto){isFull()},
             RepeatCommand(InstantCommand{
@@ -159,11 +155,9 @@ class RedAutoClose: MegiddoOpMode(AllianceColor.RED) {
                 if (abs(getVel()) <outtakeThreshold) setPower(-intakePower)
                 else setPower(intakePower)}
             ){isFull()},
-            Delay(0.6.seconds).then(FollowPath(
-                moveToEndIntake, holdEnd=false, maxPower = 0.35,
-            )),
-        ),
-        FollowPath(moveToShooting3),
+
+            ),
+        FollowPath(moveToShooting2),
         InstantCommand{ turretSeq().schedule() },
         Delay(1.5.seconds),
         transferAll(

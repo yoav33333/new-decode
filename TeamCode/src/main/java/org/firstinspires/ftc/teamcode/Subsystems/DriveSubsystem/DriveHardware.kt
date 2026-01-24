@@ -4,6 +4,7 @@ import com.bylazar.configurables.annotations.Configurable
 import com.bylazar.field.PanelsField.field
 import com.bylazar.field.PanelsField.presets
 import com.bylazar.field.Style
+import com.bylazar.gamepad.Gamepad
 import com.pedropathing.follower.Follower
 import com.pedropathing.geometry.Pose
 import com.pedropathing.paths.Path
@@ -13,6 +14,7 @@ import com.qualcomm.hardware.limelightvision.LLResult
 import dev.nextftc.core.components.Component
 import dev.nextftc.extensions.pedro.PedroComponent.Companion.follower
 import dev.nextftc.ftc.ActiveOpMode.runtime
+import dev.nextftc.ftc.Gamepads
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveVars.startingPose
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLight.rotationOffset
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLight.updateLL
@@ -24,6 +26,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.vectorFromTarge
 import org.firstinspires.ftc.teamcode.Util.DriftKalmanFilter
 import org.firstinspires.ftc.teamcode.Util.Util.pose3DMetersToInches
 import org.firstinspires.ftc.teamcode.Util.Util.pose3dToPose
+import kotlin.math.abs
 
 @Configurable
 object DriveHardware : Component {
@@ -110,52 +113,38 @@ object DriveHardware : Component {
         driftFilterY.reset(0.0,3.0)
     }
 
+    // Add this variable at the top of your DriveHardware object
+    private var isHolding = false
+
     override fun postUpdate() {
-//        updateLL()
+        val stickThreshold = 0.05
+        val velocityThreshold = 0.5
+        val angularVelocityThreshold = 0.05
 
-//        val result: LLResult? = LimeLightVars.result
-//        if (result != null && result.isValid){
-//            Drawing.drawDebug(follower, pose3dToPose(pose3DMetersToInches(result.botpose_MT2)))
-//            MyTelemetry.addData("Mt22", pose3dToPose(pose3DMetersToInches(result.botpose_MT2)))
-//        }
-//        else{
-            Drawing.drawDebug(follower)
-//        }
-//        MyTelemetry.addData("X", follower.pose.x)
-//        MyTelemetry.addData("Y", follower.pose.y)
-//        MyTelemetry.addData("heading", follower.heading)
-//        // Fetch Limelight data and pass to our update method
-//        val result: LLResult? = LimeLightVars.result
-//        MyTelemetry.addData("pre Robot Pose", getPoseEstimate())
-////        var pose = pose3DMetersToInches(result.botpose)
-//
-////        MyTelemetry.addData("LL Pose with Offsets", poseWithOffsets.toString())
-//        if (result != null && result.isValid()) {
-//            var pose = pose3DMetersToInches(result.botpose)
-////            MyTelemetry.addData("stdDiv x: ", result.stddevMt1[0]* 39.3701)
-////            MyTelemetry.addData("stdDiv y: ", result.stddevMt1[1]* 39.3701)
-////            MyTelemetry.addData("stdDiv yaw: ", result.stddevMt1[5])
-////            MyTelemetry.addData("MT1 pose: ", pose)
-////            MyTelemetry.addData("MT1 field pose: ", pose3dToPose(pose))
-//            MyTelemetry.addData("MT1 pose: ", pose)
-//            val llPose = pose3dToPose(pose)
-////                val llPose = pose3dToPose(result.botpose)
-//            MyTelemetry.addData("LL Pose TRU E", result.botpose)
-////                MyTelemetry.addData("LL Pose", llPose.toString())
-//            val poseWithOffsets = addOffsets(llPose)
-//            LimeLightVars.llPose = poseWithOffsets
-//            MyTelemetry.addData("LL Pose with Offsets", poseWithOffsets.toString())
-//            updatePoseEstimate(poseWithOffsets, result.timestamp, result.stddevMt1)
-////            Drawing.drawDebug(pose3dToPose(pose))
-//        }
-//        else{
-//            updatePoseEstimate(null, 0.0, DoubleArray(6))
-//
-//        }
-//        updatePoseEstimate(LimeLightVars.result)
+        val sticksAtRest = abs(Gamepads.gamepad1.leftStickY.get()) < stickThreshold &&
+                abs(Gamepads.gamepad1.leftStickX.get()) < stickThreshold &&
+                abs(Gamepads.gamepad1.rightStickX.get()) < stickThreshold
 
-//
-        // Update target vector for automated scoring
+        val robotStopped = follower.velocity.magnitude < velocityThreshold &&
+                follower.angularVelocity < angularVelocityThreshold
+
+        if (sticksAtRest) {
+            if (robotStopped && !isHolding) {
+                follower.holdPoint(follower.pose)
+                isHolding = true
+            }
+
+            MyTelemetry.addData("Drive State", if (isHolding) "Holding Pose" else "Decelerating")
+        } else {
+            if (isHolding || follower.isBusy) {
+                follower.breakFollowing()
+                follower.startTeleopDrive()
+                isHolding = false
+            }
+            MyTelemetry.addData("Drive State", "Teleop Driving")
+        }
+
+        Drawing.drawDebug(follower)
         vectorFromTarget = getPoseEstimate().asVector.minus(RobotVars.goalPos)
     }
     fun addOffsets(pose: Pose): Pose {

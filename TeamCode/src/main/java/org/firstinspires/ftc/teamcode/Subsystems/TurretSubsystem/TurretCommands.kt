@@ -15,6 +15,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.setAngle
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.setTargetPosition
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.zeroEnc
+import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.state
 import kotlin.math.abs
 import kotlin.time.Duration.Companion.seconds
 
@@ -23,28 +24,26 @@ object TurretCommands {
         .setRequirements(TurretHardware)
     fun moveToAngler(angle: Double) = InstantCommand{setAngle(angle)}
 //        .setRequirements(TurretHardware)
-val centerAprilTags = LambdaCommand()
-    .setUpdate {centerApriltag() }
-    .setIsDone { false }
-    .setInterruptible(false)
-    .setRequirements(TurretHardware)
+    fun centerAprilTags() = InstantCommand{state = TurretState.TrackingAprilTags}
     fun turretSeq() = SequentialGroup(
-    InstantCommand{moveToAngle(0.0)},
+    InstantCommand{setTargetPosition(0.0)
+        state = TurretState.ResetEncoder},
     Delay(0.3.seconds),
     WaitUntil{abs(getVel())<5},
         InstantCommand{zeroEnc()},
-        InstantCommand{ centerAprilTags.schedule() }
+        Delay(0.3.seconds),
+        InstantCommand{ centerAprilTags().schedule() }
     )
-    val resetSeq = LambdaCommand()
-        .setStart { moveToAngle(0.0) }
-    .setUpdate { MyTelemetry.addData("running","")
-//        MyTelemetry.
-    }
-        .setIsDone { abs(getVel())<5 }
-        .setStop { zeroEnc()
-            centerAprilTags.schedule()}
-    .setInterruptible(false)
-    .setRequirements(TurretHardware)
+//    val resetSeq = LambdaCommand()
+//        .setStart { moveToAngle(0.0) }
+//    .setUpdate { MyTelemetry.addData("running","")
+////        MyTelemetry.
+//    }
+//        .setIsDone { abs(getVel())<5 }
+//        .setStop { zeroEnc()
+//            centerAprilTags.schedule()}
+//    .setInterruptible(false)
+//    .setRequirements(TurretHardware)
 
     fun moveToGlobalAngle(angle: Double) = InstantCommand{TurretHardware.setTargetPositionFromGlobalDegrees(angle)}
         .setRequirements(TurretHardware)
