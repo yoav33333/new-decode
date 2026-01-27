@@ -46,7 +46,7 @@ class BlueAutoFar: MegiddoOpMode(AllianceColor.BLUE) {
     @JvmField var preIntakePose = Pose(98.169, 34.479).mirror()
     @JvmField var preIntakePose2 = Pose(115.986, 9.000).mirror()
     @JvmField var endIntakePose = Pose(125.944, 34.789).mirror()
-    @JvmField var endIntakePose2 = Pose(130.986, 9.000).mirror()
+    @JvmField var endIntakePose2 = Pose(130.986, 14.000).mirror()
     @JvmField var finishPose = Pose(90.958, 38.408).mirror()
     var moveToShooting1 = PathChain()
     var moveToPreIntake = PathChain()
@@ -107,19 +107,20 @@ class BlueAutoFar: MegiddoOpMode(AllianceColor.BLUE) {
                 RepeatCommand(runIntakeSeqAuto){isFull()},
             ).schedule()
         },
-        Delay(0.3),
+        Delay(0.2),
         FollowPath(moveToShooting1),
-        Delay(0.2.seconds),
+        Delay(0.6.seconds),
         transferAll(
             SequentialGroup(
                 WaitUntil { atTargetVelocity() },
                 runTransfer
             )
         ),
-        reverseTransfer,
-        Delay(0.1),
-        stopTransfer,
-        FollowPath(moveToPreIntake),
+        ParallelGroup(
+            SequentialGroup(reverseTransfer,
+                Delay(0.1),
+                stopTransfer),
+            FollowPath(moveToPreIntake),),
         IntakeCommands.stopIntake,
         ParallelGroup(
             InstantCommand { resetSpindexer() },
@@ -130,22 +131,23 @@ class BlueAutoFar: MegiddoOpMode(AllianceColor.BLUE) {
                 else setPower(intakePower)}
             ){isFull()},
             Delay(0.3.seconds).then(FollowPath(
-                moveToEndIntake, holdEnd=false, maxPower = 0.38,
+                moveToEndIntake, holdEnd=false, maxPower = 0.32,
             )),
         ),
+        InstantCommand{ turretSeq().schedule() },
         FollowPath(moveToShooting2),
-        InstantCommand{ turretSeq().schedule() },
-        Delay(0.6.seconds),
+        Delay(0.4.seconds),
         transferAll(
             SequentialGroup(
                 WaitUntil { atTargetVelocity() },
                 runTransfer
             )
         ),
-        reverseTransfer,
-        Delay(0.1),
-        stopTransfer,
-        FollowPath(moveToPreIntake2),
+        ParallelGroup(
+            SequentialGroup(reverseTransfer,
+                Delay(0.1),
+                stopTransfer),
+            FollowPath(moveToPreIntake2),),
         IntakeCommands.stopIntake,
         ParallelGroup(
             InstantCommand { resetSpindexer() },
@@ -156,12 +158,12 @@ class BlueAutoFar: MegiddoOpMode(AllianceColor.BLUE) {
                 else setPower(intakePower)}
             ){isFull()},
             Delay(0.3.seconds).then(FollowPath(
-                moveToEndIntake2, holdEnd=false, maxPower = 0.38,
+                moveToEndIntake2, holdEnd=false, maxPower = 0.32,
             )),
         ),
-        FollowPath(moveToShooting3),
         InstantCommand{ turretSeq().schedule() },
-        Delay(0.6.seconds),
+        FollowPath(moveToShooting3),
+        Delay(0.3.seconds),
         transferAll(
             SequentialGroup(
                 WaitUntil { atTargetVelocity() },

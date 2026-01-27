@@ -134,9 +134,9 @@ class RedAutoFar: MegiddoOpMode(AllianceColor.RED) {
                 moveToEndIntake, holdEnd=false, maxPower = 0.32,
             )),
         ),
-        FollowPath(moveToShooting2),
         InstantCommand{ turretSeq().schedule() },
-        Delay(0.8.seconds),
+        FollowPath(moveToShooting2),
+        Delay(0.4.seconds),
         transferAll(
             SequentialGroup(
                 WaitUntil { atTargetVelocity() },
@@ -161,9 +161,9 @@ class RedAutoFar: MegiddoOpMode(AllianceColor.RED) {
                 moveToEndIntake2, holdEnd=false, maxPower = 0.32,
             )),
         ),
-        FollowPath(moveToShooting3),
         InstantCommand{ turretSeq().schedule() },
-        Delay(0.8.seconds),
+        FollowPath(moveToShooting3),
+        Delay(0.3.seconds),
         transferAll(
             SequentialGroup(
                 WaitUntil { atTargetVelocity() },

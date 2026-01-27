@@ -138,9 +138,8 @@ class BlueAutoClose: MegiddoOpMode(AllianceColor.BLUE) {
                 moveToEndIntake, holdEnd=false, maxPower = 0.38,
             )),
         ),
-        FollowPath(moveToShooting2),
-        outtake,
         InstantCommand{ turretSeq().schedule() },
+        FollowPath(moveToShooting2),
         Delay(0.4.seconds),
         transferAll(
             SequentialGroup(
@@ -165,9 +164,8 @@ class BlueAutoClose: MegiddoOpMode(AllianceColor.BLUE) {
                 moveToEndIntake2, holdEnd=false, maxPower = 0.38,
             )),
         ),
-        FollowPath(moveToShooting3),
-        outtake,
         InstantCommand{ turretSeq().schedule() },
+        FollowPath(moveToShooting3),
         Delay(0.4.seconds),
         transferAll(
             SequentialGroup(
