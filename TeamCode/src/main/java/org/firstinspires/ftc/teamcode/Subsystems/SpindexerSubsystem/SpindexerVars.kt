@@ -1,8 +1,5 @@
 package org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem
 
-import com.ThermalEquilibrium.homeostasis.Controllers.Feedback.AngleController
-import com.ThermalEquilibrium.homeostasis.Controllers.Feedback.BasicPID
-import com.ThermalEquilibrium.homeostasis.Parameters.PIDCoefficients
 import com.bylazar.configurables.annotations.Configurable
 //import org.firstinspires.ftc.teamcode.Util.ColorRange
 import org.firstinspires.ftc.teamcode.Util.HSVRange
@@ -23,9 +20,12 @@ object SpindexerVars {
     @JvmField var degreesPerSlot = 66
     @JvmField var intakeSlot = 0
     @JvmField var transferSlot = 1
-    @JvmField var spinDelay = 0.4
+    @JvmField var spinDelayShoot = 0.25
+    @JvmField var spinDelayIntake = 0.00
     @JvmField var delayMul = 1.0
-    @JvmField var offset = 7.5
+    @JvmField var offset = 4.5
+    @JvmField var offsetEnc = 16
+    @JvmField var MulEnc = 1.1
     @JvmField var purpleRange = HSVRange(190.0,1000.0,0.0,1000.0,0.0,1000.0)
     @JvmField var greenRange = HSVRange(80.0,190.0,0.0,1000.0,0.0,1000.0)
 //    @JvmField var distThreshold = 30

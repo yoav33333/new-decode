@@ -28,10 +28,10 @@ object TurretCommands {
     fun turretSeq() = SequentialGroup(
     InstantCommand{setTargetPosition(0.0)
         state = TurretState.ResetEncoder},
-    Delay(0.3.seconds),
-    WaitUntil{abs(getVel())<5},
+    Delay(0.35.seconds),
+    WaitUntil{abs(getVel())<4},
         InstantCommand{zeroEnc()},
-        Delay(0.3.seconds),
+//        Delay(0.3.seconds),
         InstantCommand{ centerAprilTags().schedule() }
     )
 //    val resetSeq = LambdaCommand()

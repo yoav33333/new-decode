@@ -12,7 +12,7 @@ class SpindexerTracker {
     // HARDWARE CONSTANTS
     private val TOTAL_SLOTS = 3
     // The servo can only move between these absolute steps relative to startup (0)
-    private val MIN_LIMIT =0
+    private val MIN_LIMIT =2
     private val MAX_LIMIT = 4
 
     // Stores the state of the PHYSICAL slots (these don't move in the array, only the head moves)
@@ -20,7 +20,7 @@ class SpindexerTracker {
 
     // Tracks where the "intake head" is relative to the physical slots.
     // 0 = Center, positive = CW, negative = CCW
-    private var currentHeadPos = 0
+    private var currentHeadPos = 2
 
     val size get() = data.size
 

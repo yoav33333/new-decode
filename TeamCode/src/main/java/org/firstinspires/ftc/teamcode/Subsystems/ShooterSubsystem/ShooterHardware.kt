@@ -55,8 +55,8 @@ object ShooterHardware: Component {
         return deltaThreshold > abs(getVelocity()-targetVelocity)
     }
     fun shoot(distance: Double){
-        if (ShooterVars.disableAutoShooter) return
         setVelocity(controlledSpeed)
+        if (ShooterVars.disableAutoShooter) return
         val distance = clamp(abs(distance), 61.4, 162.0)
         setVelocity(shootPowLUT.get(distance))
         hoodTarget = hoodLUT.get(distance)-abs(targetVelocity-getVelocity())*hoodCorrectionMul

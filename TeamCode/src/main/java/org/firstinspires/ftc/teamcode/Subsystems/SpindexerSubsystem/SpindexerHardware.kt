@@ -7,9 +7,12 @@ import dev.nextftc.core.components.Component
 import dev.nextftc.ftc.ActiveOpMode.hardwareMap
 import dev.nextftc.hardware.impl.ServoEx
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.MyTelemetry
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.MulEnc
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.degreesPerSlot
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.delayMul
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.greenRange
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.intakeSlot
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.offsetEnc
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.purpleRange
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.targetPosition
 import org.firstinspires.ftc.teamcode.Util.AxonEncoder
@@ -17,6 +20,7 @@ import org.firstinspires.ftc.teamcode.Util.FilteredColorSensor
 import org.firstinspires.ftc.teamcode.Util.SpindexerSlotState
 import org.firstinspires.ftc.teamcode.Util.SpindexerTracker
 import org.firstinspires.ftc.teamcode.Util.Util
+import org.firstinspires.ftc.teamcode.Util.Util.wrap360
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -31,7 +35,7 @@ object SpindexerHardware: Component {
 
     // We need to track the absolute step position here to calculate angle correctly.
     // Range is expected to be -2 to 2 based on your description.
-    private var currentSteps = 0
+    @JvmField var currentSteps = 2
 
     fun isFull(): Boolean {
         return tracker.isFull()
@@ -39,6 +43,7 @@ object SpindexerHardware: Component {
     fun isEmpty(): Boolean{
         return tracker.isEmpty()
     }
+    fun isAtTarget(): Boolean = targetPosition == getPosition()
 
     fun getColorInIntake(): SpindexerSlotState {
         var hsv = colorSensor1.value.getHSV()
@@ -92,7 +97,7 @@ object SpindexerHardware: Component {
     }
 
     fun getPosition(): Double {
-        return spindexerEncoder.value.getPosition()+SpindexerVars.offset
+        return wrap360(-spindexerEncoder.value.getPosition()*MulEnc +SpindexerVars.offsetEnc)
     }
 
     fun moveStateToPosition(color: SpindexerSlotState, pos: Int) : Boolean{
@@ -134,7 +139,7 @@ object SpindexerHardware: Component {
         val newStepPosition = currentSteps + steps
 
         // Hard limits: Ensure we don't go beyond -2 or 2 (or whatever your SpindexerTracker limit is)
-        if (newStepPosition > 5 || newStepPosition < 0) {
+        if (newStepPosition > 4 || newStepPosition < 2) {
             MyTelemetry.addData("Spindexer Warning", "Rotation limit hit! Requested: $newStepPosition")
             return
         }
@@ -151,13 +156,14 @@ object SpindexerHardware: Component {
     }
 
     fun resetSpindexer(){
-        currentSteps = 0
+        currentSteps = 2
         tracker.setPose(currentSteps)
         targetPosition = SpindexerVars.offset
     }
 
     fun isAtTargetPosition(): Boolean {
-        return abs(getPosition() - targetPosition) < 5
+//        return abs(getPosition() - targetPosition) < 20
+        return true
     }
 
     fun angleToServoPos(angle: Double): Double {
@@ -165,10 +171,12 @@ object SpindexerHardware: Component {
     }
 
     override fun postUpdate() {
+        targetPosition = currentSteps * SpindexerVars.degreesPerSlot + SpindexerVars.offset
         setPosition(angleToServoPos(targetPosition))
         MyTelemetry.addData("Spindexer Position", getPosition())
         MyTelemetry.addData("Spindexer Vol", spindexerEncoder.value.getVoltage())
         MyTelemetry.addData("Spindexer Target angle", targetPosition)
+        MyTelemetry.addData("Spindexer at target", isAtTargetPosition())
         MyTelemetry.addData("Spindexer target pos", getTargetPosition())
         MyTelemetry.addData("Spindexer Steps", currentSteps) // Debug current steps
         MyTelemetry.addData("Spindexer state", tracker.toString())

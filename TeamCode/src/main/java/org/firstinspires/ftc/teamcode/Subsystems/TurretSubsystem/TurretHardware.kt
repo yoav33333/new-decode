@@ -40,7 +40,6 @@ object TurretHardware: Component {
     fun centerApriltag(){
         val result = result
         if (result== null || !result.isValid)return
-        MyTelemetry.addData("new Target",getAngle()-(result.tx*p)-follower.angularVelocity/loopTime)
         MyTelemetry.addData("tx",result.tx)
         setTargetPosition(getAngle()-(result.tx*p)-follower.angularVelocity.deg.value/loopTime)
 //            (result.botposeAvgDist*distP))-follower.angularVelocity/loopTime
@@ -52,7 +51,7 @@ object TurretHardware: Component {
 //            //closest to any end
 //            degrees = if (degrees>180) -servoRange/2 else servoRange/2
 //        }
-        targetPosition = clamp(position, -(servoRange/2-10), servoRange/2-10)
+        targetPosition = clamp(position, -(servoRange/2), servoRange/2)
     }
     fun getPosition(): Double {
         return -(transferMotor.value.currentPosition-offset)

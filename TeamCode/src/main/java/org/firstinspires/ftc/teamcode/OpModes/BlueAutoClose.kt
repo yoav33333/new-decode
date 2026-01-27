@@ -14,6 +14,7 @@ import dev.nextftc.core.commands.utility.InstantCommand
 import dev.nextftc.extensions.pedro.PedroComponent.Companion.follower
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveVars
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeCommands
+import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeCommands.outtake
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeHardware.getVel
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeHardware.setPower
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeVars.intakePower
@@ -48,15 +49,15 @@ import kotlin.time.Duration.Companion.seconds
 
 @Autonomous
 @Configurable
-class RedAutoClose: MegiddoOpMode(AllianceColor.RED) {
+class BlueAutoClose: MegiddoOpMode(AllianceColor.BLUE) {
 
-    @JvmField var startingPose = Pose(116.704, 131.789,Math.toRadians(216.0))
-    @JvmField var shootingPose = Pose(93.014, 92.282)
-    @JvmField var preIntakePose = Pose(94.239, 88.887)
-    @JvmField var preIntakePose2 = Pose(94.239, 88.887-22)
-    @JvmField var endIntakePose = Pose(120.634, 88.944)
-    @JvmField var endIntakePose2 = Pose(115.634, 88.944-22)
-    @JvmField var finishPose = Pose(119.775, 91.634)
+    @JvmField var startingPose = Pose(116.704, 131.789,Math.toRadians(216.0)).mirror()
+    @JvmField var shootingPose = Pose(93.014, 92.282).mirror()
+    @JvmField var preIntakePose = Pose(94.239, 88.887).mirror()
+    @JvmField var preIntakePose2 = Pose(94.239, 88.887-22).mirror()
+    @JvmField var endIntakePose = Pose(115.634, 88.944).mirror()
+    @JvmField var endIntakePose2 = Pose(115.634, 88.944-22).mirror()
+    @JvmField var finishPose = Pose(119.775, 91.634).mirror()
     var moveToShooting1 = PathChain()
     var moveToPreIntake = PathChain()
     var moveToEndIntake = PathChain()
@@ -71,35 +72,35 @@ class RedAutoClose: MegiddoOpMode(AllianceColor.RED) {
     override fun onInit(){
         moveToShooting1 = follower.pathBuilder()
             .addPath(BezierLine(startingPose, shootingPose))
-            .setConstantHeadingInterpolation(Math.toRadians(216.0))
+            .setConstantHeadingInterpolation(Math.toRadians(180-216.0))
             .build()
         moveToPreIntake = follower.pathBuilder()
             .addPath(BezierLine(shootingPose, preIntakePose))
-            .setLinearHeadingInterpolation(Math.toRadians(216.0), Math.toRadians(180.0))
+            .setLinearHeadingInterpolation(Math.toRadians(180-216.0), Math.toRadians(180-180.0))
             .build()
         moveToEndIntake = follower.pathBuilder()
             .addPath(BezierLine(preIntakePose, endIntakePose))
-            .setConstantHeadingInterpolation(Math.toRadians(180.0))
+            .setConstantHeadingInterpolation(Math.toRadians(180-180.0))
             .build()
         moveToShooting2 = follower.pathBuilder()
             .addPath(BezierLine(endIntakePose, shootingPose))
-            .setLinearHeadingInterpolation(Math.toRadians(180.0), Math.toRadians(216.0))
+            .setLinearHeadingInterpolation(Math.toRadians(180-180.0), Math.toRadians(180-216.0))
             .build()
         moveToPreIntake2 = follower.pathBuilder()
             .addPath(BezierLine(shootingPose, preIntakePose2))
-            .setLinearHeadingInterpolation(Math.toRadians(216.0), Math.toRadians(180.0))
+            .setLinearHeadingInterpolation(Math.toRadians(180-216.0), Math.toRadians(180-180.0))
             .build()
         moveToEndIntake2 = follower.pathBuilder()
             .addPath(BezierLine(preIntakePose2, endIntakePose2))
-            .setConstantHeadingInterpolation(Math.toRadians(180.0))
+            .setConstantHeadingInterpolation(Math.toRadians(180-180.0))
             .build()
         moveToShooting3 = follower.pathBuilder()
             .addPath(BezierLine(endIntakePose2, shootingPose))
-            .setLinearHeadingInterpolation(Math.toRadians(180.0), Math.toRadians(216.0))
+            .setLinearHeadingInterpolation(Math.toRadians(180-180.0), Math.toRadians(180-216.0))
             .build()
         moveToFinish = follower.pathBuilder()
             .addPath(BezierLine(shootingPose, finishPose))
-            .setLinearHeadingInterpolation(Math.toRadians(216.0), Math.toRadians(0.0))
+            .setLinearHeadingInterpolation(Math.toRadians(180-216.0), Math.toRadians(180-0.0))
             .build()
 //        scanCommand.schedule()
     }
@@ -137,8 +138,9 @@ class RedAutoClose: MegiddoOpMode(AllianceColor.RED) {
                 moveToEndIntake, holdEnd=false, maxPower = 0.38,
             )),
         ),
-        InstantCommand{ turretSeq().schedule() },
         FollowPath(moveToShooting2),
+        outtake,
+        InstantCommand{ turretSeq().schedule() },
         Delay(0.4.seconds),
         transferAll(
             SequentialGroup(
@@ -163,8 +165,9 @@ class RedAutoClose: MegiddoOpMode(AllianceColor.RED) {
                 moveToEndIntake2, holdEnd=false, maxPower = 0.38,
             )),
         ),
-        InstantCommand{ turretSeq().schedule() },
         FollowPath(moveToShooting3),
+        outtake,
+        InstantCommand{ turretSeq().schedule() },
         Delay(0.4.seconds),
         transferAll(
             SequentialGroup(

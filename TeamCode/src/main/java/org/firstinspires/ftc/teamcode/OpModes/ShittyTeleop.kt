@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeCommands
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.AllianceColor
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.intakeCommand
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.shootingCommand
+import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.auto
 //import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.shootingCommand
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterCommands
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterCommands.shoot
@@ -30,6 +31,7 @@ import org.firstinspires.ftc.teamcode.Util.UtilCommands.RepeatCommand
 
 open class ShittyTeleop(color: AllianceColor): MegiddoOpMode(color) {
     init {
+        auto = false
         //Operator controls(Fail safes)
         Gamepads.gamepad2.rightBumper
             .whenBecomesTrue(rotate(1))
@@ -47,7 +49,7 @@ open class ShittyTeleop(color: AllianceColor): MegiddoOpMode(color) {
         Gamepads.gamepad1.leftBumper.whenBecomesTrue (shootingCommand )
         //pre speed up
         Gamepads.gamepad1.a.whenBecomesTrue (shoot )
-        Gamepads.gamepad1.dpadDown.whenBecomesTrue (resetIMU )
+        Gamepads.gamepad1.dpadUp.whenBecomesTrue (resetIMU )
         Gamepads.gamepad1.y.whenBecomesTrue (turretSeq())
 //            .whenBecomesFalse {  InstantCommand{globalAngle = true}}
         Gamepads.gamepad1.b.whenBecomesTrue(InstantCommand {runTurret = false})
