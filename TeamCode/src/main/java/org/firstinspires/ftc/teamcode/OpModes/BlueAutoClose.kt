@@ -104,7 +104,6 @@ class BlueAutoClose: MegiddoOpMode(AllianceColor.BLUE) {
             .build()
 //        scanCommand.schedule()
     }
-
     fun auto(): CommandSeqNoReq = CommandSeqNoReq(
         InstantCommand{turretSeq().schedule()
             ParallelGroup(
@@ -112,9 +111,9 @@ class BlueAutoClose: MegiddoOpMode(AllianceColor.BLUE) {
                 RepeatCommand(runIntakeSeqAuto){isFull()},
             ).schedule()
         },
-        Delay(0.3),
+        Delay(0.2),
         FollowPath(moveToShooting1),
-        Delay(0.2.seconds),
+        Delay(0.7.seconds),
         transferAll(
             SequentialGroup(
                 WaitUntil { atTargetVelocity() },
@@ -138,6 +137,7 @@ class BlueAutoClose: MegiddoOpMode(AllianceColor.BLUE) {
                 moveToEndIntake, holdEnd=false, maxPower = 0.38,
             )),
         ),
+        Delay(0.9.seconds).then(outtake),
         InstantCommand{ turretSeq().schedule() },
         FollowPath(moveToShooting2),
         Delay(0.4.seconds),
@@ -164,6 +164,7 @@ class BlueAutoClose: MegiddoOpMode(AllianceColor.BLUE) {
                 moveToEndIntake2, holdEnd=false, maxPower = 0.38,
             )),
         ),
+        Delay(0.9.seconds).then(outtake),
         InstantCommand{ turretSeq().schedule() },
         FollowPath(moveToShooting3),
         Delay(0.4.seconds),
@@ -181,6 +182,7 @@ class BlueAutoClose: MegiddoOpMode(AllianceColor.BLUE) {
             RepeatCommand(InstantCommand{ MyTelemetry.addData("ewtdfghtyu87", "cd") })
         )
     )
+
     override fun onStartButtonPressed() {
 
 //        turretSeq().schedule()

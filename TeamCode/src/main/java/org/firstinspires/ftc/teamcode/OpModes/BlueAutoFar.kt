@@ -15,6 +15,7 @@ import dev.nextftc.extensions.pedro.PedroComponent.Companion.follower
 import dev.nextftc.extensions.pedro.TurnBy
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveVars
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeCommands
+import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeCommands.outtake
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeHardware.getVel
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeHardware.setPower
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeVars.intakePower
@@ -46,7 +47,7 @@ class BlueAutoFar: MegiddoOpMode(AllianceColor.BLUE) {
     @JvmField var preIntakePose = Pose(98.169, 34.479).mirror()
     @JvmField var preIntakePose2 = Pose(115.986, 9.000).mirror()
     @JvmField var endIntakePose = Pose(125.944, 34.789).mirror()
-    @JvmField var endIntakePose2 = Pose(130.986, 14.000).mirror()
+    @JvmField var endIntakePose2 = Pose(130.986, 12.000).mirror()
     @JvmField var finishPose = Pose(90.958, 38.408).mirror()
     var moveToShooting1 = PathChain()
     var moveToPreIntake = PathChain()
@@ -109,7 +110,7 @@ class BlueAutoFar: MegiddoOpMode(AllianceColor.BLUE) {
         },
         Delay(0.2),
         FollowPath(moveToShooting1),
-        Delay(0.6.seconds),
+        Delay(0.7.seconds),
         transferAll(
             SequentialGroup(
                 WaitUntil { atTargetVelocity() },
@@ -134,6 +135,7 @@ class BlueAutoFar: MegiddoOpMode(AllianceColor.BLUE) {
                 moveToEndIntake, holdEnd=false, maxPower = 0.32,
             )),
         ),
+        Delay(0.9.seconds).then(outtake),
         InstantCommand{ turretSeq().schedule() },
         FollowPath(moveToShooting2),
         Delay(0.4.seconds),
@@ -161,6 +163,7 @@ class BlueAutoFar: MegiddoOpMode(AllianceColor.BLUE) {
                 moveToEndIntake2, holdEnd=false, maxPower = 0.32,
             )),
         ),
+        Delay(0.9.seconds).then(outtake),
         InstantCommand{ turretSeq().schedule() },
         FollowPath(moveToShooting3),
         Delay(0.3.seconds),

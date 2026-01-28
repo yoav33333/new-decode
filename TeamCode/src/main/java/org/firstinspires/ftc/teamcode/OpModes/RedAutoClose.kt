@@ -14,6 +14,7 @@ import dev.nextftc.core.commands.utility.InstantCommand
 import dev.nextftc.extensions.pedro.PedroComponent.Companion.follower
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveVars
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeCommands
+import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeCommands.outtake
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeHardware.getVel
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeHardware.setPower
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeVars.intakePower
@@ -111,9 +112,9 @@ class RedAutoClose: MegiddoOpMode(AllianceColor.RED) {
                 RepeatCommand(runIntakeSeqAuto){isFull()},
             ).schedule()
         },
-        Delay(0.3),
+        Delay(0.2),
         FollowPath(moveToShooting1),
-        Delay(0.2.seconds),
+        Delay(0.7.seconds),
         transferAll(
             SequentialGroup(
                 WaitUntil { atTargetVelocity() },
@@ -137,6 +138,7 @@ class RedAutoClose: MegiddoOpMode(AllianceColor.RED) {
                 moveToEndIntake, holdEnd=false, maxPower = 0.38,
             )),
         ),
+        Delay(0.9.seconds).then(outtake),
         InstantCommand{ turretSeq().schedule() },
         FollowPath(moveToShooting2),
         Delay(0.4.seconds),
@@ -163,6 +165,7 @@ class RedAutoClose: MegiddoOpMode(AllianceColor.RED) {
                 moveToEndIntake2, holdEnd=false, maxPower = 0.38,
             )),
         ),
+        Delay(0.9.seconds).then(outtake),
         InstantCommand{ turretSeq().schedule() },
         FollowPath(moveToShooting3),
         Delay(0.4.seconds),

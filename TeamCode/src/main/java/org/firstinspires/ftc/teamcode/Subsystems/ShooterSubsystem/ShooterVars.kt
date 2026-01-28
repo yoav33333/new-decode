@@ -22,7 +22,7 @@ object ShooterVars {
     @JvmField var veloControl: BasicPID = BasicPID(veloCoefficients)
 
     fun createShooterLut(): InterpLUT{
-        return createLUT(mapOf(61.3 to 950.0, 71.0 to 1150.0, 94.0 to 1260.0, 117.2 to 1420.0, 135.0 to 1480.0, 162.8 to 1685.0))
+        return createLUT(mapOf(61.3 to 950.0, 71.0 to 1150.0, 94.0 to 1270.0, 117.2 to 1410.0, 135.0 to 1480.0, 162.8 to 1665.0))
     }
     fun createHoodLUT(): InterpLUT{
         return createLUT(mapOf(61.3 to 0.00, 71.0 to 0.15, 94.0 to 0.29, 117.2 to 0.36, 135.0 to 0.39, 162.8 to 0.4))

@@ -101,7 +101,7 @@ object SpindexerCommands {
         SequentialGroup(
             moveToTransferPositionLocking(RobotVars.randomization.value[0]),
             WaitUntil{isAtTargetPosition()},
-            ActiveDelay { SpindexerVars.spinDelayShoot.seconds},
+            ActiveDelay { (SpindexerVars.spinDelayShoot+smartDist*0.001).seconds},
             startWhen,
 //            Delay(SpindexerVars.spinDelayShoot.seconds),
             WaitUntil{atTargetVelocity()},
@@ -112,7 +112,7 @@ object SpindexerCommands {
             moveToTransferPositionLocking(RobotVars.randomization.value[2]),
             ActiveDelay { (SpindexerVars.spinDelayShoot+smartDist*0.01).seconds},
             WaitUntil{isAtTargetPosition()},
-            Delay(0.1.seconds),
+            Delay(0.2.seconds),
 //            Delay(SpindexerVars.spinDelayShoot.seconds),
 //            Delay(SpindexerVars.spinDelayShoot.seconds),
 //            Delay(SpindexerVars.spinDelayShoot.seconds),
