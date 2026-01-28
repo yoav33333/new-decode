@@ -34,6 +34,14 @@ object TurretCommands {
 //        Delay(0.3.seconds),
         InstantCommand{ centerAprilTags().schedule() }
     )
+    val toggleLock = InstantCommand{
+        if (state == TurretState.Disabled){
+            state = TurretState.TrackingAprilTags
+        }
+        else{
+            state = TurretState.Disabled
+        }
+    }
 //    val resetSeq = LambdaCommand()
 //        .setStart { moveToAngle(0.0) }
 //    .setUpdate { MyTelemetry.addData("running","")

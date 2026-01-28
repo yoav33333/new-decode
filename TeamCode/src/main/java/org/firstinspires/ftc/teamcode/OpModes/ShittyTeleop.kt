@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveCommands
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveCommands.resetIMU
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeCommands
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.AllianceColor
+import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.cancelShooting
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.intakeCommand
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.shootingCommand
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.auto
@@ -21,6 +22,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferComma
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.stopTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.lockOnGoal
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.moveToAngle
+import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.toggleLock
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.turretSeq
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.runTurret
 //import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.setTargetPositionFromDegrees
@@ -48,12 +50,11 @@ open class ShittyTeleop(color: AllianceColor): MegiddoOpMode(color) {
         Gamepads.gamepad1.rightBumper.whenBecomesTrue (intakeCommand )
         Gamepads.gamepad1.leftBumper.whenBecomesTrue (shootingCommand )
         //pre speed up
-        Gamepads.gamepad1.a.whenBecomesTrue (shoot )
         Gamepads.gamepad1.dpadUp.whenBecomesTrue (resetIMU )
         Gamepads.gamepad1.y.whenBecomesTrue (turretSeq())
 //            .whenBecomesFalse {  InstantCommand{globalAngle = true}}
-        Gamepads.gamepad1.b.whenBecomesTrue(InstantCommand {runTurret = false})
-            .whenBecomesFalse (InstantCommand{runTurret = true})
+        Gamepads.gamepad1.a.whenBecomesTrue(toggleLock)
+        Gamepads.gamepad1.x.whenBecomesTrue(cancelShooting)
 
 
 
