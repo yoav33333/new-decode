@@ -95,7 +95,7 @@ class BlueAutoFar: MegiddoOpMode(AllianceColor.BLUE) {
             .build()
         moveToFinish = follower.pathBuilder()
             .addPath(BezierLine(shootingPose, finishPose))
-            .setLinearHeadingInterpolation(Math.toRadians(180-240.0), Math.toRadians(180-0.0))
+            .setLinearHeadingInterpolation(Math.toRadians(180-240.0), Math.toRadians(180-180.0))
             .build()
 //        scanCommand.schedule()
     }

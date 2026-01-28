@@ -95,7 +95,7 @@ class RedAutoFar: MegiddoOpMode(AllianceColor.RED) {
             .build()
         moveToFinish = follower.pathBuilder()
             .addPath(BezierLine(shootingPose, finishPose))
-            .setLinearHeadingInterpolation(Math.toRadians(255.0), Math.toRadians(0.0))
+            .setLinearHeadingInterpolation(Math.toRadians(255.0), Math.toRadians(180.0))
             .build()
 //        scanCommand.schedule()
     }

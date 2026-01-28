@@ -100,7 +100,7 @@ class BlueAutoClose: MegiddoOpMode(AllianceColor.BLUE) {
             .build()
         moveToFinish = follower.pathBuilder()
             .addPath(BezierLine(shootingPose, finishPose))
-            .setLinearHeadingInterpolation(Math.toRadians(180-216.0), Math.toRadians(180-0.0))
+            .setLinearHeadingInterpolation(Math.toRadians(180-216.0), Math.toRadians(180-180.0))
             .build()
 //        scanCommand.schedule()
     }
@@ -186,7 +186,5 @@ class BlueAutoClose: MegiddoOpMode(AllianceColor.BLUE) {
 //        turretSeq().schedule()
         auto().schedule()
     }
-
-
 
 }

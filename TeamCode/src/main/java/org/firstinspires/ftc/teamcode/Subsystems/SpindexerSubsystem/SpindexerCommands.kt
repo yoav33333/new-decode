@@ -11,8 +11,12 @@ import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware.atTargetVelocity
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.checkIntakeColorAndUpdate
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.checkIntakeColorAndUpdateAuto
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.currentSteps
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.isAtTargetPosition
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.resetSpindexer
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.tracker
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.spinDelayIntake
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.targetPosition
 import org.firstinspires.ftc.teamcode.Util.ActiveDelay
 import org.firstinspires.ftc.teamcode.Util.SpindexerSlotState
 import kotlin.time.Duration.Companion.seconds
@@ -84,6 +88,15 @@ object SpindexerCommands {
         runIntakeCycleAuto
 
     //        ).setRequirements(SpindexerHardware)
+    val fixSpindex = SequentialGroup(
+        InstantCommand{resetSpindexer()},
+        Delay(0.1.seconds),
+        InstantCommand{
+            currentSteps = 4
+            tracker.setPose(currentSteps)
+            targetPosition = currentSteps * SpindexerVars.degreesPerSlot + SpindexerVars.offset
+        }
+    )
     fun transferAll(startWhen: Command) =
         SequentialGroup(
             moveToTransferPositionLocking(RobotVars.randomization.value[0]),

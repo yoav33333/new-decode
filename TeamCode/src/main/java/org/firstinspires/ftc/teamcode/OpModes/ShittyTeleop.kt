@@ -2,22 +2,32 @@ package org.firstinspires.ftc.teamcode.OpModes
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import dev.nextftc.core.commands.CommandManager
+import dev.nextftc.core.commands.delays.Delay
+import dev.nextftc.core.commands.delays.WaitUntil
+import dev.nextftc.core.commands.groups.SequentialGroup
 import dev.nextftc.core.commands.utility.InstantCommand
 import dev.nextftc.ftc.Gamepads
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveCommands
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveCommands.resetIMU
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeCommands
+import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.smartDist
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.AllianceColor
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.cancelShooting
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.intakeCommand
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.shootingCommand
+import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.auto
 //import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.shootingCommand
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterCommands
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterCommands.shoot
+import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware.atTargetVelocity
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.fixSpindex
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.moveToTransferPositionLocking
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.rotate
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.runIntakeCycle
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.tracker
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars
+import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.reverseTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.runTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.stopTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.lockOnGoal
@@ -25,10 +35,13 @@ import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.toggleLock
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.turretSeq
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.runTurret
+import org.firstinspires.ftc.teamcode.Util.ActiveDelay
+import org.firstinspires.ftc.teamcode.Util.SpindexerSlotState
 //import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.setTargetPositionFromDegrees
 import org.firstinspires.ftc.teamcode.Util.SpindexerTracker
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.LoopingCommand
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.RepeatCommand
+import kotlin.time.Duration.Companion.seconds
 
 
 open class ShittyTeleop(color: AllianceColor): MegiddoOpMode(color) {
@@ -51,10 +64,34 @@ open class ShittyTeleop(color: AllianceColor): MegiddoOpMode(color) {
         Gamepads.gamepad1.leftBumper.whenBecomesTrue (shootingCommand )
         //pre speed up
         Gamepads.gamepad1.dpadUp.whenBecomesTrue (resetIMU )
-        Gamepads.gamepad1.y.whenBecomesTrue (turretSeq())
-//            .whenBecomesFalse {  InstantCommand{globalAngle = true}}
+        Gamepads.gamepad1.y.whenBecomesTrue (turretSeq().and(cancelShooting))
         Gamepads.gamepad1.a.whenBecomesTrue(toggleLock)
         Gamepads.gamepad1.x.whenBecomesTrue(cancelShooting)
+        Gamepads.gamepad1.options.whenBecomesTrue(fixSpindex)
+        Gamepads.gamepad1.rightTrigger.atLeast(0.3)
+            .whenBecomesTrue(
+                SequentialGroup(
+                    WaitUntil{atTargetVelocity()},
+                    moveToTransferPositionLocking(SpindexerSlotState.PURPLE),
+                    ActiveDelay { (SpindexerVars.spinDelayShoot+smartDist*0.01).seconds},
+                    runTransfer,
+                    Delay(0.3),
+                    reverseTransfer,
+                    stopTransfer
+                )
+            )
+        Gamepads.gamepad1.leftTrigger.atLeast(0.3)
+            .whenBecomesTrue(
+                SequentialGroup(
+                    WaitUntil{atTargetVelocity()},
+                    moveToTransferPositionLocking(SpindexerSlotState.GREEN),
+                    ActiveDelay { (SpindexerVars.spinDelayShoot+smartDist*0.01).seconds},
+                    runTransfer,
+                    Delay(0.3),
+                    reverseTransfer,
+                    stopTransfer
+                )
+            )
 
 
 
