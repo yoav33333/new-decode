@@ -151,31 +151,31 @@ class BlueAutoFar: MegiddoOpMode(AllianceColor.BLUE) {
                 stopTransfer),
             FollowPath(moveToPreIntake2),),
         IntakeCommands.stopIntake,
-        ParallelGroup(
-            InstantCommand { resetSpindexer() },
-            RepeatCommand(runIntakeSeqAuto){isFull()},
-            RepeatCommand(InstantCommand{
-                MyTelemetry.addData("running","")
-                if (abs(getVel()) <outtakeThreshold) setPower(-intakePower)
-                else setPower(intakePower)}
-            ){isFull()},
-            Delay(0.3.seconds).then(FollowPath(
-                moveToEndIntake2, holdEnd=false, maxPower = 0.32,
-            )),
-        ),
-        Delay(0.9.seconds).then(outtake),
-        InstantCommand{ turretSeq().schedule() },
-        FollowPath(moveToShooting3),
-        Delay(0.3.seconds),
-        transferAll(
-            SequentialGroup(
-                WaitUntil { atTargetVelocity() },
-                runTransfer
-            )
-        ),
-        reverseTransfer,
-        Delay(0.1),
-        stopTransfer,
+//        ParallelGroup(
+//            InstantCommand { resetSpindexer() },
+//            RepeatCommand(runIntakeSeqAuto){isFull()},
+//            RepeatCommand(InstantCommand{
+//                MyTelemetry.addData("running","")
+//                if (abs(getVel()) <outtakeThreshold) setPower(-intakePower)
+//                else setPower(intakePower)}
+//            ){isFull()},
+//            Delay(0.3.seconds).then(FollowPath(
+//                moveToEndIntake2, holdEnd=false, maxPower = 0.32,
+//            )),
+//        ),
+//        Delay(0.9.seconds).then(outtake),
+//        InstantCommand{ turretSeq().schedule() },
+//        FollowPath(moveToShooting3),
+//        Delay(0.3.seconds),
+//        transferAll(
+//            SequentialGroup(
+//                WaitUntil { atTargetVelocity() },
+//                runTransfer
+//            )
+//        ),
+//        reverseTransfer,
+//        Delay(0.1),
+//        stopTransfer,
         ParallelGroup(
             FollowPath(moveToFinish),
             RepeatCommand(InstantCommand{ MyTelemetry.addData("ewtdfghtyu87", "cd") })

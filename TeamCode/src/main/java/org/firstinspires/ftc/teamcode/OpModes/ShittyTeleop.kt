@@ -75,7 +75,7 @@ open class ShittyTeleop(color: AllianceColor): MegiddoOpMode(color) {
                     moveToTransferPositionLocking(SpindexerSlotState.PURPLE),
                     ActiveDelay { (SpindexerVars.spinDelayShoot+smartDist*0.01).seconds},
                     runTransfer,
-                    Delay(0.3),
+                    Delay(0.5),
                     reverseTransfer,
                     stopTransfer
                 )
@@ -87,7 +87,7 @@ open class ShittyTeleop(color: AllianceColor): MegiddoOpMode(color) {
                     moveToTransferPositionLocking(SpindexerSlotState.GREEN),
                     ActiveDelay { (SpindexerVars.spinDelayShoot+smartDist*0.01).seconds},
                     runTransfer,
-                    Delay(0.3),
+                    Delay(0.5),
                     reverseTransfer,
                     stopTransfer
                 )

@@ -18,8 +18,8 @@ object SpindexerVars {
     @JvmField var steps = 0
     @JvmField var maxRotation = 355.0
     @JvmField var degreesPerSlot = 66
-    @JvmField var intakeSlot = 0
-    @JvmField var transferSlot = 2
+    @JvmField var intakeSlot = 2
+    @JvmField var transferSlot = 0
     @JvmField var spinDelayShoot = 0.25
     @JvmField var spinDelayIntake = 0.00
     @JvmField var delayMul = 1.0
