@@ -3,10 +3,13 @@ package org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem
 import com.bylazar.configurables.annotations.Configurable
 import com.qualcomm.hardware.rev.RevColorSensorV3
 import com.qualcomm.robotcore.hardware.ColorRangeSensor
+import com.qualcomm.robotcore.hardware.DigitalChannel
 import dev.nextftc.core.components.Component
 import dev.nextftc.ftc.ActiveOpMode.hardwareMap
 import dev.nextftc.hardware.impl.ServoEx
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.MyTelemetry
+import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware.shooterMotor2
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.resetingSeq
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.MulEnc
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.degreesPerSlot
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.delayMul
@@ -14,9 +17,11 @@ import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVar
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.intakeSlot
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.offsetEnc
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.purpleRange
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.state
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.targetPosition
 import org.firstinspires.ftc.teamcode.Util.AxonEncoder
 import org.firstinspires.ftc.teamcode.Util.FilteredColorSensor
+import org.firstinspires.ftc.teamcode.Util.InputChannel
 import org.firstinspires.ftc.teamcode.Util.SpindexerSlotState
 import org.firstinspires.ftc.teamcode.Util.SpindexerTracker
 import org.firstinspires.ftc.teamcode.Util.Util
@@ -27,7 +32,8 @@ import kotlin.math.max
 @Configurable
 object SpindexerHardware: Component {
     val spindexerEncoder = lazy { AxonEncoder("Abs spin") }
-    val spindexerServo = lazy { ServoEx("spindex") }
+    val spindexerServo = lazy { ServoEx("spindex", cacheTolerance = 0.0) }
+    @JvmField var transferSensor = lazy { InputChannel(hardwareMap, "tm").get() }
     @JvmField var colorSensor1 = lazy { FilteredColorSensor(hardwareMap.get(RevColorSensorV3::class.java, "Lcolor")) }
     @JvmField var colorSensor2 = lazy { FilteredColorSensor(hardwareMap.get(RevColorSensorV3::class.java, "Rcolor")) }
 
@@ -36,7 +42,15 @@ object SpindexerHardware: Component {
     // We need to track the absolute step position here to calculate angle correctly.
     // Range is expected to be -2 to 2 based on your description.
     @JvmField var currentSteps = 2
-
+    fun resetSpindexerEnc(){
+        offsetEnc = -shooterMotor2.value.currentPosition
+    }
+    fun getSpindexerPos(): Double{
+        return -(offsetEnc+shooterMotor2.value.currentPosition)/8192*360
+    }
+    fun getSpindexerVel(): Double{
+        return (shooterMotor2.value.velocity)/8192*360
+    }
     fun isFull(): Boolean {
         return tracker.isFull()
     }
@@ -158,28 +172,40 @@ object SpindexerHardware: Component {
     fun resetSpindexer(){
         currentSteps = 2
         tracker.setPose(currentSteps)
-        targetPosition = SpindexerVars.offset
+        targetPosition = currentSteps * SpindexerVars.degreesPerSlot + SpindexerVars.offset
+        setPosition(angleToServoPos(targetPosition))
     }
 
     fun isAtTargetPosition(): Boolean {
-//        return abs(getPosition() - targetPosition) < 20
-        return true
+        return abs(getSpindexerPos()/2+2 * SpindexerVars.degreesPerSlot - targetPosition) < 15
+//        return true
+    }
+    fun hasBallInTransfer(): Boolean {
+        return !transferSensor.value.state
     }
 
     fun angleToServoPos(angle: Double): Double {
         return angle/ SpindexerVars.maxRotation
     }
 
+    override fun postInit() {
+        resetingSeq.schedule()
+//        spindexerServo.value.position = 0.5
+    }
     override fun postUpdate() {
         targetPosition = currentSteps * SpindexerVars.degreesPerSlot + SpindexerVars.offset
-        setPosition(angleToServoPos(targetPosition))
-        MyTelemetry.addData("Spindexer Position", getPosition())
-        MyTelemetry.addData("Spindexer Vol", spindexerEncoder.value.getVoltage())
+        if(state == State.RUN)setPosition(angleToServoPos(targetPosition))
+        MyTelemetry.addData("Spindexer Position", getSpindexerPos())
+        MyTelemetry.addData("Spindexer Vel", getSpindexerVel())
+//        MyTelemetry.addData("Spindexer Vol", spindexerEncoder.value.getVoltage())
         MyTelemetry.addData("Spindexer Target angle", targetPosition)
         MyTelemetry.addData("Spindexer at target", isAtTargetPosition())
+        MyTelemetry.addData("transfer sensor", hasBallInTransfer())
         MyTelemetry.addData("Spindexer target pos", getTargetPosition())
         MyTelemetry.addData("Spindexer Steps", currentSteps) // Debug current steps
         MyTelemetry.addData("Spindexer state", tracker.toString())
         MyTelemetry.addData("is full", tracker.isFull())
+        MyTelemetry.addData("delta", abs(getSpindexerPos()/2+2 * SpindexerVars.degreesPerSlot - targetPosition))
+        MyTelemetry.addData("state", state)
     }
 }

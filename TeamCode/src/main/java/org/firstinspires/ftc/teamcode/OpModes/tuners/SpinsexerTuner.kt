@@ -10,12 +10,14 @@ import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeCommands
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeHardware
 //import org.firstinspires.ftc.teamcode.Subsystems.Robot.Photon
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.intakeCommand
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.resetingSeq
 //import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.shootingCommand
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.rotate
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.runIntakeCycle
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.transferAll
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.getColorInIntake
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.spindexerServo
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.tracker
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.runTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.stopTransfer
@@ -42,10 +44,14 @@ class SpinsexerTuner: TunerOpMode(SpindexerHardware, IntakeHardware) {
         RepeatCommand(InstantCommand { getColorInIntake() }).schedule()
                         Gamepads . gamepad2 . dpadUp . whenBecomesTrue ((IntakeCommands.intake))
                     .whenBecomesFalse(IntakeCommands.stopIntake)
-
+        Gamepads.gamepad2.y.whenBecomesTrue (resetingSeq)
 
     }
 
+    override fun onInit() {
+//        resetingSeq.schedule()
+//        spindexerServo.value.position = 0.5
+    }
     override fun onUpdate() {
 //        var hsv = colorSensor2.value.getHSV()
 //        MyTelemetry.addData("color sensor 2", hsv.toString())

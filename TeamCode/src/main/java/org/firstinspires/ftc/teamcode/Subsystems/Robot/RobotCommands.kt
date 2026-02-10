@@ -76,7 +76,6 @@ object RobotCommands {
                 shoot,
                 transferAll(
                     SequentialGroup(
-                WaitUntil { atTargetVelocity() },
                         runTransfer
                     )
                 ),

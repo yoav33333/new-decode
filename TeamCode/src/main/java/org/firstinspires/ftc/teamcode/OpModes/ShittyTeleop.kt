@@ -92,10 +92,6 @@ open class ShittyTeleop(color: AllianceColor): MegiddoOpMode(color) {
                     stopTransfer
                 )
             )
-
-
-
-
     }
     override fun onStartButtonPressed() {
         DriveCommands.driverControlled.schedule()

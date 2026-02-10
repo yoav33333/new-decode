@@ -6,13 +6,14 @@ import com.bylazar.configurables.annotations.Configurable
 
 @Configurable
 object TurretVars {
-    @JvmField var servoRange = 287.0
+    @JvmField var servoRange = 315.0
     @JvmField var p = -0.9
     @JvmField var runTurret = true
     @JvmField var distP = 0.05
     @JvmField var encoderMul = 8192*360
     @JvmField var Kv = 0.5
     @JvmField var offset = .0
+
     @JvmField var state = TurretState.Disabled
     @JvmField var targetPosition = 0.0
     @JvmField var posCoefficients: PIDCoefficients = PIDCoefficients(0.0135, 0.0, 0.0009)

@@ -12,13 +12,18 @@ import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardwar
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.checkIntakeColorAndUpdate
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.checkIntakeColorAndUpdateAuto
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.currentSteps
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.getSpindexerVel
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.hasBallInTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.isAtTargetPosition
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.resetSpindexer
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.resetSpindexerEnc
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.tracker
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.spinDelayIntake
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.state
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.targetPosition
 import org.firstinspires.ftc.teamcode.Util.ActiveDelay
 import org.firstinspires.ftc.teamcode.Util.SpindexerSlotState
+import kotlin.math.abs
 import kotlin.time.Duration.Companion.seconds
 
 object SpindexerCommands {
@@ -55,27 +60,24 @@ object SpindexerCommands {
     val runIntakeCycle =
         SequentialGroup(
 //            WaitUntil{isAtTargetPosition()},
+            WaitUntil{isAtTargetPosition()},
             checkColorAndUpdate,
-            ActiveDelay{spinDelayIntake.seconds},
-
+//            ActiveDelay{spinDelayIntake.seconds},
             moveToIntakePosition,
-//            IfElseCommand({ IntakeHardware.getVel()<400 }
-//                ,outtake, intake),
-//            smartIntake,
-            Delay(0.30),
 
 //            Delay(0.05.seconds)\\\\
         ).setRequirements(SpindexerHardware)
     val runIntakeCycleAuto =
         SequentialGroup(
-//            WaitUntil{isAtTargetPosition()},
+
+            WaitUntil{isAtTargetPosition()},
             checkColorAndUpdateAuto,
-            ActiveDelay{spinDelayIntake.seconds},
+//            ActiveDelay{spinDelayIntake.seconds},
             moveToIntakePosition,
 //            IfElseCommand({ IntakeHardware.getVel()<400 }
 //                ,outtake, intake),
 //            smartIntake,
-            Delay(0.3),
+//            Delay(0.3),
             //            Delay(0.05.seconds)\\\\
         ).setRequirements(SpindexerHardware)
     val runIntakeSeq=
@@ -97,24 +99,39 @@ object SpindexerCommands {
             targetPosition = currentSteps * SpindexerVars.degreesPerSlot + SpindexerVars.offset
         }
     )
+    val resetingSeq = SequentialGroup(
+        InstantCommand{
+            resetSpindexer()
+            state = State.RESET},
+//        WaitUntil{getSpindexerVel()>10},
+        Delay(0.2),
+//        WaitUntil{abs(getSpindexerVel())>100}.raceWith(Delay(0.5)),
+        WaitUntil{abs(getSpindexerVel())<50},
+        InstantCommand{
+            resetSpindexerEnc()
+            state = State.RUN
+        }
+
+    )
     fun transferAll(startWhen: Command) =
         SequentialGroup(
             moveToTransferPositionLocking(RobotVars.randomization.value[0]),
             WaitUntil{isAtTargetPosition()},
-            ActiveDelay { (0.1).seconds},
+            WaitUntil { atTargetVelocity() },
+//            ActiveDelay { (0.1).seconds},
             startWhen,
-            ActiveDelay { (SpindexerVars.spinDelayShoot+smartDist*0.0002).seconds},
+//            ActiveDelay { (SpindexerVars.spinDelayShoot+smartDist*0.0002).seconds},
 
 //            Delay(SpindexerVars.spinDelayShoot.seconds),
-            WaitUntil{atTargetVelocity()},
+            WaitUntil{atTargetVelocity()&&!hasBallInTransfer()},
             moveToTransferPositionLocking(RobotVars.randomization.value[1]),
-            ActiveDelay { (SpindexerVars.spinDelayShoot+smartDist*0.0002).seconds} ,
-            WaitUntil{isAtTargetPosition()},
+//            ActiveDelay { (SpindexerVars.spinDelayShoot+smartDist*0.0002).seconds} ,
+            WaitUntil{isAtTargetPosition()&&!hasBallInTransfer()},
             WaitUntil{atTargetVelocity()},
             moveToTransferPositionLocking(RobotVars.randomization.value[2]),
-            ActiveDelay { (SpindexerVars.spinDelayShoot+smartDist*0.0002).seconds},
-            WaitUntil{isAtTargetPosition()},
-            Delay(0.2.seconds),
+//            ActiveDelay { (SpindexerVars.spinDelayShoot+smartDist*0.0002).seconds},
+            WaitUntil{isAtTargetPosition()&&!hasBallInTransfer()},
+            Delay(0.4.seconds),
 //            Delay(SpindexerVars.spinDelayShoot.seconds),
 //            Delay(SpindexerVars.spinDelayShoot.seconds),
 //            Delay(SpindexerVars.spinDelayShoot.seconds),

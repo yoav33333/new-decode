@@ -16,6 +16,8 @@ import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.getGlobalHeading
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.getPosition
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.getPositionServo
+import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretState
+import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.state
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.targetPosition
 
 //import org.firstinspires.ftc.teamcode.Subsystems.Robot.Photon
@@ -34,6 +36,7 @@ class TurretTuner :TunerOpMode(PedroComponent(Constants::createFollower)){
     override fun onStartButtonPressed() {
         DriveCommands.driverControlled.schedule()
 //        lockOnGoal.schedule()
+        state = TurretState.TrackingAprilTags
     }
 
     override fun onUpdate() {

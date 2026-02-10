@@ -7,6 +7,7 @@ import com.bylazar.field.Style
 import com.bylazar.gamepad.Gamepad
 import com.pedropathing.follower.Follower
 import com.pedropathing.geometry.Pose
+import com.pedropathing.math.Vector
 import com.pedropathing.paths.Path
 import com.pedropathing.paths.PathChain
 import com.pedropathing.util.PoseHistory
@@ -15,6 +16,7 @@ import dev.nextftc.core.components.Component
 import dev.nextftc.extensions.pedro.PedroComponent.Companion.follower
 import dev.nextftc.ftc.ActiveOpMode.runtime
 import dev.nextftc.ftc.Gamepads
+import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.Drawing.drawLine
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveVars.startingPose
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLight.rotationOffset
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLight.updateLL
@@ -144,8 +146,11 @@ object DriveHardware : Component {
             MyTelemetry.addData("Drive State", "Teleop Driving")
         }
 
+//        vectorFromTarget = Vector(0.0,0.0)
+        vectorFromTarget.setOrthogonalComponents(getPoseEstimate().asVector.minus(RobotVars.goalPos).xComponent, getPoseEstimate().asVector.minus(RobotVars.goalPos).yComponent)
+        Drawing.drawVector(vectorFromTarget, follower.pose)
         Drawing.drawDebug(follower)
-        vectorFromTarget = getPoseEstimate().asVector.minus(RobotVars.goalPos)
+
     }
     fun addOffsets(pose: Pose): Pose {
 //        return pose
@@ -196,6 +201,7 @@ internal object Drawing {
                 ), robotLook
             )
         }
+
         drawPoseHistory(follower.getPoseHistory(), historyLook)
         drawRobot(follower.getPose(), historyLook)
 
@@ -281,6 +287,35 @@ internal object Drawing {
         panelsField.line(points[1]!![0], points[1]!![1])
     }
 
+    /**
+     * This draws a Path with a specified look.
+     *
+     * @param path  the Path to draw
+     * @param style the parameters used to draw the Path with
+     */
+    fun drawLine(pose1: Pose, pose2:Pose, style: Style) {
+//        val points = path.getPanelsDrawingPoints()
+
+//        for (i in points[0]!!.indices) {
+//            for (j in points.indices) {
+//                if (java.lang.Double.isNaN(points[j]!![i])) {
+//                    points[j]!![i] = 0.0
+//                }
+//            }
+//        }
+
+        panelsField.setStyle(style)
+        panelsField.moveCursor(pose1.x, pose1.y)
+        panelsField.line(pose2.x, pose2.y)
+    }
+
+fun drawVector(vec: Vector, basePose: Pose) {
+    val endX = basePose.x + vec.xComponent
+    val endY = basePose.y + vec.yComponent
+    panelsField.setStyle(llLook)
+    panelsField.moveCursor(basePose.x, basePose.y)
+    panelsField.line(endX, endY)
+}
     /**
      * This draws all the Paths in a PathChain with a
      * specified look.

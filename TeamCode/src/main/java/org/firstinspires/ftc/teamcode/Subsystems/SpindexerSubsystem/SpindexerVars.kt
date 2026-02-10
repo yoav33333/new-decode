@@ -24,16 +24,20 @@ object SpindexerVars {
     @JvmField var spinDelayIntake = 0.00
     @JvmField var delayMul = 1.0
     @JvmField var offset = 4.5
-    @JvmField var offsetEnc = 16
+    @JvmField var offsetEnc = 0.0
     @JvmField var MulEnc = 1.1
-    @JvmField var purpleRange = HSVRange(190.0,1000.0,0.0,1000.0,0.0,1000.0)
-    @JvmField var greenRange = HSVRange(80.0,190.0,0.0,1000.0,0.0,1000.0)
+    @JvmField var purpleRange = HSVRange(170.0,1000.0,0.0,1000.0,0.0,1000.0)
+    @JvmField var greenRange = HSVRange(80.0,170.0,0.0,1000.0,0.0,1000.0)
 //    @JvmField var distThreshold = 30
     @JvmField var defaultColor = SpindexerSlotState.PURPLE
+    @JvmField var state = State.RUN
 
 //    @JvmField var coefficients= PIDCoefficients(0.5, 0.0, 0.0)
 //    @JvmField var pid = BasicPID(coefficients)
 //    @JvmField var controller = AngleController(pid)
+}
 
-
+enum class State{
+    RESET,
+    RUN
 }
