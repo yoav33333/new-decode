@@ -86,10 +86,10 @@ public class InterpLUT {
     }
 
     /**
-     * Interpolates the value of Y = f(X) for given X. Clamps X to the domain of the spline.
+     * Interpolates the value of Y = kv(X) for given X. Clamps X to the domain of the spline.
      *
      * @param input The X value.
-     * @return The interpolated Y = f(X) value.
+     * @return The interpolated Y = kv(X) value.
      */
     public double get(double input) {
         // Handle the boundary cases.

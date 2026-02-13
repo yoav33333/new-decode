@@ -68,7 +68,7 @@ public class FusionLocalizer implements Localizer {
     }
 
     /**
-     * Consider the system xₖ₊₁ = xₖ + (f(xₖ, uₖ) + wₖ) * Δt.
+     * Consider the system xₖ₊₁ = xₖ + (kv(xₖ, uₖ) + wₖ) * Δt.
      * <p>
      * wₖ is the noise in the system caused by sensor uncertainty, a zero-mean random vector with covariance Q.
      * <p>
@@ -78,9 +78,9 @@ public class FusionLocalizer implements Localizer {
      * </pre>
      * Here F and G represent the State Transition Matrix and Control-to-State Matrix respectively.
      * <p>
-     * The State Transition Matrix F is given by I + ∂f/∂x.
+     * The State Transition Matrix F is given by I + ∂kv/∂x.
      * We computed our twist integration using a first-order forward-Euler approximation.
-     * Therefore, f only depends on the twist, not on x, so ∂f/∂x = 0 and F = I.
+     * Therefore, kv only depends on the twist, not on x, so ∂kv/∂x = 0 and F = I.
      * <p>
      * The Control-to-State Matrix G is given by ∂xₖ₊₁ / ∂wₖ.
      * Here this is simply I * Δt.

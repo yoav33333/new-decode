@@ -10,6 +10,7 @@ object RobotVars {
     var goalPosRed = Vector(Pose(144.0,144.0))
     var goalPosBlue = Vector(Pose(0.0,144.0))
     var auto = false
+    @JvmField var nominalVoltage = 12.0
     var goalPos = Vector(0.0, 0.0)
     var vectorFromTarget = Vector(0.0, 0.0)
     @JvmField var allianceColor = AllianceColor.RED

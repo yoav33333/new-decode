@@ -13,7 +13,7 @@ object SpindexerVars {
 //    @JvmField var d = 0.0
 //    @JvmField var kv = 0.0
 //    @JvmField var gain = 0.2
-//    @JvmField var f = 0.0
+//    @JvmField var kv = 0.0
     @JvmField var targetPosition = 0.0
     @JvmField var steps = 0
     @JvmField var maxRotation = 355.0
@@ -39,5 +39,6 @@ object SpindexerVars {
 
 enum class State{
     RESET,
-    RUN
+    RUN,
+    FIX
 }

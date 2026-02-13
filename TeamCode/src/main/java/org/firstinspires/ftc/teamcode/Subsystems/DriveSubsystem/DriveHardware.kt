@@ -13,6 +13,7 @@ import com.pedropathing.paths.PathChain
 import com.pedropathing.util.PoseHistory
 import com.qualcomm.hardware.limelightvision.LLResult
 import dev.nextftc.core.components.Component
+import dev.nextftc.core.units.rad
 import dev.nextftc.extensions.pedro.PedroComponent.Companion.follower
 import dev.nextftc.ftc.ActiveOpMode.runtime
 import dev.nextftc.ftc.Gamepads
@@ -25,6 +26,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.centerOfRotati
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.MyTelemetry
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.vectorFromTarget
+import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.getTargetAngle
 import org.firstinspires.ftc.teamcode.Util.DriftKalmanFilter
 import org.firstinspires.ftc.teamcode.Util.Util.pose3DMetersToInches
 import org.firstinspires.ftc.teamcode.Util.Util.pose3dToPose
@@ -116,7 +118,7 @@ object DriveHardware : Component {
     }
 
     // Add this variable at the top of your DriveHardware object
-    private var isHolding = false
+    var isHolding = false
 
     override fun postUpdate() {
         val stickThreshold = 0.05
@@ -149,7 +151,12 @@ object DriveHardware : Component {
 //        vectorFromTarget = Vector(0.0,0.0)
         vectorFromTarget.setOrthogonalComponents(getPoseEstimate().asVector.minus(RobotVars.goalPos).xComponent, getPoseEstimate().asVector.minus(RobotVars.goalPos).yComponent)
         Drawing.drawVector(vectorFromTarget, follower.pose)
-        Drawing.drawDebug(follower)
+        val robotPose = getPoseEstimate()
+        val rotatedOffset = centerOfRotationOffset.copy()
+        rotatedOffset.rotateVector(robotPose.heading.rad.value)
+        val turretPose = Pose(robotPose.asVector.plus(rotatedOffset).xComponent, robotPose.asVector.plus(rotatedOffset).xComponent, Math.toRadians(getTargetAngle()))
+
+        Drawing.drawDebug(follower, turretPose)
 
     }
     fun addOffsets(pose: Pose): Pose {

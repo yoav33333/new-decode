@@ -4,11 +4,13 @@ import com.bylazar.configurables.annotations.Configurable
 import com.qualcomm.hardware.rev.RevColorSensorV3
 import com.qualcomm.robotcore.hardware.ColorRangeSensor
 import com.qualcomm.robotcore.hardware.DigitalChannel
+import dev.nextftc.bindings.button
 import dev.nextftc.core.components.Component
 import dev.nextftc.ftc.ActiveOpMode.hardwareMap
 import dev.nextftc.hardware.impl.ServoEx
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.MyTelemetry
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware.shooterMotor2
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.fixSpindex
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.resetingSeq
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.MulEnc
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.degreesPerSlot
@@ -180,6 +182,11 @@ object SpindexerHardware: Component {
         return abs(getSpindexerPos()/2+2 * SpindexerVars.degreesPerSlot - targetPosition) < 15
 //        return true
     }
+
+    fun getVel(): Double {
+        return shooterMotor2.value.velocity
+//        return true
+    }
     fun hasBallInTransfer(): Boolean {
         return !transferSensor.value.state
     }
@@ -190,7 +197,12 @@ object SpindexerHardware: Component {
 
     override fun postInit() {
         resetingSeq.schedule()
+
 //        spindexerServo.value.position = 0.5
+    }
+
+    override fun postStartButtonPressed() {
+//        button { !isAtTargetPosition()&& abs(getVel()) <5 && state == State.RUN}.whenBecomesTrue (fixSpindex.value)
     }
     override fun postUpdate() {
         targetPosition = currentSteps * SpindexerVars.degreesPerSlot + SpindexerVars.offset
@@ -207,5 +219,7 @@ object SpindexerHardware: Component {
         MyTelemetry.addData("is full", tracker.isFull())
         MyTelemetry.addData("delta", abs(getSpindexerPos()/2+2 * SpindexerVars.degreesPerSlot - targetPosition))
         MyTelemetry.addData("state", state)
+        MyTelemetry.addData("balls In spindexer", tracker.getAmount())
+        MyTelemetry.addData("Spindexer vel", getVel())
     }
 }

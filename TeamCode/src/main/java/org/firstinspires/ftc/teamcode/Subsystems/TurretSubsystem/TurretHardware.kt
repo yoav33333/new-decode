@@ -22,6 +22,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.dist
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.encoderMul
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.offset
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.p
+import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.servoOffset
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.servoRange
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.state
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.targetPosition
@@ -39,7 +40,7 @@ object TurretHardware: Component {
         servo2.value.position = pos
     }
     fun setAngle(angle: Double){
-        setPosition((angle+servoRange/2)/servoRange)
+        setPosition((angle+servoOffset+servoRange/2)/servoRange)
     }
     fun centerApriltag(){
         val result = result
@@ -65,6 +66,9 @@ object TurretHardware: Component {
     }
     fun getAngle():Double{
         return ((getPosition()/8192)*360)/5
+    }
+    fun getTargetAngle():Double{
+        return ((getPositionServo())*360)
     }
     //    fun getEncoderPosition(): Double {
 //        return wrap360(getPosition() + offset)
@@ -107,17 +111,19 @@ object TurretHardware: Component {
         return target.theta
     }
 
-    fun update() {
+    fun update(offset: Double) {
         // 1. Calculate the vector from the Robot to the Goal
         // Formula: Target - Current
         val robotPose = getPoseEstimate()
         val rotatedOffset = centerOfRotationOffset.copy()
         rotatedOffset.rotateVector(robotPose.heading.rad.value)
-        val deltaVec = RobotVars.goalPos.minus(robotPose.asVector.plus(rotatedOffset))
+        val deltaVec = RobotVars.goalPos.minus(robotPose.asVector
+            .minus(rotatedOffset)
+            )
 
         // 2. Get the Global Heading required to face that goal
         // .theta returns the angle of the vector in radians
-        val globalTargetAngleRad = deltaVec.theta
+        val globalTargetAngleRad = deltaVec.theta-offset
 
         // 3. Get the robot's current heading (and account for latency with angular velocity)
         // Ensure both are in Radians
@@ -160,7 +166,7 @@ object TurretHardware: Component {
     override fun postUpdate() {
 //        centerApriltag()
 //        se(targetPosition)
-        update()
+//        update()
         MyTelemetry.addData("Turret Servo Position", getPosition())
         MyTelemetry.addData("Turret Servo angle", getAngle())
         MyTelemetry.addData("Turret Servo realpos", getPositionServo())

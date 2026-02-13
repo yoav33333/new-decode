@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.setTargetPosition
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.zeroEnc
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.state
+import org.firstinspires.ftc.teamcode.Util.UtilCommands.SequentialGroupFixed
 import kotlin.math.abs
 import kotlin.time.Duration.Companion.seconds
 
@@ -25,14 +26,16 @@ object TurretCommands {
     fun moveToAngler(angle: Double) = InstantCommand{setAngle(angle)}
 //        .setRequirements(TurretHardware)
     fun centerAprilTags() = InstantCommand{state = TurretState.TrackingAprilTags}
-    fun turretSeq() = SequentialGroup(
-    InstantCommand{setTargetPosition(0.0)
-        state = TurretState.ResetEncoder},
-    Delay(0.35.seconds),
-    WaitUntil{abs(getVel())<4},
-        InstantCommand{zeroEnc()},
+    fun turretSeq() = SequentialGroupFixed(
+        InstantCommand {
+            setTargetPosition(0.0)
+            state = TurretState.ResetEncoder
+        },
+        Delay(0.35.seconds),
+        WaitUntil { abs(getVel()) < 4 },
+        InstantCommand { zeroEnc() },
 //        Delay(0.3.seconds),
-        InstantCommand{ centerAprilTags().schedule() }
+        InstantCommand { centerAprilTags().schedule() }
     )
     val toggleLock = InstantCommand{
         if (state == TurretState.Disabled){

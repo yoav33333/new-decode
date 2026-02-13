@@ -12,13 +12,21 @@ object ShooterVars {
     @JvmField var hoodLUT = createHoodLUT()
     @JvmField var runShooter = false
     @JvmField var disableAutoShooter = false
-    @JvmField var f = 0.67
+    @JvmField var kv = 0.00051
+    @JvmField var ks = 0.1
+    @JvmField var minPos = 0.13
+    @JvmField var maxPos = 0.51
+    @JvmField var minAngle = 35.38
+    @JvmField var maxAngle = 48.54
+    @JvmField var hoodTargetAngle = 40.0
     @JvmField var hoodCorrectionMul = 0.000
+    @JvmField var entryAng = 20.0
+    @JvmField var dy = 25.98425197
     @JvmField var controlledSpeed = 0.0
     @JvmField var hoodTarget = 0.0
     @JvmField var targetVelocity = 0.0
     @JvmField var deltaThreshold = 20.0
-    @JvmField var veloCoefficients: PIDCoefficients = PIDCoefficients(0.012, 0.0, 0.0015)
+    @JvmField var veloCoefficients: PIDCoefficients = PIDCoefficients(0.007, 0.0, 0.001)
     @JvmField var veloControl: BasicPID = BasicPID(veloCoefficients)
 
     fun createShooterLut(): InterpLUT{

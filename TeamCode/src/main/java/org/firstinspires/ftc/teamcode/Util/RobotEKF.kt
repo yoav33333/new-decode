@@ -96,7 +96,7 @@ class RobotEKF(val dt: Double, private val bufferSize: Int = 100) {
     fun predict(v: Double, w: Double, timestamp: Long) {
         val theta = currentState.x[2]
 
-        // 1. Non-linear state transition f(x)
+        // 1. Non-linear state transition kv(x)
         val nextX = DoubleArray(5)
         nextX[0] = currentState.x[0] + v * cos(theta) * dt
         nextX[1] = currentState.x[1] + v * sin(theta) * dt

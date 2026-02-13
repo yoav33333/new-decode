@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.OpModes
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
+import dev.nextftc.bindings.button
 import dev.nextftc.core.commands.CommandManager
 import dev.nextftc.core.commands.delays.Delay
 import dev.nextftc.core.commands.delays.WaitUntil
@@ -25,8 +26,12 @@ import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCom
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.moveToTransferPositionLocking
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.rotate
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.runIntakeCycle
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.getVel
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.isAtTargetPosition
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.tracker
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.state
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.State
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.reverseTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.runTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.stopTransfer
@@ -41,6 +46,7 @@ import org.firstinspires.ftc.teamcode.Util.SpindexerSlotState
 import org.firstinspires.ftc.teamcode.Util.SpindexerTracker
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.LoopingCommand
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.RepeatCommand
+import kotlin.math.abs
 import kotlin.time.Duration.Companion.seconds
 
 
@@ -67,7 +73,7 @@ open class ShittyTeleop(color: AllianceColor): MegiddoOpMode(color) {
         Gamepads.gamepad1.y.whenBecomesTrue (turretSeq().and(cancelShooting))
         Gamepads.gamepad1.a.whenBecomesTrue(toggleLock)
         Gamepads.gamepad1.x.whenBecomesTrue(cancelShooting)
-        Gamepads.gamepad1.options.whenBecomesTrue(fixSpindex)
+        Gamepads.gamepad1.options.whenBecomesTrue(fixSpindex.value)
         Gamepads.gamepad1.rightTrigger.atLeast(0.3)
             .whenBecomesTrue(
                 SequentialGroup(
@@ -92,6 +98,8 @@ open class ShittyTeleop(color: AllianceColor): MegiddoOpMode(color) {
                     stopTransfer
                 )
             )
+
+
     }
     override fun onStartButtonPressed() {
         DriveCommands.driverControlled.schedule()

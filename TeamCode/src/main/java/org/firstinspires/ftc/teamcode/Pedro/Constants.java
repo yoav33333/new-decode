@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.Pedro;
 
 import static org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveVars.measurementVariance;
 import static org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveVars.processVariance;
+//import static org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.nominaVoltage;
+import static org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.nominalVoltage;
 import static org.firstinspires.ftc.teamcode.Util.Util.mmToInches;
 import static java.lang.Math.PI;
 
@@ -56,7 +58,7 @@ public class Constants {
             .yVelocity(52.52714724615654)
             .useBrakeModeInTeleOp(true)
             .useVoltageCompensation(true)
-            .nominalVoltage(12);
+            .nominalVoltage(nominalVoltage);
 
     public static TwoWheelConstants deadWheelLocalizerConstants =
             new TwoWheelConstants()

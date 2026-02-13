@@ -1,28 +1,34 @@
 package org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem
 
 import dev.nextftc.core.commands.Command
+//import dev.nextftc.core.commands.conditionals.IfElseCommand
 import dev.nextftc.core.commands.delays.Delay
 import dev.nextftc.core.commands.delays.WaitUntil
 import dev.nextftc.core.commands.groups.SequentialGroup
 import dev.nextftc.core.commands.utility.InstantCommand
 import dev.nextftc.core.commands.utility.LambdaCommand
+import dev.nextftc.core.commands.utility.NullCommand
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.smartDist
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware.atTargetVelocity
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.angleToServoPos
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.checkIntakeColorAndUpdate
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.checkIntakeColorAndUpdateAuto
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.currentSteps
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.getSpindexerVel
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.getVel
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.hasBallInTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.isAtTargetPosition
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.resetSpindexer
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.resetSpindexerEnc
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.setPosition
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.tracker
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.spinDelayIntake
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.state
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.targetPosition
 import org.firstinspires.ftc.teamcode.Util.ActiveDelay
 import org.firstinspires.ftc.teamcode.Util.SpindexerSlotState
+import org.firstinspires.ftc.teamcode.Util.UtilCommands.SequentialGroupFixed
 import kotlin.math.abs
 import kotlin.time.Duration.Companion.seconds
 
@@ -58,7 +64,7 @@ object SpindexerCommands {
 
 
     val runIntakeCycle =
-        SequentialGroup(
+        SequentialGroupFixed(
 //            WaitUntil{isAtTargetPosition()},
             WaitUntil{isAtTargetPosition()},
             checkColorAndUpdate,
@@ -68,7 +74,7 @@ object SpindexerCommands {
 //            Delay(0.05.seconds)\\\\
         ).setRequirements(SpindexerHardware)
     val runIntakeCycleAuto =
-        SequentialGroup(
+        SequentialGroupFixed(
 
             WaitUntil{isAtTargetPosition()},
             checkColorAndUpdateAuto,
@@ -90,15 +96,30 @@ object SpindexerCommands {
         runIntakeCycleAuto
 
     //        ).setRequirements(SpindexerHardware)
-    val fixSpindex = SequentialGroup(
-        InstantCommand{resetSpindexer()},
-        Delay(0.1.seconds),
-        InstantCommand{
-            currentSteps = 4
-            tracker.setPose(currentSteps)
-            targetPosition = currentSteps * SpindexerVars.degreesPerSlot + SpindexerVars.offset
-        }
-    )
+    val fixSpindex = lazy{
+        SequentialGroupFixed(
+            Delay(0.05),
+//            IfElseCommand(
+//                { !isAtTargetPosition() && abs(getVel()) < 5 },
+                SequentialGroupFixed(
+                    InstantCommand {
+                        state = State.FIX
+                        targetPosition = 2 * SpindexerVars.degreesPerSlot + SpindexerVars.offset
+                        setPosition(angleToServoPos(targetPosition))
+                    },
+                    Delay(0.05.seconds),
+                    InstantCommand {
+                        targetPosition = 4 * SpindexerVars.degreesPerSlot + SpindexerVars.offset
+                        setPosition(angleToServoPos(targetPosition))
+                    },
+                    Delay(0.1),
+                    InstantCommand {
+                        state = State.RUN
+                    }),
+//                NullCommand()
+            )
+//        )
+    }
     val resetingSeq = SequentialGroup(
         InstantCommand{
             resetSpindexer()
@@ -106,7 +127,7 @@ object SpindexerCommands {
 //        WaitUntil{getSpindexerVel()>10},
         Delay(0.2),
 //        WaitUntil{abs(getSpindexerVel())>100}.raceWith(Delay(0.5)),
-        WaitUntil{abs(getSpindexerVel())<50},
+        WaitUntil{abs(getSpindexerVel())<1},
         InstantCommand{
             resetSpindexerEnc()
             state = State.RUN
@@ -114,7 +135,7 @@ object SpindexerCommands {
 
     )
     fun transferAll(startWhen: Command) =
-        SequentialGroup(
+        SequentialGroupFixed(
             moveToTransferPositionLocking(RobotVars.randomization.value[0]),
             WaitUntil{isAtTargetPosition()},
             WaitUntil { atTargetVelocity() },

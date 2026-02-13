@@ -96,6 +96,14 @@ class SpindexerTracker {
         return bestMove
     }
 
+    fun getAmount():Int{
+        var counter = 0
+        for (slot in data){
+            if (slot!= SpindexerSlotState.EMPTY) counter++
+        }
+        return counter
+    }
+
     // Debug print
     override fun toString(): String {
         return "Head:$currentHeadPos " + (0 until size).joinToString(prefix = "[", postfix = "]") {

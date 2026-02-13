@@ -37,8 +37,8 @@ open class MegiddoOpMode(allianceColor: AllianceColor): NextFTCOpMode() {
             DriveHardware,
             TurretHardware,
             LimeLight,
-            Robot
-//            Antony
+            Robot,
+            Antony
         )
     }
 }
