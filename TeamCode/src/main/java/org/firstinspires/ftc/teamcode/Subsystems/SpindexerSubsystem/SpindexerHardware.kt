@@ -182,6 +182,10 @@ object SpindexerHardware: Component {
         return abs(getSpindexerPos()/2+2 * SpindexerVars.degreesPerSlot - targetPosition) < 15
 //        return true
     }
+    fun isStuck(): Boolean {
+        return abs(getVel()) < 5
+//        return true
+    }
 
     fun getVel(): Double {
         return shooterMotor2.value.velocity
@@ -202,7 +206,7 @@ object SpindexerHardware: Component {
     }
 
     override fun postStartButtonPressed() {
-//        button { !isAtTargetPosition()&& abs(getVel()) <5 && state == State.RUN}.whenBecomesTrue (fixSpindex.value)
+//        button { !isAtTargetPosition()&& isStuck() && state == State.RUN}.whenBecomesTrue (fixSpindex.value)
     }
     override fun postUpdate() {
         targetPosition = currentSteps * SpindexerVars.degreesPerSlot + SpindexerVars.offset

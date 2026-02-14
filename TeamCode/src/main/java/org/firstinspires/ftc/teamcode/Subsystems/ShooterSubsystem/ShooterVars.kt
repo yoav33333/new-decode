@@ -16,8 +16,8 @@ object ShooterVars {
     @JvmField var ks = 0.1
     @JvmField var minPos = 0.13
     @JvmField var maxPos = 0.51
-    @JvmField var minAngle = 35.38
-    @JvmField var maxAngle = 48.54
+    @JvmField var minAngle = 90-48.54
+    @JvmField var maxAngle = 90-35.38
     @JvmField var hoodTargetAngle = 40.0
     @JvmField var hoodCorrectionMul = 0.000
     @JvmField var entryAng = 20.0

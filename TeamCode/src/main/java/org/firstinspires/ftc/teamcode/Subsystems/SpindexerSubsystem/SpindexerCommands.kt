@@ -19,6 +19,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHar
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.getVel
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.hasBallInTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.isAtTargetPosition
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.isStuck
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.resetSpindexer
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.resetSpindexerEnc
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.setPosition
@@ -98,7 +99,17 @@ object SpindexerCommands {
     //        ).setRequirements(SpindexerHardware)
     val fixSpindex = lazy{
         SequentialGroupFixed(
-            Delay(0.05),
+            Delay(0.1),
+            InstantCommand{
+                if (!isAtTargetPosition() && isStuck()){
+                    fixSpindexSeq.value.schedule()
+                }
+            }
+        )
+    }
+    val fixSpindexSeq = lazy{
+        SequentialGroupFixed(
+//            Delay(0.1),
 //            IfElseCommand(
 //                { !isAtTargetPosition() && abs(getVel()) < 5 },
                 SequentialGroupFixed(
@@ -137,8 +148,8 @@ object SpindexerCommands {
     fun transferAll(startWhen: Command) =
         SequentialGroupFixed(
             moveToTransferPositionLocking(RobotVars.randomization.value[0]),
-            WaitUntil{isAtTargetPosition()},
-            WaitUntil { atTargetVelocity() },
+            WaitUntil{isAtTargetPosition()&&atTargetVelocity()},
+//            WaitUntil { atTargetVelocity() },
 //            ActiveDelay { (0.1).seconds},
             startWhen,
 //            ActiveDelay { (SpindexerVars.spinDelayShoot+smartDist*0.0002).seconds},
@@ -147,8 +158,8 @@ object SpindexerCommands {
             WaitUntil{atTargetVelocity()&&!hasBallInTransfer()},
             moveToTransferPositionLocking(RobotVars.randomization.value[1]),
 //            ActiveDelay { (SpindexerVars.spinDelayShoot+smartDist*0.0002).seconds} ,
-            WaitUntil{isAtTargetPosition()&&!hasBallInTransfer()},
-            WaitUntil{atTargetVelocity()},
+            WaitUntil{isAtTargetPosition()&&!hasBallInTransfer()&&atTargetVelocity()},
+//            WaitUntil{atTargetVelocity()},
             moveToTransferPositionLocking(RobotVars.randomization.value[2]),
 //            ActiveDelay { (SpindexerVars.spinDelayShoot+smartDist*0.0002).seconds},
             WaitUntil{isAtTargetPosition()&&!hasBallInTransfer()},

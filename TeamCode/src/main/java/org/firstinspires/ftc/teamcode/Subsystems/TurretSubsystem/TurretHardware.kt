@@ -118,7 +118,7 @@ object TurretHardware: Component {
         val rotatedOffset = centerOfRotationOffset.copy()
         rotatedOffset.rotateVector(robotPose.heading.rad.value)
         val deltaVec = RobotVars.goalPos.minus(robotPose.asVector
-            .minus(rotatedOffset)
+            .minus(rotatedOffset).plus(Vector(follower.velocity.magnitude*loopTime/1000, follower.velocity.theta*loopTime/1000))
             )
 
         // 2. Get the Global Heading required to face that goal
@@ -127,7 +127,7 @@ object TurretHardware: Component {
 
         // 3. Get the robot's current heading (and account for latency with angular velocity)
         // Ensure both are in Radians
-        val robotHeadingRad = follower.heading.rad.value + (follower.angularVelocity.rad.value / loopTime)
+        val robotHeadingRad = follower.heading.rad.value + (follower.angularVelocity * loopTime/1000)
 
         // 4. Calculate the relative (local) angle
         var localAngleRad = globalTargetAngleRad - robotHeadingRad
