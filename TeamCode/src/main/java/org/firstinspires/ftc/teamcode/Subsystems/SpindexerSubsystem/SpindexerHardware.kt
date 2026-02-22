@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem
 
+import com.ThermalEquilibrium.homeostasis.Utils.Timer
 import com.bylazar.configurables.annotations.Configurable
 import com.qualcomm.hardware.rev.RevColorSensorV3
 import com.qualcomm.robotcore.hardware.ColorRangeSensor
@@ -20,7 +21,9 @@ import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVar
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.offsetEnc
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.purpleRange
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.state
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.stuckTimeStart
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.targetPosition
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.wasStuck
 import org.firstinspires.ftc.teamcode.Util.AxonEncoder
 import org.firstinspires.ftc.teamcode.Util.FilteredColorSensor
 import org.firstinspires.ftc.teamcode.Util.InputChannel
@@ -32,146 +35,116 @@ import kotlin.math.abs
 import kotlin.math.max
 
 @Configurable
-object SpindexerHardware: Component {
+object SpindexerHardware : Component {
+    // --- Hardware References ---
     val spindexerEncoder = lazy { AxonEncoder("Abs spin") }
     val spindexerServo = lazy { ServoEx("spindex", cacheTolerance = 0.0) }
-    @JvmField var transferSensor = lazy { InputChannel(hardwareMap, "tm").get() }
+//    @JvmField var transferSensor = lazy { InputChannel(hardwareMap, "tm").get() }
     @JvmField var colorSensor1 = lazy { FilteredColorSensor(hardwareMap.get(RevColorSensorV3::class.java, "Lcolor")) }
     @JvmField var colorSensor2 = lazy { FilteredColorSensor(hardwareMap.get(RevColorSensorV3::class.java, "Rcolor")) }
 
+    val timer = Timer()
     var tracker = SpindexerTracker()
 
-    // We need to track the absolute step position here to calculate angle correctly.
-    // Range is expected to be -2 to 2 based on your description.
+    // --- I/O Caching Variables ---
+    private var cachedEncoderPos = 0.0
+    private var cachedVelocity = 0.0
+    private var cachedTransferState = false
+    private var lastCommandedServoPos = -1.0 // Initialize with impossible value
+    private val SERVO_EPSILON = 0.001 // Minimum change required to trigger a write
+
     @JvmField var currentSteps = 2
-    fun resetSpindexerEnc(){
+
+    // --- Optimized Getters (Using Caches) ---
+    fun getSpindexerPos(): Double = -(offsetEnc + cachedEncoderPos) / 8192 * 360
+    fun getSpindexerVel(): Double = (cachedVelocity) / 8192 * 360
+    fun getVel(): Double = cachedVelocity
+    fun hasBallInTransfer(): Boolean = !cachedTransferState
+
+    // --- Logic Methods ---
+    fun resetSpindexerEnc() {
         offsetEnc = -shooterMotor2.value.currentPosition
     }
-    fun getSpindexerPos(): Double{
-        return -(offsetEnc+shooterMotor2.value.currentPosition)/8192*360
-    }
-    fun getSpindexerVel(): Double{
-        return (shooterMotor2.value.velocity)/8192*360
-    }
-    fun isFull(): Boolean {
-        return tracker.isFull()
-    }
-    fun isEmpty(): Boolean{
-        return tracker.isEmpty()
-    }
+
+    fun isFull(): Boolean = tracker.isFull()
+    fun isEmpty(): Boolean = tracker.isEmpty()
     fun isAtTarget(): Boolean = targetPosition == getPosition()
 
     fun getColorInIntake(): SpindexerSlotState {
-        var hsv = colorSensor1.value.getHSV()
+        // Localizing sensor reads
+        val s1 = colorSensor1.value
+        val s2 = colorSensor2.value
 
-        MyTelemetry.addData("color sensor 1", hsv.toString())
-        if (purpleRange.inRange(hsv)) {
-            MyTelemetry.addData("Intake Color Sensor 1", "Purple")
-            return SpindexerSlotState.PURPLE
-        } else if (greenRange.inRange(hsv)) {
-            MyTelemetry.addData("Intake Color Sensor 1", "Green")
-            return SpindexerSlotState.GREEN
-        } else {
-            var hsv = colorSensor2.value.getHSV()
-            MyTelemetry.addData("color sensor 2", hsv.toString())
-            if (purpleRange.inRange(hsv)) {
-                MyTelemetry.addData("Intake Color Sensor 2", "Purple")
-                return SpindexerSlotState.PURPLE
-            } else if (greenRange.inRange(hsv)) {
-                MyTelemetry.addData("Intake Color Sensor 2", "Green")
-                return SpindexerSlotState.GREEN
-            } else {
-                MyTelemetry.addData("Intake Color Sensor 2", "Empty")
-                return SpindexerSlotState.EMPTY
-            }
-        }
+        var hsv = s1.getHSV()
+        if (purpleRange.inRange(hsv)) return SpindexerSlotState.PURPLE
+        if (greenRange.inRange(hsv)) return SpindexerSlotState.GREEN
+
+        hsv = s2.getHSV()
+        if (purpleRange.inRange(hsv)) return SpindexerSlotState.PURPLE
+        if (greenRange.inRange(hsv)) return SpindexerSlotState.GREEN
+
+        return SpindexerSlotState.EMPTY
     }
 
-    fun checkIntakeColorAndUpdate(): Boolean{
+    fun checkIntakeColorAndUpdate(): Boolean {
         val color = getColorInIntake()
-        if (color != SpindexerSlotState.EMPTY){
+        return if (color != SpindexerSlotState.EMPTY) {
             tracker.set(intakeSlot, color)
-            return true
-        }
-        return false
-    }
-    fun checkIntakeColorAndUpdateAuto(): Boolean{
-        val color = getColorInIntake()
-        if (color != SpindexerSlotState.EMPTY){
-            tracker[intakeSlot] = color
-            return true
-        }
-        tracker[intakeSlot] = SpindexerSlotState.PURPLE
-        return false
+            true
+        } else false
     }
 
+    fun checkIntakeColorAndUpdateAuto(): Boolean {
+        val color = getColorInIntake()
+        tracker[intakeSlot] = if (color != SpindexerSlotState.EMPTY) color else SpindexerSlotState.PURPLE
+        return color != SpindexerSlotState.EMPTY
+    }
+
+    /**
+     * Optimized Write: Only communicates with the servo if the position
+     * has changed significantly.
+     */
     fun setPosition(position: Double) {
-        spindexerServo.value.position = position
+        if (abs(position - lastCommandedServoPos) > SERVO_EPSILON) {
+            spindexerServo.value.position = position
+            lastCommandedServoPos = position
+        }
     }
-    fun getTargetPosition(): Double{
-        return spindexerServo.value.position
-    }
+
+    fun getTargetPosition(): Double = lastCommandedServoPos
 
     fun getPosition(): Double {
-        return wrap360(-spindexerEncoder.value.getPosition()*MulEnc +SpindexerVars.offsetEnc)
+        return wrap360(-spindexerEncoder.value.getPosition() * MulEnc + SpindexerVars.offsetEnc)
     }
 
-    fun moveStateToPosition(color: SpindexerSlotState, pos: Int) : Boolean{
-        // tracker.stepsToState now returns the shortest LEGAL move within servo limits
-        val steps = tracker.stepsToState(color, pos)
-
-        if (steps == null) {
-            // If we can't reach the state (e.g., servo limit reached), we might need to reset
-            // or we simply can't perform the action.
-            return false
-        }
-        delayMul = max(1.0,steps/1.5)
+    fun moveStateToPosition(color: SpindexerSlotState, pos: Int): Boolean {
+        val steps = tracker.stepsToState(color, pos) ?: return false
+        delayMul = max(1.0, steps / 1.5)
         rotate(steps)
         colorSensor1.value.resetFilter()
         colorSensor2.value.resetFilter()
         return true
     }
 
-    fun moveEmptyToIntakePosition(): Boolean {
-        return moveStateToPosition(SpindexerSlotState.EMPTY, SpindexerVars.intakeSlot)
-    }
+    fun moveEmptyToIntakePosition(): Boolean = moveStateToPosition(SpindexerSlotState.EMPTY, SpindexerVars.intakeSlot)
+
     fun moveColorToTransferPosition(color: SpindexerSlotState): Boolean {
-        if(moveStateToPosition(color, SpindexerVars.transferSlot)){
+        return if (moveStateToPosition(color, SpindexerVars.transferSlot)) {
             tracker[SpindexerVars.transferSlot] = SpindexerSlotState.EMPTY
-            return true
-        }
-        return false
-    }
-    fun moveColorToTransferPositionOff(color: SpindexerSlotState): Boolean {
-        if(moveStateToPosition(color, SpindexerVars.transferSlot+1)){
-//            tracker[SpindexerVars.transferSlot] = SpindexerSlotState.EMPTY
-            return true
-        }
-        return false
+            true
+        } else false
     }
 
     fun rotate(steps: Int) {
-        // Calculate the new potential position
         val newStepPosition = currentSteps + steps
+        if (newStepPosition > 4 || newStepPosition < 2) return
 
-        // Hard limits: Ensure we don't go beyond -2 or 2 (or whatever your SpindexerTracker limit is)
-        if (newStepPosition > 4 || newStepPosition < 2) {
-            MyTelemetry.addData("Spindexer Warning", "Rotation limit hit! Requested: $newStepPosition")
-            return
-        }
-
-        // Update local step counter
         currentSteps = newStepPosition
-
-        // Update the logical tracker so it knows where the "head" is
         tracker.move(steps)
-
-        // Calculate target angle based on absolute steps
-        // NO MODULO HERE: We want the servo to go to the actual physical angle
         targetPosition = currentSteps * SpindexerVars.degreesPerSlot + SpindexerVars.offset
     }
 
-    fun resetSpindexer(){
+    fun resetSpindexer() {
         currentSteps = 2
         tracker.setPose(currentSteps)
         targetPosition = currentSteps * SpindexerVars.degreesPerSlot + SpindexerVars.offset
@@ -179,51 +152,49 @@ object SpindexerHardware: Component {
     }
 
     fun isAtTargetPosition(): Boolean {
-        return abs(getSpindexerPos()/2+2 * SpindexerVars.degreesPerSlot - targetPosition) < 15
-//        return true
-    }
-    fun isStuck(): Boolean {
-        return abs(getVel()) < 5
-//        return true
+        return abs(getSpindexerPos() / 2 + 2 * SpindexerVars.degreesPerSlot - targetPosition) < 15
     }
 
-    fun getVel(): Double {
-        return shooterMotor2.value.velocity
-//        return true
-    }
-    fun hasBallInTransfer(): Boolean {
-        return !transferSensor.value.state
-    }
+    fun isStuck(): Boolean = abs(cachedVelocity) < 2
+    fun timeStuck(): Double = timer.currentTime() - stuckTimeStart
+    fun angleToServoPos(angle: Double): Double = angle / SpindexerVars.maxRotation
 
-    fun angleToServoPos(angle: Double): Double {
-        return angle/ SpindexerVars.maxRotation
-    }
+    override fun postInit() {lastCommandedServoPos = -1.0}
+    override fun postStartButtonPressed() {}
 
-    override fun postInit() {
-        resetingSeq.schedule()
+    /**
+     * Main Loop execution.
+     * Reads all sensors once, processes logic, then writes once.
+     */
+    private fun updateSystem() {
+        // 1. READ (Slow I/O)
+        cachedEncoderPos = shooterMotor2.value.currentPosition.toDouble()
+        cachedVelocity = shooterMotor2.value.velocity
+        cachedTransferState = true
 
-//        spindexerServo.value.position = 0.5
-    }
-
-    override fun postStartButtonPressed() {
-//        button { !isAtTargetPosition()&& isStuck() && state == State.RUN}.whenBecomesTrue (fixSpindex.value)
-    }
-    override fun postUpdate() {
+        // 2. LOGIC
         targetPosition = currentSteps * SpindexerVars.degreesPerSlot + SpindexerVars.offset
-        if(state == State.RUN)setPosition(angleToServoPos(targetPosition))
-        MyTelemetry.addData("Spindexer Position", getSpindexerPos())
-        MyTelemetry.addData("Spindexer Vel", getSpindexerVel())
-//        MyTelemetry.addData("Spindexer Vol", spindexerEncoder.value.getVoltage())
-        MyTelemetry.addData("Spindexer Target angle", targetPosition)
-        MyTelemetry.addData("Spindexer at target", isAtTargetPosition())
-        MyTelemetry.addData("transfer sensor", hasBallInTransfer())
-        MyTelemetry.addData("Spindexer target pos", getTargetPosition())
-        MyTelemetry.addData("Spindexer Steps", currentSteps) // Debug current steps
-        MyTelemetry.addData("Spindexer state", tracker.toString())
-        MyTelemetry.addData("is full", tracker.isFull())
-        MyTelemetry.addData("delta", abs(getSpindexerPos()/2+2 * SpindexerVars.degreesPerSlot - targetPosition))
-        MyTelemetry.addData("state", state)
-        MyTelemetry.addData("balls In spindexer", tracker.getAmount())
-        MyTelemetry.addData("Spindexer vel", getVel())
+
+        if (state == State.RUN) {
+            setPosition(angleToServoPos(targetPosition))
+        }
+
+        // Stuck detection logic
+        if (isStuck()) {
+            if (!wasStuck) {
+                stuckTimeStart = timer.currentTime()
+                wasStuck = true
+            }
+        } else {
+            wasStuck = false
+        }
+
+        // 3. TELEMETRY (Combined for speed)
+        MyTelemetry.addData("Spin Pos/Vel", "%.1f / %.1f".format(getSpindexerPos(), getSpindexerVel()))
+        MyTelemetry.addData("Target/Step", "%.1f / %d".format(targetPosition, currentSteps))
+        MyTelemetry.addData("Stats", "Full: ${tracker.isFull()} | Ball: ${hasBallInTransfer()}")
     }
+
+    override fun postUpdate() = updateSystem()
+    override fun postWaitForStart() = updateSystem()
 }

@@ -10,6 +10,7 @@ import dev.nextftc.core.commands.utility.InstantCommand
 import dev.nextftc.ftc.Gamepads
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveCommands
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveCommands.resetIMU
+import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveCommands.resetPos
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeCommands
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.smartDist
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.AllianceColor
@@ -20,10 +21,11 @@ import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.auto
 //import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.shootingCommand
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterCommands
-import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterCommands.shoot
+//import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterCommands.shoot
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware.atTargetVelocity
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.fixSpindex
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.moveToTransferPositionLocking
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.resetingSeq
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.rotate
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.runIntakeCycle
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.getVel
@@ -35,10 +37,10 @@ import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.State
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.reverseTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.runTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.stopTransfer
-import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.lockOnGoal
+//import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.lockOnGoal
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.moveToAngle
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.toggleLock
-import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.turretSeq
+//import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.turretSeq
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.runTurret
 import org.firstinspires.ftc.teamcode.Util.ActiveDelay
 import org.firstinspires.ftc.teamcode.Util.SpindexerSlotState
@@ -70,7 +72,8 @@ open class ShittyTeleop(color: AllianceColor): MegiddoOpMode(color) {
         Gamepads.gamepad1.leftBumper.whenBecomesTrue (shootingCommand )
         //pre speed up
         Gamepads.gamepad1.dpadUp.whenBecomesTrue (resetIMU )
-        Gamepads.gamepad1.y.whenBecomesTrue (turretSeq().and(cancelShooting))
+        Gamepads.gamepad1.dpadDown.whenBecomesTrue (resetPos )
+//        Gamepads.gamepad1.y.whenBecomesTrue (turretSeq().and(cancelShooting))
         Gamepads.gamepad1.a.whenBecomesTrue(toggleLock)
         Gamepads.gamepad1.x.whenBecomesTrue(cancelShooting)
         Gamepads.gamepad1.options.whenBecomesTrue(fixSpindex.value)
@@ -106,7 +109,8 @@ open class ShittyTeleop(color: AllianceColor): MegiddoOpMode(color) {
     }
 
     override fun onInit() {
-        turretSeq().schedule()
+        resetingSeq.schedule()
+//        turretSeq().schedule()
 
 //        moveToAngle(270.0).schedule()
     }

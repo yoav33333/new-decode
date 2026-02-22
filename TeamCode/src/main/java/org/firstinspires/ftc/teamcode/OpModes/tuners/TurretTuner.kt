@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLight
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.MyTelemetry
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.moveToAngle
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.moveToAngler
-import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.moveToGlobalAngle
+//import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.moveToGlobalAngle
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.getAngle
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.getGlobalHeading
@@ -26,8 +26,8 @@ import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.targ
 class TurretTuner :TunerOpMode(PedroComponent(Constants::createFollower)){
     init {
         Gamepads.gamepad2.a.whenBecomesTrue (moveToAngler(0.0))
-        Gamepads.gamepad2.y.whenBecomesTrue (moveToAngler(90.0))
-        Gamepads.gamepad2.b.whenBecomesTrue (moveToAngler(-90.0))
+        Gamepads.gamepad2.y.whenBecomesTrue (moveToAngler(351.69/2))
+        Gamepads.gamepad2.b.whenBecomesTrue (moveToAngler(-351.69/2))
 //        Gamepads.gamepad2.b.whenTrue (moveToGlobalAngle(0.0))
         Gamepads.gamepad2.dpadDown.whenBecomesTrue (resetIMU )
 //        Gamepads.gamepad2.rightBumper.whenTrue{}
@@ -40,13 +40,13 @@ class TurretTuner :TunerOpMode(PedroComponent(Constants::createFollower)){
     }
 
     override fun onUpdate() {
-        MyTelemetry.addData("Turret Servo Position", getPosition())
-        MyTelemetry.addData("Turret Servo angle", getAngle())
-        MyTelemetry.addData("Turret Servo realpos", getPositionServo())
-        MyTelemetry.addData("Turret Servo angle2", ((getPosition()/8192)*360)/5)
-//        MyTelemetry.addData("Turret Vol", turretEncoder.value.getVoltage())
-        MyTelemetry.addData("Turret Target Position", targetPosition)
-//        MyTelemetry.addData("Turret vol", getEncoderPosition())
-        MyTelemetry.addData("Turret Global Heading", getGlobalHeading())
+//        MyTelemetry.addData("Turret Servo Position", getPosition())
+//        MyTelemetry.addData("Turret Servo angle", getAngle())
+//        MyTelemetry.addData("Turret Servo realpos", getPositionServo())
+//        MyTelemetry.addData("Turret Servo angle2", ((getPosition()/8192)*360)/5)
+////        MyTelemetry.addData("Turret Vol", turretEncoder.value.getVoltage())
+//        MyTelemetry.addData("Turret Target Position", targetPosition)
+////        MyTelemetry.addData("Turret vol", getEncoderPosition())
+//        MyTelemetry.addData("Turret Global Heading", getGlobalHeading())
     }
 }

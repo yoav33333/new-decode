@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Antony
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveHardware
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLight
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.AllianceColor
+import org.firstinspires.ftc.teamcode.Subsystems.Robot.Photon
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.Robot
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware
@@ -28,6 +29,7 @@ open class MegiddoOpMode(allianceColor: AllianceColor): NextFTCOpMode() {
             BindingsComponent,
             BulkReadComponent,
             LoopTimer,
+//            Photon,
             MyTelemetry,
             PedroComponent(Constants::createFollower),
             IntakeHardware,

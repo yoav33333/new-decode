@@ -1,12 +1,12 @@
 package com.outoftheboxrobotics.photoncore.Neutrino.Rev2MSensor;
 
+import static com.qualcomm.hardware.stmicroelectronics.VL53L0X.Register.RESULT_RANGE_STATUS;
+
 import com.qualcomm.hardware.lynx.LynxI2cDeviceSynch;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.TypeConversion;
-
-import static com.qualcomm.hardware.stmicroelectronics.VL53L0X.Register.RESULT_RANGE_STATUS;
 
 public class Rev2mDistanceSensorEx extends Rev2mDistanceSensor {
 

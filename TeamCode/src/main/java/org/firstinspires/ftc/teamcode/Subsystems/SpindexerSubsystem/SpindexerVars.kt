@@ -15,6 +15,8 @@ object SpindexerVars {
 //    @JvmField var gain = 0.2
 //    @JvmField var kv = 0.0
     @JvmField var targetPosition = 0.0
+    @JvmField var stuckTimeStart = 0.0
+    @JvmField var wasStuck = false
     @JvmField var steps = 0
     @JvmField var maxRotation = 355.0
     @JvmField var degreesPerSlot = 66

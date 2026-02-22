@@ -17,9 +17,8 @@ import dev.nextftc.core.units.rad
 import dev.nextftc.extensions.pedro.PedroComponent.Companion.follower
 import dev.nextftc.ftc.ActiveOpMode.runtime
 import dev.nextftc.ftc.Gamepads
-import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.Drawing.drawLine
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveVars.startingPose
-import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLight.rotationOffset
+//import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLight.rotationOffset
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLight.updateLL
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.centerOfRotationOffset
@@ -34,340 +33,126 @@ import kotlin.math.abs
 
 @Configurable
 object DriveHardware : Component {
-    @JvmField var driftFilterX = DriftKalmanFilter(
-        0.0,
-        10.0,
-        0.1
-    )
-    @JvmField var driftFilterY = DriftKalmanFilter(
-        0.0,
-        10.0,
-        0.1
-    )
-    var lastTime = 0.0
-
+    var isHolding = false
+        private set
 
     fun getPoseEstimate(): Pose = follower.pose
-
-    fun setPoseEstimate(pose: Pose) {
-        follower.pose = pose
-    }
-
-    /**
-     * Computes measured drift (bias) between odometry position and camera position.
-     *
-     * @param odoPose double[3] = {odoX, odoY, odoHeading}
-     * @param camPose double[3] = {camX, camY, camHeading}
-     * @return double[3] = {driftX, driftY, driftHeading}
-     */
-    fun computeMeasuredDrift(odoPose: Pose, camPose: Pose): DoubleArray {
-
-        val driftX = odoPose.x - camPose.x
-        val driftY = odoPose.y - camPose.y
-        val driftHeading = normalizeAngle(odoPose.heading - camPose.heading)
-
-        return doubleArrayOf(driftX, driftY, driftHeading)
-    }
-
-    /**
-     * Normalize an angle to the range [-pi, pi].
-     *
-     * @param angle Angle in radians.
-     * @return Equivalent angle normalized to [-pi, pi].
-     */
-    private fun normalizeAngle(angle: Double): Double {
-        var angle = angle
-        while (angle > Math.PI) angle -= 2.0 * Math.PI
-        while (angle < -Math.PI) angle += 2.0 * Math.PI
-        return angle
-    }
-    // In DriveHardware.kt
-    @JvmStatic
-    fun updatePoseEstimate(result: LLResult?) {
-        var deadWheelPose = getPoseEstimate()
-        if (lastTime==0.0) lastTime = runtime
-        var now = runtime
-        var dt = now - lastTime
-        lastTime = now
-
-        driftFilterX.predict(dt);
-        driftFilterY.predict(dt);
-
-        if (result != null && result.isValid) {
-            MyTelemetry.addData("MT2  X",result.botpose_MT2.position.x)
-            MyTelemetry.addData("MT2  Y",result.botpose_MT2.position.y)
-        val (measuredDriftX, measuredDriftY, _) = computeMeasuredDrift(
-            deadWheelPose,
-            pose3dToPose(pose3DMetersToInches(result.botpose_MT2)))
-        var (visionNoiseVarianceX,visionNoiseVarianceY) = result.stddevMt2.take(2)
-
-        // 3) Correct drift
-        driftFilterX.update(measuredDriftX, visionNoiseVarianceX)
-        driftFilterY.update(measuredDriftY, visionNoiseVarianceY)
-        }
-
-        follower.pose.plus(Pose(driftFilterX.driftEstimate,
-            driftFilterY.driftEstimate, follower.heading))
-    }
+    fun setPoseEstimate(pose: Pose) { follower.pose = pose }
 
     override fun postInit() {
         setPoseEstimate(startingPose)
         Drawing.init()
-        driftFilterX.reset(0.0,3.0)
-        driftFilterY.reset(0.0,3.0)
     }
-
-    // Add this variable at the top of your DriveHardware object
-    var isHolding = false
 
     override fun postUpdate() {
         val stickThreshold = 0.05
         val velocityThreshold = 0.5
-        val angularVelocityThreshold = 0.05
+        val angularThreshold = 0.05
 
-        val sticksAtRest = abs(Gamepads.gamepad1.leftStickY.get()) < stickThreshold &&
-                abs(Gamepads.gamepad1.leftStickX.get()) < stickThreshold &&
-                abs(Gamepads.gamepad1.rightStickX.get()) < stickThreshold
+        // Cache stick values to avoid repeated calls
+        val lx = Gamepads.gamepad1.leftStickX.get()
+        val ly = Gamepads.gamepad1.leftStickY.get()
+        val rx = Gamepads.gamepad1.rightStickX.get()
 
-        val robotStopped = follower.velocity.magnitude < velocityThreshold &&
-                follower.angularVelocity < angularVelocityThreshold
+        val sticksAtRest = abs(lx) < stickThreshold &&
+                abs(ly) < stickThreshold &&
+                abs(rx) < stickThreshold
 
         if (sticksAtRest) {
+            val vel = follower.velocity
+            val robotStopped = vel.magnitude < velocityThreshold &&
+                    abs(follower.angularVelocity) < angularThreshold
+
             if (robotStopped && !isHolding) {
                 follower.holdPoint(follower.pose)
                 isHolding = true
             }
-
-            MyTelemetry.addData("Drive State", if (isHolding) "Holding Pose" else "Decelerating")
+            MyTelemetry.addData("Drive State", if (isHolding) "Holding" else "Decelerating")
         } else {
+            // Only reset if we were previously holding or Pedro is running a path
             if (isHolding || follower.isBusy) {
                 follower.breakFollowing()
                 follower.startTeleopDrive()
                 isHolding = false
             }
-            MyTelemetry.addData("Drive State", "Teleop Driving")
+            MyTelemetry.addData("Drive State", "Teleop")
         }
 
-//        vectorFromTarget = Vector(0.0,0.0)
-        vectorFromTarget.setOrthogonalComponents(getPoseEstimate().asVector.minus(RobotVars.goalPos).xComponent, getPoseEstimate().asVector.minus(RobotVars.goalPos).yComponent)
-        Drawing.drawVector(vectorFromTarget, follower.pose)
-        val robotPose = getPoseEstimate()
-        val rotatedOffset = centerOfRotationOffset.copy()
-        rotatedOffset.rotateVector(robotPose.heading.rad.value)
-        val turretPose = Pose(robotPose.asVector.plus(rotatedOffset).xComponent, robotPose.asVector.plus(rotatedOffset).xComponent, Math.toRadians(getTargetAngle()))
-
-        Drawing.drawDebug(follower, turretPose)
-
-    }
-    fun addOffsets(pose: Pose): Pose {
-//        return pose
-        LimeLightVars.centerOfRotationOffset.rotateVector(pose.heading)
-        return pose
-            .minus(Pose(centerOfRotationOffset.xComponent, centerOfRotationOffset.yComponent))
+        Drawing.drawDebug(follower)
     }
 }
-
 internal object Drawing {
-    const val ROBOT_RADIUS: Double = 9.0 // woah
+    const val ROBOT_RADIUS: Double = 9.0
     private val panelsField = field
 
-    private val robotLook = Style(
-        "", "#3F51B5", 0.75
-    )
-    private val llLook = Style(
-        "", "#FFBF00", 0.75
-    )
-    private val historyLook = Style(
-        "", "#4CAF50", 0.75
-    )
+    private val robotLook = Style("", "#3F51B5", 0.75)
+    private val llLook = Style("", "#FFBF00", 0.75)
+    private val historyLook = Style("", "#4CAF50", 0.75)
 
-    /**
-     * This prepares Panels Field for using Pedro Offsets
-     */
     fun init() {
         panelsField.setOffsets(presets.PEDRO_PATHING)
     }
 
-    /**
-     * This draws everything that will be used in the Follower's telemetryDebug() method. This takes
-     * a Follower as an input, so an instance of the DashbaordDrawingHandler class is not needed.
-     *
-     * @param follower Pedro Follower instance.
-     */
-    fun drawDebug(follower: Follower) {
-        if (follower.getCurrentPath() != null) {
-            drawPath(follower.getCurrentPath(), robotLook)
-            val closestPoint =
-                follower.getPointFromPath(follower.getCurrentPath().getClosestPointTValue())
-            drawRobot(
-                Pose(
-                    closestPoint.getX(),
-                    closestPoint.getY(),
-                    follower.getCurrentPath()
-                        .getHeadingGoal(follower.getCurrentPath().getClosestPointTValue())
-                ), robotLook
-            )
+    fun drawDebug(follower: Follower, llPose: Pose? = null) {
+        val currentPath = follower.currentPath
+
+        if (currentPath != null) {
+            drawPath(currentPath, robotLook)
+            val t = currentPath.closestPointTValue
+            val closestPoint = follower.getPointFromPath(t)
+
+            // Draw Ghost Robot at Target
+            drawRobot(Pose(closestPoint.x, closestPoint.y, currentPath.getHeadingGoal(t)), robotLook)
         }
 
-        drawPoseHistory(follower.getPoseHistory(), historyLook)
-        drawRobot(follower.getPose(), historyLook)
+        if (llPose != null) drawRobot(llPose, llLook)
 
-        sendPacket()
-    }
-    fun drawDebug(follower: Follower, llPose: Pose) {
-        if (follower.getCurrentPath() != null) {
-            drawPath(follower.getCurrentPath(), robotLook)
-            val closestPoint =
-                follower.getPointFromPath(follower.getCurrentPath().getClosestPointTValue())
-            drawRobot(
-                Pose(
-                    closestPoint.getX(),
-                    closestPoint.getY(),
-                    follower.getCurrentPath()
-                        .getHeadingGoal(follower.getCurrentPath().getClosestPointTValue())
-                ), robotLook
-            )
-        }
-        drawRobot(llPose, llLook)
-        drawPoseHistory(follower.getPoseHistory(), historyLook)
-        drawRobot(follower.getPose(), historyLook)
-
-        sendPacket()
+        drawPoseHistory(follower.poseHistory, historyLook)
+        drawRobot(follower.pose, historyLook)
+        panelsField.update()
     }
 
-    /**
-     * This draws a robot at a specified Pose with a specified
-     * look. The heading is represented as a line.
-     *
-     * @param pose  the Pose to draw the robot at
-     * @param style the parameters used to draw the robot with
-     */
-    /**
-     * This draws a robot at a specified Pose. The heading is represented as a line.
-     *
-     * @param pose the Pose to draw the robot at
-     */
-    @JvmOverloads
     fun drawRobot(pose: Pose?, style: Style = robotLook) {
-        if (pose == null || java.lang.Double.isNaN(pose.getX()) || java.lang.Double.isNaN(pose.getY()) || java.lang.Double.isNaN(
-                pose.getHeading()
-            )
-        ) {
-            return
+        if (pose == null || pose.x.isNaN() || pose.y.isNaN()) return
+
+        with(panelsField) {
+            setStyle(style)
+            moveCursor(pose.x, pose.y)
+            circle(ROBOT_RADIUS)
+
+            // Calculate heading line without creating a new Vector object if possible
+            val heading = pose.heading
+            val cos = Math.cos(heading)
+            val sin = Math.sin(heading)
+
+            // Draw heading line from center to edge
+            moveCursor(pose.x + (cos * ROBOT_RADIUS * 0.5), pose.y + (sin * ROBOT_RADIUS * 0.5))
+            line(pose.x + (cos * ROBOT_RADIUS), pose.y + (sin * ROBOT_RADIUS))
         }
-
-        panelsField.setStyle(style)
-        panelsField.moveCursor(pose.getX(), pose.getY())
-        panelsField.circle(ROBOT_RADIUS)
-
-        val v = pose.getHeadingAsUnitVector()
-        v.setMagnitude(v.getMagnitude() * ROBOT_RADIUS)
-        val x1 = pose.getX() + v.getXComponent() / 2
-        val y1 = pose.getY() + v.getYComponent() / 2
-        val x2 = pose.getX() + v.getXComponent()
-        val y2 = pose.getY() + v.getYComponent()
-
-        panelsField.setStyle(style)
-        panelsField.moveCursor(x1, y1)
-        panelsField.line(x2, y2)
     }
 
-    /**
-     * This draws a Path with a specified look.
-     *
-     * @param path  the Path to draw
-     * @param style the parameters used to draw the Path with
-     */
     fun drawPath(path: Path, style: Style) {
-        val points = path.getPanelsDrawingPoints()
-
-        for (i in points[0]!!.indices) {
-            for (j in points.indices) {
-                if (java.lang.Double.isNaN(points[j]!![i])) {
-                    points[j]!![i] = 0.0
-                }
-            }
-        }
-
+        val points = path.getPanelsDrawingPoints() ?: return
         panelsField.setStyle(style)
-        panelsField.moveCursor(points[0]!![0], points[0]!![1])
-        panelsField.line(points[1]!![0], points[1]!![1])
-    }
 
-    /**
-     * This draws a Path with a specified look.
-     *
-     * @param path  the Path to draw
-     * @param style the parameters used to draw the Path with
-     */
-    fun drawLine(pose1: Pose, pose2:Pose, style: Style) {
-//        val points = path.getPanelsDrawingPoints()
+        // direct access to array indices is faster than nested iterators
+        val xPoints = points[0]!!
+        val yPoints = points[1]!!
 
-//        for (i in points[0]!!.indices) {
-//            for (j in points.indices) {
-//                if (java.lang.Double.isNaN(points[j]!![i])) {
-//                    points[j]!![i] = 0.0
-//                }
-//            }
-//        }
-
-        panelsField.setStyle(style)
-        panelsField.moveCursor(pose1.x, pose1.y)
-        panelsField.line(pose2.x, pose2.y)
-    }
-
-fun drawVector(vec: Vector, basePose: Pose) {
-    val endX = basePose.x + vec.xComponent
-    val endY = basePose.y + vec.yComponent
-    panelsField.setStyle(llLook)
-    panelsField.moveCursor(basePose.x, basePose.y)
-    panelsField.line(endX, endY)
-}
-    /**
-     * This draws all the Paths in a PathChain with a
-     * specified look.
-     *
-     * @param pathChain the PathChain to draw
-     * @param style     the parameters used to draw the PathChain with
-     */
-    fun drawPath(pathChain: PathChain, style: Style) {
-        for (i in 0..<pathChain.size()) {
-            drawPath(pathChain.getPath(i), style)
+        for (i in 0 until xPoints.size - 1) {
+            panelsField.moveCursor(xPoints[i], yPoints[i])
+            panelsField.line(xPoints[i+1], yPoints[i+1])
         }
     }
 
-    /**
-     * This draws the pose history of the robot.
-     *
-     * @param poseTracker the PoseHistory to get the pose history from
-     * @param style       the parameters used to draw the pose history with
-     */
-    /**
-     * This draws the pose history of the robot.
-     *
-     * @param poseTracker the PoseHistory to get the pose history from
-     */
-    @JvmOverloads
     fun drawPoseHistory(poseTracker: PoseHistory, style: Style = historyLook) {
         panelsField.setStyle(style)
+        val xPos = poseTracker.xPositionsArray
+        val yPos = poseTracker.yPositionsArray
 
-        val size = poseTracker.getXPositionsArray().size
-        for (i in 0..<size - 1) {
-            panelsField.moveCursor(
-                poseTracker.getXPositionsArray()[i],
-                poseTracker.getYPositionsArray()[i]
-            )
-            panelsField.line(
-                poseTracker.getXPositionsArray()[i + 1],
-                poseTracker.getYPositionsArray()[i + 1]
-            )
+        for (i in 0 until xPos.size - 1) {
+            panelsField.moveCursor(xPos[i], yPos[i])
+            panelsField.line(xPos[i + 1], yPos[i + 1])
         }
-    }
-
-    /**
-     * This tries to send the current packet to FTControl Panels.
-     */
-    fun sendPacket() {
-        panelsField.update()
     }
 }

@@ -17,12 +17,16 @@ import com.pedropathing.ftc.localization.Encoder;
 import com.pedropathing.ftc.localization.constants.ThreeWheelIMUConstants;
 import com.pedropathing.ftc.localization.constants.TwoWheelConstants;
 import com.pedropathing.ftc.localization.localizers.TwoWheelLocalizer;
+import com.pedropathing.localization.Localizer;
 import com.pedropathing.paths.PathConstraints;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveVars;
+import org.firstinspires.ftc.teamcode.Util.GoBildaPinpointDriver;
+import org.firstinspires.ftc.teamcode.Util.PinpointConstants;
 
 import dev.nextftc.ftc.ActiveOpMode;
 import kotlin.Lazy;
@@ -59,7 +63,14 @@ public class Constants {
             .useBrakeModeInTeleOp(true)
             .useVoltageCompensation(true)
             .nominalVoltage(nominalVoltage);
-
+    public static PinpointConstants ppConstants = new PinpointConstants()
+            .forwardPodY((210.0-43))
+            .strafePodX((182.3-33))
+            .distanceUnit(DistanceUnit.MM)
+            .hardwareMapName("pp")
+            .customEncoderResolution(74.527559055118110236220472440945)
+            .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD)
+            .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
     public static TwoWheelConstants deadWheelLocalizerConstants =
             new TwoWheelConstants()
                     .IMU_HardwareMapName("imu")
@@ -102,13 +113,16 @@ public class Constants {
             1.75,
             1
     );
-
+    public static Localizer loc(){
+        return new MyPinpointLoc(ActiveOpMode.hardwareMap(), ppConstants);
+    }
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .mecanumDrivetrain(driveConstants)
-//                .setLocalizer(localizer.getValue())
+                .setLocalizer(loc())
 //                .setLocalizer(getLocalizer(hardwareMap, deadWheelLocalizerConstants))
-                .twoWheelLocalizer(deadWheelLocalizerConstants)
+//                .twoWheelLocalizer(deadWheelLocalizerConstants)
+//                .pinpointLocalizer(ppConstants)
                 .pathConstraints(pathConstraints)
                 .build();
     }

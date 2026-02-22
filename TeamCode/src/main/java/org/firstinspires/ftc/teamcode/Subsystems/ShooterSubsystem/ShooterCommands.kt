@@ -5,10 +5,10 @@ import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.ru
 import java.util.function.DoubleSupplier
 
 object ShooterCommands {
-    fun setVelocity(velocity: Double) =
-        InstantCommand{ ShooterHardware.setVelocity(velocity)}.setRequirements(ShooterHardware)
-    fun setHoodPosition(position: Double) =
-        InstantCommand{ ShooterHardware.setHoodPosition(position)}.setRequirements(ShooterHardware)
-    val shoot = InstantCommand{ runShooter = true}
+//    fun setVelocity(velocity: Double) =
+//        InstantCommand{ ShooterHardware.setVelocity(velocity)}.setRequirements(ShooterHardware)
+//    fun setHoodPosition(position: Double) =
+//        InstantCommand{ ShooterHardware.setHoodPosition(position)}.setRequirements(ShooterHardware)
+//    val shoot = InstantCommand{ runShooter = true}
 
 }

@@ -26,6 +26,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.scanCommand
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.shootingCommand
 //import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.shootingCommandAuto
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware.atTargetVelocity
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.resetingSeq
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.runIntakeSeq
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.runIntakeSeqAuto
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.transferAll
@@ -34,15 +35,16 @@ import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHar
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.reverseTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.runTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.stopTransfer
-import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.turretSeq
+//import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.turretSeq
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.getAngle
-import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.setTargetPosition
+//import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.setTargetPosition
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.p
 import org.firstinspires.ftc.teamcode.Util.FollowPath
 import org.firstinspires.ftc.teamcode.Util.MySeqCommand
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.CommandSeqNoReq
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.ParallelDeadlineGroupKill
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.RepeatCommand
+import org.firstinspires.ftc.teamcode.Util.UtilCommands.UninteraptingCommand
 import kotlin.math.abs
 //import org.firstinspires.ftc.teamcode.Util.FollowPath
 import kotlin.time.Duration.Companion.seconds
@@ -69,14 +71,18 @@ class RedAutoClose: MegiddoOpMode(AllianceColor.RED) {
     init {
         DriveVars.startingPose = startingPose
     }
+    val scan = SequentialGroup(
+        resetingSeq,
+        scanCommand.raceWith(WaitUntil{ isFull() })
+    )
     override fun onInit(){
         moveToShooting1 = follower.pathBuilder()
             .addPath(BezierLine(startingPose, shootingPose))
-            .setConstantHeadingInterpolation(Math.toRadians(216.0))
+            .setLinearHeadingInterpolation(Math.toRadians(216.0), Math.toRadians(180.0))
             .build()
         moveToPreIntake = follower.pathBuilder()
             .addPath(BezierLine(shootingPose, preIntakePose))
-            .setLinearHeadingInterpolation(Math.toRadians(216.0), Math.toRadians(180.0))
+            .setLinearHeadingInterpolation(Math.toRadians(180.0), Math.toRadians(180.0))
             .build()
         moveToEndIntake = follower.pathBuilder()
             .addPath(BezierLine(preIntakePose, endIntakePose))
@@ -84,11 +90,11 @@ class RedAutoClose: MegiddoOpMode(AllianceColor.RED) {
             .build()
         moveToShooting2 = follower.pathBuilder()
             .addPath(BezierLine(endIntakePose, shootingPose))
-            .setLinearHeadingInterpolation(Math.toRadians(180.0), Math.toRadians(216.0))
+            .setLinearHeadingInterpolation(Math.toRadians(180.0), Math.toRadians(180.0))
             .build()
         moveToPreIntake2 = follower.pathBuilder()
             .addPath(BezierLine(shootingPose, preIntakePose2))
-            .setLinearHeadingInterpolation(Math.toRadians(216.0), Math.toRadians(180.0))
+            .setLinearHeadingInterpolation(Math.toRadians(180.0), Math.toRadians(180.0))
             .build()
         moveToEndIntake2 = follower.pathBuilder()
             .addPath(BezierLine(preIntakePose2, endIntakePose2))
@@ -96,96 +102,107 @@ class RedAutoClose: MegiddoOpMode(AllianceColor.RED) {
             .build()
         moveToShooting3 = follower.pathBuilder()
             .addPath(BezierLine(endIntakePose2, shootingPose))
-            .setLinearHeadingInterpolation(Math.toRadians(180.0), Math.toRadians(216.0))
+            .setLinearHeadingInterpolation(Math.toRadians(180.0), Math.toRadians(180.0))
             .build()
         moveToFinish = follower.pathBuilder()
             .addPath(BezierLine(shootingPose, finishPose))
-            .setLinearHeadingInterpolation(Math.toRadians(216.0), Math.toRadians(180.0))
+            .setLinearHeadingInterpolation(Math.toRadians(180.0), Math.toRadians(180.0))
             .build()
 //        scanCommand.schedule()
+        scan.setRequirements(emptySet())
+//        = mutableSetOf()
+        scan.schedule()
     }
 
-    fun auto(): CommandSeqNoReq = CommandSeqNoReq(
-        InstantCommand{turretSeq().schedule()
-            ParallelGroup(
-                InstantCommand { resetSpindexer() },
-                RepeatCommand(runIntakeSeqAuto){isFull()},
-            ).schedule()
-        },
-        Delay(0.2),
-        FollowPath(moveToShooting1),
-        Delay(0.7.seconds),
+    fun auto(): SequentialGroup = SequentialGroup(
+
+//        Delay(0.2),
+        FollowPath({ moveToShooting1 }),
+//        Delay(0.2.seconds),
         transferAll(
             SequentialGroup(
                 WaitUntil { atTargetVelocity() },
                 runTransfer
             )
         ),
-        reverseTransfer,
-        Delay(0.1),
-        stopTransfer,
-        FollowPath(moveToPreIntake),
+        ParallelGroup(
+            SequentialGroup(
+                reverseTransfer,
+                Delay(0.1),
+                stopTransfer),
+        FollowPath({ moveToPreIntake })),
         IntakeCommands.stopIntake,
         ParallelGroup(
-            InstantCommand { resetSpindexer() },
-            RepeatCommand(runIntakeSeqAuto){isFull()},
-            RepeatCommand(InstantCommand{
-                MyTelemetry.addData("running","")
-                if (abs(getVel()) <outtakeThreshold) setPower(-intakePower)
-                else setPower(intakePower)}
-            ){isFull()},
-            Delay(0.3.seconds).then(FollowPath(
-                moveToEndIntake, holdEnd=false, maxPower = 0.38,
+            UninteraptingCommand(intakeCommand),
+//            InstantCommand { resetSpindexer() },
+//            RepeatCommand(runIntakeSeqAuto){isFull()},
+//            RepeatCommand(InstantCommand{
+//                MyTelemetry.addData("running","")
+//                if (abs(getVel()) <outtakeThreshold) setPower(-intakePower)
+//                else setPower(intakePower)}
+//            ){isFull()},
+            Delay(0.1.seconds).then(FollowPath(
+                { moveToEndIntake }, holdEnd=false, maxPower = 0.5,
             )),
         ),
-        Delay(0.9.seconds).then(outtake),
-        InstantCommand{ turretSeq().schedule() },
-        FollowPath(moveToShooting2),
-        Delay(0.4.seconds),
+        UninteraptingCommand(Delay(0.1.seconds).then(outtake)),
+        FollowPath({ moveToShooting2 }),
+//        Delay(0.1.seconds),
         transferAll(
             SequentialGroup(
                 WaitUntil { atTargetVelocity() },
                 runTransfer
             )
         ),
-        reverseTransfer,
-        Delay(0.1),
-        stopTransfer,
-        FollowPath(moveToPreIntake2),
+
+        UninteraptingCommand(
+            SequentialGroup(
+                reverseTransfer,
+                Delay(0.1),
+                stopTransfer
+            ),),
+        FollowPath({ moveToPreIntake2 }),
         IntakeCommands.stopIntake,
         ParallelGroup(
-            InstantCommand { resetSpindexer() },
-            RepeatCommand(runIntakeSeqAuto){isFull()},
-            RepeatCommand(InstantCommand{
-                MyTelemetry.addData("running","")
-                if (abs(getVel()) <outtakeThreshold) setPower(-intakePower)
-                else setPower(intakePower)}
-            ){isFull()},
+            UninteraptingCommand(intakeCommand),
+//            InstantCommand { resetSpindexer() },
+//            RepeatCommand(runIntakeSeqAuto){isFull()},
+//            RepeatCommand(InstantCommand{
+//                MyTelemetry.addData("running","")
+//                if (abs(getVel()) <outtakeThreshold) setPower(-intakePower)
+//                else setPower(intakePower)}
+//            ){isFull()},
             Delay(0.3.seconds).then(FollowPath(
-                moveToEndIntake2, holdEnd=false, maxPower = 0.38,
+                { moveToEndIntake2 }, holdEnd=false, maxPower = 0.5,
             )),
         ),
-        Delay(0.9.seconds).then(outtake),
-        InstantCommand{ turretSeq().schedule() },
-        FollowPath(moveToShooting3),
-        Delay(0.4.seconds),
+//        UninteraptingCommand(Delay(0.9.seconds).then(outtake)),
+//        InstantCommand{ turretSeq().schedule() },
+        FollowPath({ moveToShooting3 }),
+//        Delay(0.1.seconds),
         transferAll(
             SequentialGroup(
                 WaitUntil { atTargetVelocity() },
                 runTransfer
             )
         ),
-        reverseTransfer,
-        Delay(0.1),
-        stopTransfer,
         ParallelGroup(
-            FollowPath(moveToFinish),
+            SequentialGroup(
+                reverseTransfer,
+                Delay(0.1),
+                stopTransfer
+            ),
+        ParallelGroup(
+            FollowPath({ moveToFinish }),
             RepeatCommand(InstantCommand{ MyTelemetry.addData("ewtdfghtyu87", "cd") })
-        )
+        ))
     )
     override fun onStartButtonPressed() {
 
 //        turretSeq().schedule()
+        InstantCommand{
+            scan.cancel()
+        }
         auto().schedule()
     }
 

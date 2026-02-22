@@ -1,8 +1,6 @@
 package com.outoftheboxrobotics.photoncore;
 
 import android.content.Context;
-import android.util.Log;
-
 
 import com.outoftheboxrobotics.photoncore.Neutrino.Rev2MSensor.Rev2mDistanceSensorEx;
 import com.outoftheboxrobotics.photoncore.Neutrino.RevColorSensor.RevColorSensorV3Ex;
@@ -17,8 +15,6 @@ import com.qualcomm.hardware.lynx.commands.LynxCommand;
 import com.qualcomm.hardware.lynx.commands.LynxDatagram;
 import com.qualcomm.hardware.lynx.commands.LynxMessage;
 import com.qualcomm.hardware.lynx.commands.LynxRespondable;
-import com.qualcomm.hardware.lynx.commands.core.LynxI2cReadStatusQueryCommand;
-import com.qualcomm.hardware.lynx.commands.core.LynxI2cWriteReadMultipleBytesCommand;
 import com.qualcomm.hardware.lynx.commands.core.LynxSetMotorConstantPowerCommand;
 import com.qualcomm.hardware.lynx.commands.core.LynxSetServoPulseWidthCommand;
 import com.qualcomm.hardware.lynx.commands.standard.LynxAck;
@@ -28,13 +24,11 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeManager;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeManagerImpl;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeManagerNotifier;
-import com.qualcomm.robotcore.exception.RobotCoreException;
 import com.qualcomm.robotcore.hardware.HardwareDevice;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynchDevice;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynchSimple;
-import com.qualcomm.robotcore.hardware.LynxModuleDescription;
 import com.qualcomm.robotcore.hardware.configuration.LynxConstants;
 import com.qualcomm.robotcore.hardware.usb.RobotUsbDevice;
 import com.qualcomm.robotcore.util.RobotLog;
@@ -69,7 +63,7 @@ public class PhotonCore implements Runnable, OpModeManagerNotifier.Notifications
 
     public static class ExperimentalParameters{
         private final AtomicBoolean singlethreadedOptimized = new AtomicBoolean(true);
-        private final AtomicInteger maximumParallelCommands = new AtomicInteger(4);
+        private final AtomicInteger maximumParallelCommands = new AtomicInteger(8);
 
         public void setSinglethreadedOptimized(boolean state){
             this.singlethreadedOptimized.set(state);
@@ -174,11 +168,13 @@ public class PhotonCore implements Runnable, OpModeManagerNotifier.Notifications
     }
 
     protected static boolean shouldParallelize(LynxCommand command){
-        return (command instanceof LynxSetMotorConstantPowerCommand);
+        return (command instanceof LynxSetMotorConstantPowerCommand ||
+                command instanceof LynxSetServoPulseWidthCommand);
     }
 
     protected static boolean shouldAckImmediately(LynxCommand command){
-        return (command instanceof LynxSetMotorConstantPowerCommand);
+        return (command instanceof LynxSetMotorConstantPowerCommand ||
+                command instanceof LynxSetServoPulseWidthCommand);
     }
 
     private boolean isSimilar(LynxRespondable respondable1, LynxRespondable respondable2){

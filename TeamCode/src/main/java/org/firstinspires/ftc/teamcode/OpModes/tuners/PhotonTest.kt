@@ -4,7 +4,10 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import dev.nextftc.core.commands.delays.Delay
 import dev.nextftc.core.commands.groups.ParallelGroup
 import dev.nextftc.core.commands.utility.InstantCommand
+import dev.nextftc.extensions.pedro.PedroComponent
 import dev.nextftc.ftc.Gamepads
+import org.firstinspires.ftc.teamcode.Pedro.Constants
+import org.firstinspires.ftc.teamcode.Pedro.Constants.createFollower
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeCommands
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.Photon
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.intakeCommand
@@ -22,7 +25,7 @@ import org.firstinspires.ftc.teamcode.Util.UtilCommands.RepeatCommand
 import kotlin.time.Duration.Companion.seconds
 
 @TeleOp(group = "tuning")
-class PhotonTest: TunerOpMode(SpindexerHardware, Photon) {
+class PhotonTest: TunerOpMode(SpindexerHardware, Photon, PedroComponent(Constants::createFollower)) {
     init {
         Gamepads.gamepad2.rightBumper
             .whenBecomesTrue(rotate(1))

@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardwar
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.angleToServoPos
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.checkIntakeColorAndUpdate
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.checkIntakeColorAndUpdateAuto
+//import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.checkIntakeColorAndUpdateAuto
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.currentSteps
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.getSpindexerVel
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.getVel
@@ -23,13 +24,14 @@ import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHar
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.resetSpindexer
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.resetSpindexerEnc
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.setPosition
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.timeStuck
+//import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.timeStuck
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.tracker
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.spinDelayIntake
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.state
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.targetPosition
 import org.firstinspires.ftc.teamcode.Util.ActiveDelay
 import org.firstinspires.ftc.teamcode.Util.SpindexerSlotState
-import org.firstinspires.ftc.teamcode.Util.UtilCommands.SequentialGroupFixed
 import kotlin.math.abs
 import kotlin.time.Duration.Companion.seconds
 
@@ -65,7 +67,7 @@ object SpindexerCommands {
 
 
     val runIntakeCycle =
-        SequentialGroupFixed(
+        SequentialGroup(
 //            WaitUntil{isAtTargetPosition()},
             WaitUntil{isAtTargetPosition()},
             checkColorAndUpdate,
@@ -75,7 +77,7 @@ object SpindexerCommands {
 //            Delay(0.05.seconds)\\\\
         ).setRequirements(SpindexerHardware)
     val runIntakeCycleAuto =
-        SequentialGroupFixed(
+        SequentialGroup(
 
             WaitUntil{isAtTargetPosition()},
             checkColorAndUpdateAuto,
@@ -86,7 +88,7 @@ object SpindexerCommands {
 //            smartIntake,
 //            Delay(0.3),
             //            Delay(0.05.seconds)\\\\
-        ).setRequirements(SpindexerHardware)
+        )
     val runIntakeSeq=
 //        ParallelDeadlineGroupKill(
 //            WaitUntil{isFull()},
@@ -98,21 +100,21 @@ object SpindexerCommands {
 
     //        ).setRequirements(SpindexerHardware)
     val fixSpindex = lazy{
-        SequentialGroupFixed(
-            Delay(0.1),
+//        SequentialGroup(
+//            Delay(0.1),
             InstantCommand{
-                if (!isAtTargetPosition() && isStuck()){
+//                if (!isAtTargetPosition() && isStuck()){
                     fixSpindexSeq.value.schedule()
-                }
+//                }
             }
-        )
+//        )
     }
     val fixSpindexSeq = lazy{
-        SequentialGroupFixed(
+        SequentialGroup(
 //            Delay(0.1),
 //            IfElseCommand(
 //                { !isAtTargetPosition() && abs(getVel()) < 5 },
-                SequentialGroupFixed(
+            SequentialGroup(
                     InstantCommand {
                         state = State.FIX
                         targetPosition = 2 * SpindexerVars.degreesPerSlot + SpindexerVars.offset
@@ -136,9 +138,9 @@ object SpindexerCommands {
             resetSpindexer()
             state = State.RESET},
 //        WaitUntil{getSpindexerVel()>10},
-        Delay(0.2),
+        Delay(4.0),
 //        WaitUntil{abs(getSpindexerVel())>100}.raceWith(Delay(0.5)),
-        WaitUntil{abs(getSpindexerVel())<1},
+        WaitUntil{timeStuck()>1.2},
         InstantCommand{
             resetSpindexerEnc()
             state = State.RUN
@@ -146,7 +148,7 @@ object SpindexerCommands {
 
     )
     fun transferAll(startWhen: Command) =
-        SequentialGroupFixed(
+        SequentialGroup(
             moveToTransferPositionLocking(RobotVars.randomization.value[0]),
             WaitUntil{isAtTargetPosition()&&atTargetVelocity()},
 //            WaitUntil { atTargetVelocity() },
@@ -156,14 +158,16 @@ object SpindexerCommands {
 
 //            Delay(SpindexerVars.spinDelayShoot.seconds),
             WaitUntil{atTargetVelocity()&&!hasBallInTransfer()},
+            Delay(0.2),
             moveToTransferPositionLocking(RobotVars.randomization.value[1]),
 //            ActiveDelay { (SpindexerVars.spinDelayShoot+smartDist*0.0002).seconds} ,
             WaitUntil{isAtTargetPosition()&&!hasBallInTransfer()&&atTargetVelocity()},
 //            WaitUntil{atTargetVelocity()},
+            Delay(0.2),
             moveToTransferPositionLocking(RobotVars.randomization.value[2]),
 //            ActiveDelay { (SpindexerVars.spinDelayShoot+smartDist*0.0002).seconds},
             WaitUntil{isAtTargetPosition()&&!hasBallInTransfer()},
-            Delay(0.4.seconds),
+            Delay(0.2.seconds),
 //            Delay(SpindexerVars.spinDelayShoot.seconds),
 //            Delay(SpindexerVars.spinDelayShoot.seconds),
 //            Delay(SpindexerVars.spinDelayShoot.seconds),

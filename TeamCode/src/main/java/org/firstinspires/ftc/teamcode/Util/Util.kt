@@ -2,8 +2,11 @@ package org.firstinspires.ftc.teamcode.Util
 
 import com.pedropathing.ftc.FTCCoordinates
 import com.pedropathing.ftc.InvertedFTCCoordinates
+import com.pedropathing.geometry.BezierLine
 import com.pedropathing.geometry.PedroCoordinates
 import com.pedropathing.geometry.Pose
+import com.pedropathing.paths.PathChain
+import dev.nextftc.extensions.pedro.PedroComponent.Companion.follower
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D
 
 object Util {
@@ -16,6 +19,12 @@ object Util {
     }
     fun pose3dToPose(pose3d: Pose): Pose {
         return Pose(pose3d.y+72,144-(pose3d.x+72),pose3d.heading)
+    }
+    fun createPath(pos1 :Pose, pos2:Pose, heading1: Double, heading2: Double): PathChain{
+        return follower.pathBuilder()
+            .addPath(BezierLine(pos1, pos2))
+            .setLinearHeadingInterpolation(heading1, heading2)
+            .build()
     }
     fun pose3DMetersToInches(pose3d: Pose3D): Pose {
         return Pose(pose3d.position.x * 39.3701,

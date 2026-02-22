@@ -14,6 +14,7 @@ object LimeLightVars {
     @JvmField var llPose = Pose()
     @JvmField var dist = 0.0
     @JvmField var smartDist = 0.0
+    @JvmField var LLMul = 0.009
     @JvmField var distFilter = LowPassFilter(0.8)
     @JvmField var limelightMountAngleDegrees = 0.0
     @JvmField var limelightLensHeightInches = 17.1141732

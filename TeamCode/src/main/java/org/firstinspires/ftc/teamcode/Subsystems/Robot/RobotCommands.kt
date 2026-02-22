@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Subsystems.Robot
 
 import dev.nextftc.core.commands.delays.Delay
 import dev.nextftc.core.commands.delays.WaitUntil
+import dev.nextftc.core.commands.groups.ParallelDeadlineGroup
 import dev.nextftc.core.commands.groups.SequentialGroup
 import dev.nextftc.core.commands.utility.InstantCommand
 import dev.nextftc.ftc.Gamepads
@@ -13,9 +14,9 @@ import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeHardware.
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeHardware.setPower
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeVars.intakePower
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeVars.outtakeThreshold
-import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterCommands.shoot
+//import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterCommands.shoot
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware.atTargetVelocity
-import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware.stopShooting
+//import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware.stopShooting
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.runIntakeSeq
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.runIntakeSeqAuto
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.transferAll
@@ -35,9 +36,8 @@ object RobotCommands {
         SequentialGroup(
             IntakeCommands.stopIntake,
             stopTransfer,
-            ParallelDeadlineGroupKill(
+            ParallelDeadlineGroup(
                 WaitUntil { isFull() },
-//                smartIntake,
                 InstantCommand { resetSpindexer() },
                 Delay(0.5),
                 RepeatCommand(runIntakeSeq),
@@ -46,45 +46,69 @@ object RobotCommands {
                     if (abs(getVel()) <outtakeThreshold|| Gamepads.gamepad1.b.get()) setPower(-intakePower)
                 else setPower(intakePower)})
             ),
-            SequentialGroup(
-                InstantCommand{smartIntake.cancel()},
-                outtake,
-                Delay(.5.seconds),
-                InstantCommand { resetSpindexer() },
-                stopIntake
-            ),
+            InstantCommand{
+                SequentialGroup(
+                    InstantCommand { smartIntake.cancel() },
+                    outtake,
+                    Delay(.5.seconds),
+                    InstantCommand { resetSpindexer() },
+                    stopIntake
+                ).schedule()
+            },
         )
 
     val scanCommand =
         SequentialGroup(
 //                smartIntake,
-            InstantCommand { resetSpindexer() },
-            Delay(0.5),
+            Delay(0.1),
             RepeatCommand(runIntakeSeqAuto) { isFull() },
         )
     val shootingCommand =
-        ParallelDeadlineGroupKill(
+        ParallelDeadlineGroup(
             SequentialGroup(
-                InstantCommand{intakeCommand.cancel()},
+                InstantCommand { intakeCommand.cancel() },
                 stopIntake,
                 WaitUntil { isEmpty() },
                 Delay(0.5),
-                InstantCommand { stopShooting() }
+//                InstantCommand { stopShooting() }
             ),
             SequentialGroup(
                 stopTransfer,
-                shoot,
+//                shoot,
                 transferAll(
                     SequentialGroup(
                         runTransfer
                     )
                 ),
-                InstantCommand { stopShooting() },
+//                InstantCommand { stopShooting() },
                 reverseTransfer,
                 Delay(0.2),
                 stopTransfer,
             )
-        ).then(InstantCommand { stopShooting() })
+        )
+    val shootingCommandAuto =
+        ParallelDeadlineGroup(
+            SequentialGroup(
+                InstantCommand { intakeCommand.cancel() },
+                stopIntake,
+                WaitUntil { isEmpty() },
+                Delay(0.5),
+//                InstantCommand { stopShooting() }
+            ),
+            SequentialGroup(
+                stopTransfer,
+//                shoot,
+                transferAll(
+                    SequentialGroup(
+                        runTransfer
+                    )
+                ),
+//                InstantCommand { stopShooting() },
+                reverseTransfer,
+                Delay(0.2),
+                stopTransfer,
+            )
+        )
     val cancelShooting = SequentialGroup(
         InstantCommand{ shootingCommand.cancel() },
         reverseTransfer,

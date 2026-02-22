@@ -6,7 +6,6 @@ import com.qualcomm.hardware.lynx.LynxUsbDevice;
 import com.qualcomm.hardware.lynx.commands.LynxCommand;
 import com.qualcomm.hardware.lynx.commands.LynxMessage;
 import com.qualcomm.hardware.lynx.commands.LynxRespondable;
-import com.qualcomm.hardware.lynx.commands.standard.LynxAck;
 
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
