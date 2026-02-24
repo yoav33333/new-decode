@@ -11,13 +11,15 @@ import dev.nextftc.ftc.ActiveOpMode.hardwareMap
 import dev.nextftc.hardware.impl.ServoEx
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.MyTelemetry
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware.shooterMotor2
-import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.fixSpindex
+//import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.fixSpindex
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.fixSpindexSeq
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.resetingSeq
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.MulEnc
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.degreesPerSlot
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.delayMul
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.greenRange
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.intakeSlot
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.offset
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.offsetEnc
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.purpleRange
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.state
@@ -33,6 +35,7 @@ import org.firstinspires.ftc.teamcode.Util.Util
 import org.firstinspires.ftc.teamcode.Util.Util.wrap360
 import kotlin.math.abs
 import kotlin.math.max
+import kotlin.time.Duration.Companion.seconds
 
 @Configurable
 object SpindexerHardware : Component {
@@ -152,7 +155,7 @@ object SpindexerHardware : Component {
     }
 
     fun isAtTargetPosition(): Boolean {
-        return abs(getSpindexerPos() / 2 + 2 * SpindexerVars.degreesPerSlot - targetPosition) < 15
+        return abs(getSpindexerPos() / 2 + 2 * SpindexerVars.degreesPerSlot+offset - targetPosition) < 15
     }
 
     fun isStuck(): Boolean = abs(cachedVelocity) < 2
@@ -160,7 +163,9 @@ object SpindexerHardware : Component {
     fun angleToServoPos(angle: Double): Double = angle / SpindexerVars.maxRotation
 
     override fun postInit() {lastCommandedServoPos = -1.0}
-    override fun postStartButtonPressed() {}
+    override fun postStartButtonPressed() {
+//        button { isStuck() && timeStuck()>0.3 && !isAtTargetPosition() && state != State.FIX}.whenBecomesTrue(fixSpindexSeq)
+    }
 
     /**
      * Main Loop execution.
@@ -193,6 +198,9 @@ object SpindexerHardware : Component {
         MyTelemetry.addData("Spin Pos/Vel", "%.1f / %.1f".format(getSpindexerPos(), getSpindexerVel()))
         MyTelemetry.addData("Target/Step", "%.1f / %d".format(targetPosition, currentSteps))
         MyTelemetry.addData("Stats", "Full: ${tracker.isFull()} | Ball: ${hasBallInTransfer()}")
+        MyTelemetry.addData("at target", isAtTargetPosition())
+        MyTelemetry.addData("offset ", getSpindexerPos() / 2 + 2 * SpindexerVars.degreesPerSlot +offset - targetPosition)
+        MyTelemetry.addData("move Spin ", getSpindexerPos() / 2 + 2 * SpindexerVars.degreesPerSlot+offset)
     }
 
     override fun postUpdate() = updateSystem()

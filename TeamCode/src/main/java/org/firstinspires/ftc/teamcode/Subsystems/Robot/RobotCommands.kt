@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Subsystems.Robot
 import dev.nextftc.core.commands.delays.Delay
 import dev.nextftc.core.commands.delays.WaitUntil
 import dev.nextftc.core.commands.groups.ParallelDeadlineGroup
+import dev.nextftc.core.commands.groups.ParallelGroup
 import dev.nextftc.core.commands.groups.SequentialGroup
 import dev.nextftc.core.commands.utility.InstantCommand
 import dev.nextftc.ftc.Gamepads
@@ -28,6 +29,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferComma
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.stopTransfer
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.ParallelDeadlineGroupKill
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.RepeatCommand
+import org.firstinspires.ftc.teamcode.Util.UtilCommands.UninteraptingCommand
 import kotlin.math.abs
 import kotlin.time.Duration.Companion.seconds
 
@@ -48,14 +50,38 @@ object RobotCommands {
             ),
             InstantCommand{
                 SequentialGroup(
+                    InstantCommand { resetSpindexer() },
                     InstantCommand { smartIntake.cancel() },
                     outtake,
                     Delay(.5.seconds),
-                    InstantCommand { resetSpindexer() },
                     stopIntake
                 ).schedule()
             },
-        )
+        ).setRequirements(this)
+    val intakeCommandAuto =
+        SequentialGroup(
+            IntakeCommands.stopIntake,
+            stopTransfer,
+            ParallelDeadlineGroup(
+                WaitUntil { isFull() },
+                InstantCommand { resetSpindexer() },
+                Delay(0.5),
+                RepeatCommand(runIntakeSeqAuto),
+                RepeatCommand(InstantCommand{
+                    MyTelemetry.addData("running","")
+                    if (abs(getVel()) <outtakeThreshold|| Gamepads.gamepad1.b.get()) setPower(-intakePower)
+                else setPower(intakePower)})
+            ),
+            InstantCommand{
+                SequentialGroup(
+                    InstantCommand { resetSpindexer() },
+                    InstantCommand { smartIntake.cancel() },
+                    outtake,
+                    Delay(.5.seconds),
+                    stopIntake
+                ).schedule()
+            },
+        ).setRequirements(this)
 
     val scanCommand =
         SequentialGroup(
@@ -64,12 +90,12 @@ object RobotCommands {
             RepeatCommand(runIntakeSeqAuto) { isFull() },
         )
     val shootingCommand =
-        ParallelDeadlineGroup(
+        ParallelGroup(
             SequentialGroup(
                 InstantCommand { intakeCommand.cancel() },
                 stopIntake,
-                WaitUntil { isEmpty() },
-                Delay(0.5),
+//                WaitUntil { isEmpty() },
+//                Delay(0.5),
 //                InstantCommand { stopShooting() }
             ),
             SequentialGroup(
@@ -80,11 +106,13 @@ object RobotCommands {
                         runTransfer
                     )
                 ),
+            UninteraptingCommand(
+
 //                InstantCommand { stopShooting() },
-                reverseTransfer,
+                SequentialGroup (reverseTransfer,
                 Delay(0.2),
-                stopTransfer,
-            )
+                stopTransfer,)
+            ))
         )
     val shootingCommandAuto =
         ParallelDeadlineGroup(

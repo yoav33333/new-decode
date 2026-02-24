@@ -20,6 +20,6 @@ object MyTelemetry : Component {
     }
 
     fun addData(label: String, data: Any) {
-//        joined.addData(label, data)
+        joined.addData(label, data)
     }
 }

@@ -12,8 +12,8 @@ object ShooterVars {
     @JvmField var hoodLUT = createHoodLUT()
     @JvmField var runShooter = false
     @JvmField var disableAutoShooter = false
-    @JvmField var kv = 0.00051
-    @JvmField var ks = 0.1
+    @JvmField var kv = 0.00054
+    @JvmField var ks = 0.12
     @JvmField var minPos = 0.13
     @JvmField var maxPos = 0.51
     @JvmField var minAngle = 90-48.54-0.5
@@ -27,7 +27,7 @@ object ShooterVars {
     @JvmField var controlledSpeed = 0.0
     @JvmField var hoodTarget = 0.0
     @JvmField var targetVelocity = 0.0
-    @JvmField var deltaThreshold = 20.0
+    @JvmField var deltaThreshold = 80.0
     @JvmField var veloCoefficients: PIDCoefficients = PIDCoefficients(0.009, 0.0, 0.00)
     @JvmField var veloControl: BasicPID = BasicPID(veloCoefficients)
 

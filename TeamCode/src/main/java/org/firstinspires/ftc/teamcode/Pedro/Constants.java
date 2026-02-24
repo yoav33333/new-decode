@@ -14,19 +14,20 @@ import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.ftc.FollowerBuilder;
 import com.pedropathing.ftc.drivetrains.MecanumConstants;
 import com.pedropathing.ftc.localization.Encoder;
+import com.pedropathing.ftc.localization.constants.PinpointConstants;
 import com.pedropathing.ftc.localization.constants.ThreeWheelIMUConstants;
 import com.pedropathing.ftc.localization.constants.TwoWheelConstants;
 import com.pedropathing.ftc.localization.localizers.TwoWheelLocalizer;
 import com.pedropathing.localization.Localizer;
 import com.pedropathing.paths.PathConstraints;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveVars;
-import org.firstinspires.ftc.teamcode.Util.GoBildaPinpointDriver;
-import org.firstinspires.ftc.teamcode.Util.PinpointConstants;
+
 
 import dev.nextftc.ftc.ActiveOpMode;
 import kotlin.Lazy;
@@ -43,7 +44,7 @@ public class Constants {
             .centripetalScaling(0.0004)
             .automaticHoldEnd(true)
             .turnHeadingErrorThreshold(0.01)
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.045, 0, 0.001, 0.045))
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.13, 0, 0.02, 0.045))
             .headingPIDFCoefficients(new PIDFCoefficients(0.85, 0, 0.08, 0.06))
             .drivePIDFCoefficients(
                     new FilteredPIDFCoefficients(0.015, 0, 0.0035, 0.95, 0.05)
@@ -113,16 +114,16 @@ public class Constants {
             1.75,
             1
     );
-    public static Localizer loc(){
-        return new MyPinpointLoc(ActiveOpMode.hardwareMap(), ppConstants);
-    }
+//    public static Localizer loc(){
+////        return new MyPinpointLoc(ActiveOpMode.hardwareMap(), ppConstants);
+//    }
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .mecanumDrivetrain(driveConstants)
-                .setLocalizer(loc())
+//                .setLocalizer(loc())
 //                .setLocalizer(getLocalizer(hardwareMap, deadWheelLocalizerConstants))
 //                .twoWheelLocalizer(deadWheelLocalizerConstants)
-//                .pinpointLocalizer(ppConstants)
+                .pinpointLocalizer(ppConstants)
                 .pathConstraints(pathConstraints)
                 .build();
     }

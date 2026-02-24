@@ -23,7 +23,8 @@ import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.auto
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterCommands
 //import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterCommands.shoot
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware.atTargetVelocity
-import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.fixSpindex
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.fixSpindexSeq
+//import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.fixSpindex
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.moveToTransferPositionLocking
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.resetingSeq
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.rotate
@@ -76,7 +77,7 @@ open class ShittyTeleop(color: AllianceColor): MegiddoOpMode(color) {
 //        Gamepads.gamepad1.y.whenBecomesTrue (turretSeq().and(cancelShooting))
         Gamepads.gamepad1.a.whenBecomesTrue(toggleLock)
         Gamepads.gamepad1.x.whenBecomesTrue(cancelShooting)
-        Gamepads.gamepad1.options.whenBecomesTrue(fixSpindex.value)
+        Gamepads.gamepad1.options.whenBecomesTrue(fixSpindexSeq)
         Gamepads.gamepad1.rightTrigger.atLeast(0.3)
             .whenBecomesTrue(
                 SequentialGroup(

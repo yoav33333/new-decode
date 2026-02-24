@@ -75,7 +75,7 @@ object SpindexerCommands {
             moveToIntakePosition,
 
 //            Delay(0.05.seconds)\\\\
-        ).setRequirements(SpindexerHardware)
+        )
     val runIntakeCycleAuto =
         SequentialGroup(
 
@@ -98,18 +98,18 @@ object SpindexerCommands {
 //            WaitUntil{isFull()},
         runIntakeCycleAuto
 
-    //        ).setRequirements(SpindexerHardware)
-    val fixSpindex = lazy{
-//        SequentialGroup(
-//            Delay(0.1),
-            InstantCommand{
-//                if (!isAtTargetPosition() && isStuck()){
-                    fixSpindexSeq.value.schedule()
-//                }
-            }
-//        )
-    }
-    val fixSpindexSeq = lazy{
+//    //        ).setRequirements(SpindexerHardware)
+//    val fixSpindex = lazy{
+////        SequentialGroup(
+////            Delay(0.1),
+//            InstantCommand{
+////                if (!isAtTargetPosition() && isStuck()){
+//                    fixSpindexSeq.value.schedule()
+////                }
+//            }
+////        )
+//    }
+    val fixSpindexSeq =
         SequentialGroup(
 //            Delay(0.1),
 //            IfElseCommand(
@@ -130,15 +130,15 @@ object SpindexerCommands {
                         state = State.RUN
                     }),
 //                NullCommand()
-            )
+            ).setRequirements(this)
 //        )
-    }
+//    }
     val resetingSeq = SequentialGroup(
         InstantCommand{
             resetSpindexer()
             state = State.RESET},
 //        WaitUntil{getSpindexerVel()>10},
-        Delay(4.0),
+        Delay(3.5),
 //        WaitUntil{abs(getSpindexerVel())>100}.raceWith(Delay(0.5)),
         WaitUntil{timeStuck()>1.2},
         InstantCommand{
@@ -167,7 +167,7 @@ object SpindexerCommands {
             moveToTransferPositionLocking(RobotVars.randomization.value[2]),
 //            ActiveDelay { (SpindexerVars.spinDelayShoot+smartDist*0.0002).seconds},
             WaitUntil{isAtTargetPosition()&&!hasBallInTransfer()},
-            Delay(0.2.seconds),
+            Delay(0.55.seconds),
 //            Delay(SpindexerVars.spinDelayShoot.seconds),
 //            Delay(SpindexerVars.spinDelayShoot.seconds),
 //            Delay(SpindexerVars.spinDelayShoot.seconds),

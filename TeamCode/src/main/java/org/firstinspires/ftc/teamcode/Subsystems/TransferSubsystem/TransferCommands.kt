@@ -16,8 +16,6 @@ object TransferCommands {
                 setPower(0.0)
         }.setRequirements(
         TransferHardware)
-    val reverseTransfer = InstantCommand { setPower(-transferPower) }.setRequirements(
-        TransferHardware)
-    val stopTransfer = InstantCommand { setPower(0.0) }.setRequirements(
-        TransferHardware)
+    val reverseTransfer = InstantCommand { setPower(-transferPower) }
+    val stopTransfer = InstantCommand { setPower(0.0) }
 }

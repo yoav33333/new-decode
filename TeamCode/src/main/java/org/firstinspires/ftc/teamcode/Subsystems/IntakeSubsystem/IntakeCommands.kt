@@ -9,9 +9,9 @@ import org.firstinspires.ftc.teamcode.Subsystems.Robot.MyTelemetry
 import kotlin.math.abs
 
 object IntakeCommands {
-    val intake = InstantCommand { setPower(intakePower) }.setRequirements(IntakeHardware)
-    val stopIntake = InstantCommand { setPower(0.0) }.setRequirements(IntakeHardware)
-    val outtake = InstantCommand { setPower(-intakePower) }.setRequirements(IntakeHardware)
+    val intake = InstantCommand { setPower(intakePower) }
+    val stopIntake = InstantCommand { setPower(0.0) }
+    val outtake = InstantCommand { setPower(-intakePower) }
     val smartIntake = LambdaCommand().setUpdate {
         MyTelemetry.addData("running","")
         if (abs(getVel()) <2000) setPower(-intakePower)

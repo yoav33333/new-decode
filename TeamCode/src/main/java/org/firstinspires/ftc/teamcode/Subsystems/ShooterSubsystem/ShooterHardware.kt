@@ -41,8 +41,7 @@ object ShooterHardware : Component {
     val shooterMotor2 = lazy { MotorEx("Low shooter").reversed() }
 
     val hoodServo1 = lazy { ServoEx("Hood servo") }
-    // Accessing .value on a lazy property repeatedly is a function call.
-    // We'll cache these in postInit for faster access.
+
     private lateinit var motor1: MotorEx
     private lateinit var motor2: MotorEx
     private lateinit var hood: ServoEx

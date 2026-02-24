@@ -19,6 +19,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.stat
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.targetPosition
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferHardware.transferMotor
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.deltaVec
+import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.reducer
 import org.firstinspires.ftc.teamcode.Util.LoopTimer.loopTime
 import org.firstinspires.ftc.teamcode.Util.Util.wrap360
 import kotlin.math.PI
@@ -51,7 +52,7 @@ object TurretHardware : Component {
     fun setPosition(pos: Double) {
         // Optimization: Only write to hardware if the change is significant (> 0.1%)
         // This keeps the Control Hub's command buffer clear.
-        if (Math.abs(lastSetPos - pos) > 0.001) {
+        if (Math.abs(lastSetPos - pos) > 0.0001) {
             s1.position = pos
             s2.position = pos
             lastSetPos = pos
@@ -100,8 +101,11 @@ object TurretHardware : Component {
 
         // 2. Compute local target with Limelight adjustment
         // Only adjust Limelight offset if the robot is relatively stable
-        if (cachedVelocity < 2.0 && follower.velocity.magnitude < 10.0) {
+        if (cachedVelocity < 1.0 && follower.velocity.magnitude < 1.0) {
             offsetLL -= centerApriltag()
+        }
+        else{
+            offsetLL *= reducer
         }
 
         var localAngleRad = globalTargetAngleRad - robotHeadingRad + offsetLL

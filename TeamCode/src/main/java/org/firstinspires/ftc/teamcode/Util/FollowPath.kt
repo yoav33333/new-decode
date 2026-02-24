@@ -1,18 +1,37 @@
 package org.firstinspires.ftc.teamcode.Util
 
-import androidx.core.util.Supplier
+import com.pedropathing.paths.Path
 import com.pedropathing.paths.PathChain
 import dev.nextftc.core.commands.Command
 import dev.nextftc.extensions.pedro.PedroComponent.Companion.follower
 
-class FollowPath(
-    var path: Supplier<PathChain>,
-    var holdEnd:Boolean = true,
-    var maxPower: Double = 1.0) : Command() {
+class FollowPath @JvmOverloads constructor(
+    private val path: PathChain,
+    private val holdEnd: Boolean? = null,
+    private val maxPower: Double? = null
+) : Command() {
+
+    init {
+        require(maxPower == null || holdEnd != null) { "If maxPower is passed, holdEnd must be passed as well." }
+    }
+
+    @JvmOverloads
+    constructor(path: Path, holdEnd: Boolean? = null, maxPower: Double? = null) : this(
+        PathChain(path),
+        holdEnd,
+        maxPower
+    )
+
     override val isDone: Boolean
-        get() =!follower.isBusy || follower.isRobotStuck
+        get() = !follower.isBusy || follower.isRobotStuck
 
     override fun start() {
-        follower.followPath(path.get(), maxPower, holdEnd)
+        if (holdEnd !== null && maxPower !== null) follower.followPath(path, maxPower, holdEnd)
+        else if (holdEnd !== null) follower.followPath(path, holdEnd)
+        else follower.followPath(path)
+    }
+
+    override fun stop(interrupted: Boolean) {
+        if (interrupted) follower.breakFollowing()
     }
 }

@@ -15,6 +15,7 @@ object TurretVars {
     @JvmField var offset = .0
     @JvmField var moveMul = .0099
     @JvmField var offsetLL = .0
+    @JvmField var reducer = 0.995
     @JvmField var servoOffset = -4.0
 
     @JvmField var state = TurretState.Disabled
