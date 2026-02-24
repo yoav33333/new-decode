@@ -33,7 +33,7 @@ import kotlin.time.Duration.Companion.seconds
 class RedAutoFar9: MegiddoOpMode(AllianceColor.RED) {
 
     @JvmField var startingPose = Pose(89.211, 8.254, toRadians(180.0))
-    @JvmField var shootingPose = Pose(89.211, 15.254)
+    @JvmField var shootingPose = Pose(93.211, 15.254)
     @JvmField var preIntakePose = Pose(98.169, 34.479)
     @JvmField var endIntakePose = Pose(115.169, 34.479)
     //    @JvmField var preIntakePose = Pose(98.169, 34.479).mirror()
@@ -42,6 +42,7 @@ class RedAutoFar9: MegiddoOpMode(AllianceColor.RED) {
 //    @JvmField var endIntakePose = Pose(125.944, 34.789)
     @JvmField var finishPose = Pose(90.958, 38.408)
     var moveToShooting1 = PathChain()
+    var moveToShooting2 = PathChain()
     var moveToIntakeHP = PathChain()
     var moveToShootingCycle = PathChain()
     var moveToPreIntake = PathChain()
@@ -76,7 +77,7 @@ class RedAutoFar9: MegiddoOpMode(AllianceColor.RED) {
             .addPath(BezierLine(preIntakePose, endIntakePose))
             .setConstantHeadingInterpolation(toRadians(180.0))
             .build()
-        moveToShooting1 = follower.pathBuilder()
+        moveToShooting2 = follower.pathBuilder()
             .addPath(BezierLine(endIntakePose, startingPose))
             .setConstantHeadingInterpolation(toRadians(180.0))
             .build()
@@ -94,18 +95,18 @@ class RedAutoFar9: MegiddoOpMode(AllianceColor.RED) {
                 runTransfer
             )
         ),
+        FollowPath( moveToPreIntake ),
         UninteraptingCommand(intakeCommandAuto),
         Delay(0.2.seconds),
         (FollowPath(
             moveToEndIntake , holdEnd=false, maxPower = 0.55,
         )),
 //        FollowPath( openGate),
-//        FollowPath( moveToShooting1 ),
-        FollowPath( moveToPreIntake ),
-        UninteraptingCommand( intakeCommandAuto ),
+        FollowPath( moveToShooting2 ),
+//        UninteraptingCommand( intakeCommandAuto ),
 //        Delay(0.3),
-        FollowPath( moveToEndIntake ),
-        Delay(0.3),
+//        FollowPath( moveToEndIntake ),
+//        Delay(0.3),
         outtake,
         InstantCommand{intakeCommandAuto.cancel()},
         transferAll(
@@ -116,7 +117,7 @@ class RedAutoFar9: MegiddoOpMode(AllianceColor.RED) {
         ),
         UninteraptingCommand( intakeCommandAuto ),
         FollowPath( moveToIntakeHP ),
-        Delay(0.3),
+        Delay(0.8),
         FollowPath( moveToShootingCycle ),
         Delay(0.3),
         outtake,
