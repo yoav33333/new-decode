@@ -27,7 +27,7 @@ object ShooterVars {
     @JvmField var controlledSpeed = 0.0
     @JvmField var hoodTarget = 0.0
     @JvmField var targetVelocity = 0.0
-    @JvmField var deltaThreshold = 80.0
+    @JvmField var deltaThreshold = 40.0
     @JvmField var veloCoefficients: PIDCoefficients = PIDCoefficients(0.009, 0.0, 0.00)
     @JvmField var veloControl: BasicPID = BasicPID(veloCoefficients)
 

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Robot
 
+import dev.nextftc.core.commands.Command
 import dev.nextftc.core.commands.delays.Delay
 import dev.nextftc.core.commands.delays.WaitUntil
 import dev.nextftc.core.commands.groups.ParallelDeadlineGroup
@@ -15,6 +16,8 @@ import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeHardware.
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeHardware.setPower
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeVars.intakePower
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeVars.outtakeThreshold
+import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLight.setScan
+import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLight.setTarget
 //import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterCommands.shoot
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware.atTargetVelocity
 //import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware.stopShooting
@@ -27,6 +30,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHar
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.reverseTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.runTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.stopTransfer
+import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.offsetLL
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.ParallelDeadlineGroupKill
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.RepeatCommand
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.UninteraptingCommand
@@ -88,6 +92,16 @@ object RobotCommands {
 //                smartIntake,
             Delay(0.1),
             RepeatCommand(runIntakeSeqAuto) { isFull() },
+        )
+    fun findPattern(stopWhen: Command) =
+        SequentialGroup(
+            InstantCommand{setScan()},
+            stopWhen,
+            InstantCommand{
+                offsetLL == 0.0
+                setTarget()
+            }
+
         )
     val shootingCommand =
         ParallelGroup(

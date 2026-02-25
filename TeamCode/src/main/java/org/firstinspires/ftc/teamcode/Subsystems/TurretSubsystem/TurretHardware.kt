@@ -36,7 +36,7 @@ object TurretHardware : Component {
     // --- CACHED VALUES (The "Snapshot") ---
     private var cachedEncoderPos = 0.0
     private var cachedServoPos = 0.0
-    private var cachedVelocity = 0.0
+    var cachedVelocity = 0.0
     private var lastSetPos = -1.0 // Track what we LAST sent to the hub
 
     /**
@@ -101,7 +101,7 @@ object TurretHardware : Component {
 
         // 2. Compute local target with Limelight adjustment
         // Only adjust Limelight offset if the robot is relatively stable
-        if (cachedVelocity < 1.0 && follower.velocity.magnitude < 1.0) {
+        if (cachedVelocity < 5.0 && follower.velocity.magnitude < 1.0) {
             offsetLL -= centerApriltag()
         }
         else{

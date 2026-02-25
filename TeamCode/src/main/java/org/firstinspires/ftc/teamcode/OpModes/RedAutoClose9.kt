@@ -15,6 +15,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveVars
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeCommands
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.AllianceColor
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.MyTelemetry
+import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.findPattern
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.intakeCommandAuto
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.scanCommand
 //import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.shootingCommandAuto
@@ -25,6 +26,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHar
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.reverseTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.runTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.stopTransfer
+import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.cachedVelocity
 import org.firstinspires.ftc.teamcode.Util.FollowPath
 //import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.turretSeq
 //import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.setTargetPosition
@@ -101,8 +103,11 @@ class RedAutoClose9: MegiddoOpMode(AllianceColor.RED) {
     fun auto(): SequentialGroup = SequentialGroup(
 
 //        Delay(0.2),
-        FollowPath(moveToShooting1),
-//        Delay(0.2.seconds),
+        FollowPath(moveToShooting1).and(findPattern(
+            Delay(0.5).then(WaitUntil{ cachedVelocity < 15.0 })
+        )
+        ),
+        //        Delay(0.2.seconds),
         transferAll(
             SequentialGroup(
                 WaitUntil { atTargetVelocity() },

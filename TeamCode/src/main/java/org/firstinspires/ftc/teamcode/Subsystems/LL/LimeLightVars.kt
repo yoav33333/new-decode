@@ -11,6 +11,7 @@ object LimeLightVars {
     @JvmField var result: LLResult? = null
     @JvmField var redPipeline = 0
     @JvmField var bluePipeline = 1
+    @JvmField var patternPipeline = 7
     @JvmField var llPose = Pose()
     @JvmField var dist = 0.0
     @JvmField var smartDist = 0.0

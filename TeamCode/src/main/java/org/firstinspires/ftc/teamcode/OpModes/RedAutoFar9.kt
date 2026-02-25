@@ -14,6 +14,7 @@ import dev.nextftc.extensions.pedro.PedroComponent.Companion.follower
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveVars
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeCommands.outtake
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.AllianceColor
+import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.findPattern
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.intakeCommandAuto
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.scanCommand
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware.atTargetVelocity
@@ -21,6 +22,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCom
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.transferAll
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.isFull
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.runTransfer
+import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.cachedVelocity
 //import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.turretSeq
 import org.firstinspires.ftc.teamcode.Util.FollowPath
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.UninteraptingCommand
@@ -84,10 +86,17 @@ class RedAutoFar9: MegiddoOpMode(AllianceColor.RED) {
         scan.setRequirements(emptySet())
 //        = mutableSetOf()
         scan.schedule()
+//        findPattern(
+//            Delay(0.5)
+//                .then(WaitUntil{ cachedVelocity < 15.0 }
+//                    .then(Delay(0.5))))
+//            .schedule()
     }
 
     fun auto(): SequentialGroup = SequentialGroup(
-        FollowPath( moveToShooting1 ),
+        FollowPath( moveToShooting1 ).and(findPattern(
+            Delay(0.5).then(WaitUntil{ cachedVelocity < 15.0 })
+        )),
 
         transferAll(
             SequentialGroup(

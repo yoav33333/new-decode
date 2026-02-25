@@ -25,6 +25,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeVars.inta
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeVars.outtakeThreshold
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.AllianceColor
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.MyTelemetry
+import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.findPattern
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.intakeCommand
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.intakeCommandAuto
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.scanCommand
@@ -38,6 +39,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHar
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.reverseTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.runTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.stopTransfer
+import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.cachedVelocity
 //import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.turretSeq
 import org.firstinspires.ftc.teamcode.Util.FollowPath
 import org.firstinspires.ftc.teamcode.Util.Util.createPath
@@ -89,10 +91,17 @@ class RedAutoOverFlow: MegiddoOpMode(AllianceColor.RED) {
         scan.setRequirements(emptySet())
 //        = mutableSetOf()
         scan.schedule()
+//        findPattern(
+//            Delay(0.5)
+//                .then(WaitUntil{ cachedVelocity < 15.0 }
+//                    .then(Delay(0.5))))
+//            .schedule()
     }
 
     fun auto(): SequentialGroup = SequentialGroup(
-        FollowPath( moveToShooting1 ),
+        FollowPath( moveToShooting1 ).and(findPattern(
+            Delay(0.5).then(WaitUntil{ cachedVelocity < 15.0 })
+        )),
 //        InstantCommand{intakeCommand.schedule()},
 //        Delay(0.1),
         transferAll(
@@ -106,9 +115,9 @@ class RedAutoOverFlow: MegiddoOpMode(AllianceColor.RED) {
             SequentialGroup(
                 UninteraptingCommand( intakeCommandAuto ),
                 FollowPath( moveToIntake ),
-                Delay(0.3),
+                Delay(0.5),
                 FollowPath( moveToShootingCycle ),
-                Delay(0.3),
+                Delay(0.2),
                 outtake,
                 InstantCommand{intakeCommandAuto.cancel()},
                 transferAll(
