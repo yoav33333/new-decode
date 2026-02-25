@@ -82,7 +82,7 @@ open class ShittyTeleop(color: AllianceColor): MegiddoOpMode(color) {
             .whenBecomesTrue(
                 SequentialGroup(
                     WaitUntil{atTargetVelocity()},
-                    moveToTransferPositionLocking(SpindexerSlotState.PURPLE),
+                    moveToTransferPositionLocking({ SpindexerSlotState.PURPLE }),
                     ActiveDelay { (SpindexerVars.spinDelayShoot+smartDist*0.01).seconds},
                     runTransfer,
                     Delay(0.5),
@@ -94,7 +94,7 @@ open class ShittyTeleop(color: AllianceColor): MegiddoOpMode(color) {
             .whenBecomesTrue(
                 SequentialGroup(
                     WaitUntil{atTargetVelocity()},
-                    moveToTransferPositionLocking(SpindexerSlotState.GREEN),
+                    moveToTransferPositionLocking({ SpindexerSlotState.GREEN }),
                     ActiveDelay { (SpindexerVars.spinDelayShoot+smartDist*0.01).seconds},
                     runTransfer,
                     Delay(0.5),

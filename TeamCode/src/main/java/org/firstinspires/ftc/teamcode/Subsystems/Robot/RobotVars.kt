@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.Util.Util.mmToInches
 object RobotVars {
     var goalPosRed = Vector(Pose(142.75,142.75))
     var goalPosBlue = Vector(Pose(1.25,142.75))
-    var obelisk = Vector(Pose(0.0,145.0))
+    var obelisk = Vector(Pose(72.0,144.0))
     var resetPosBlue = Pose(133.5,10.4153543307, Math.toRadians(-90.0))
     var resetPosRed = resetPosBlue.mirror()
     var auto = false

@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardwar
 //import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.fixSpindex
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.fixSpindexSeq
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.resetingSeq
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.tracker
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.MulEnc
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.degreesPerSlot
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.delayMul
@@ -201,6 +202,7 @@ object SpindexerHardware : Component {
         MyTelemetry.addData("at target", isAtTargetPosition())
         MyTelemetry.addData("offset ", getSpindexerPos() / 2 + 2 * SpindexerVars.degreesPerSlot +offset - targetPosition)
         MyTelemetry.addData("move Spin ", getSpindexerPos() / 2 + 2 * SpindexerVars.degreesPerSlot+offset)
+        MyTelemetry.addData("spin state ", tracker.toString())
     }
 
     override fun postUpdate() = updateSystem()

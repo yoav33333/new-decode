@@ -93,9 +93,9 @@ object LimeLight: Component {
             var pose = pose3DMetersToInches(result.botpose)
             smartDist = distFilter.estimate(pose3dToPose(pose)
                 .asVector.minus(RobotVars.goalPos).magnitude)
-            smartDist = distFilter.estimate(pose3dToPose(pose)
-                .plus(Pose(follower.velocity.xComponent*smartDist*LLMul, follower.velocity.yComponent*smartDist*LLMul))
-                .asVector.minus(RobotVars.goalPos).magnitude)
+//            smartDist = distFilter.estimate(pose3dToPose(pose)
+//                .plus(Pose(follower.velocity.xComponent*smartDist*LLMul, follower.velocity.yComponent*smartDist*LLMul))
+//                .asVector.minus(RobotVars.goalPos).magnitude)
         }
     }
 

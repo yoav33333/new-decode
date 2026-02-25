@@ -70,7 +70,7 @@ object RobotCommands {
                 WaitUntil { isFull() },
                 InstantCommand { resetSpindexer() },
                 Delay(0.5),
-                RepeatCommand(runIntakeSeqAuto),
+                RepeatCommand(runIntakeSeq),
                 RepeatCommand(InstantCommand{
                     MyTelemetry.addData("running","")
                     if (abs(getVel()) <outtakeThreshold|| Gamepads.gamepad1.b.get()) setPower(-intakePower)

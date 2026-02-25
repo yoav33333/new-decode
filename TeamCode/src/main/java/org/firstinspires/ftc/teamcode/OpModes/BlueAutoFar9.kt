@@ -17,7 +17,6 @@ import org.firstinspires.ftc.teamcode.Subsystems.Robot.AllianceColor
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.findPattern
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.intakeCommandAuto
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.scanCommand
-import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.shootingCommand
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware.atTargetVelocity
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.resetingSeq
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.transferAll
@@ -33,17 +32,17 @@ import kotlin.time.Duration.Companion.seconds
 
 @Autonomous
 @Configurable
-class RedAutoFar9: MegiddoOpMode(AllianceColor.RED) {
+class BlueAutoFar9: MegiddoOpMode(AllianceColor.BLUE) {
 
-    @JvmField var startingPose = Pose(89.211, 8.254, toRadians(180.0))
-    @JvmField var shootingPose = Pose(93.211, 15.254)
-    @JvmField var preIntakePose = Pose(98.169, 34.479)
-    @JvmField var endIntakePose = Pose(119.169, 34.479)
+    @JvmField var startingPose = Pose(95.211, 8.254, toRadians(180.0)).mirror()
+    @JvmField var shootingPose = Pose(93.211, 15.254).mirror()
+    @JvmField var preIntakePose = Pose(98.169, 34.479).mirror()
+    @JvmField var endIntakePose = Pose(115.169, 34.479).mirror()
     //    @JvmField var preIntakePose = Pose(98.169, 34.479).mirror()
 
-    @JvmField var intakePoseHP = Pose(130.944, 5.789)
-//    @JvmField var endIntakePose = Pose(125.944, 34.789)
-    @JvmField var finishPose = Pose(90.958, 38.408)
+    @JvmField var intakePoseHP = Pose(129.944, 5.789).mirror()
+//    @JvmField var endIntakePose = Pose(125.944, 34.789).mirror()
+    @JvmField var finishPose = Pose(90.958, 38.408).mirror()
     var moveToShooting1 = PathChain()
     var moveToShooting2 = PathChain()
     var moveToIntakeHP = PathChain()
@@ -62,53 +61,54 @@ class RedAutoFar9: MegiddoOpMode(AllianceColor.RED) {
     override fun onInit(){
         moveToShooting1 = follower.pathBuilder()
             .addPath(BezierLine(startingPose, shootingPose))
-            .setLinearHeadingInterpolation(toRadians(180.0), toRadians(180.0))
+            .setLinearHeadingInterpolation(toRadians(180-180.0), toRadians(180-180.0))
             .build()
         moveToIntakeHP = follower.pathBuilder()
             .addPath(BezierLine(shootingPose, intakePoseHP))
-            .setLinearHeadingInterpolation(toRadians(180.0), toRadians(180.0))
+            .setLinearHeadingInterpolation(toRadians(180-180.0), toRadians(180-180.0))
             .build()
         moveToShootingCycle = follower.pathBuilder()
             .addPath(BezierLine(intakePoseHP, shootingPose))
-            .setConstantHeadingInterpolation(toRadians(180.0))
+            .setConstantHeadingInterpolation(toRadians(180-180.0))
             .build()
         moveToPreIntake = follower.pathBuilder()
             .addPath(BezierLine(shootingPose, preIntakePose))
-            .setConstantHeadingInterpolation(toRadians(180.0))
+            .setConstantHeadingInterpolation(toRadians(180-180.0))
             .build()
         moveToEndIntake = follower.pathBuilder()
             .addPath(BezierLine(preIntakePose, endIntakePose))
-            .setConstantHeadingInterpolation(toRadians(180.0))
+            .setConstantHeadingInterpolation(toRadians(180-180.0))
             .build()
         moveToShooting2 = follower.pathBuilder()
             .addPath(BezierLine(endIntakePose, startingPose))
-            .setConstantHeadingInterpolation(toRadians(180.0))
+            .setConstantHeadingInterpolation(toRadians(180-180.0))
             .build()
         scan.setRequirements(emptySet())
 //        = mutableSetOf()
         scan.schedule()
-//        findPattern(
-//            Delay(0.5)
-//                .then(WaitUntil{ cachedVelocity < 15.0 }
-//                    .then(Delay(0.5))))
-//            .schedule()
     }
 
     fun auto(): SequentialGroup = SequentialGroup(
         FollowPath( moveToShooting1 ).and(findPattern(
             Delay(0.5).then(WaitUntil{ cachedVelocity < 15.0 })
         )),
-        shootingCommand,
+
+        transferAll(
+            SequentialGroup(
+                WaitUntil { atTargetVelocity() },
+                runTransfer
+            )
+        ),
         FollowPath( moveToPreIntake ),
         UninteraptingCommand(intakeCommandAuto),
         Delay(0.2.seconds),
         (FollowPath(
-            moveToEndIntake , holdEnd=false, maxPower = 0.45,
+            moveToEndIntake , holdEnd=false, maxPower = 0.55,
         )),
 //        FollowPath( openGate),
         FollowPath( moveToShooting2 ),
 //        UninteraptingCommand( intakeCommandAuto ),
-        Delay(0.3),
+//        Delay(0.3),
 //        FollowPath( moveToEndIntake ),
 //        Delay(0.3),
         outtake,
@@ -123,12 +123,17 @@ class RedAutoFar9: MegiddoOpMode(AllianceColor.RED) {
         FollowPath( moveToIntakeHP ),
         Delay(0.8),
         FollowPath( moveToShootingCycle ),
-        Delay(0.6),
+        Delay(0.3),
         outtake,
         InstantCommand{intakeCommandAuto.cancel()},
-        shootingCommand,
+        transferAll(
+            SequentialGroup(
+                WaitUntil { atTargetVelocity() },
+                runTransfer
+            )
+        ),
 
-        InstantCommand{follower.holdPoint(finishPose)}
+            InstantCommand{follower.holdPoint(finishPose)}
     )
     override fun onStartButtonPressed() {
 
