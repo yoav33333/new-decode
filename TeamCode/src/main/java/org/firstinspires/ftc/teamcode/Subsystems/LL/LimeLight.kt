@@ -57,6 +57,7 @@ object LimeLight: Component {
         val result: LLResult? = LimeLightVars.result
 //        MyTelemetry.addData("dist from tag", updateDistFormTag())
         if (result != null && result.isValid()) {
+            MyTelemetry.addData("id", result.fiducialResults[0].fiducialId)
             var pose = pose3DMetersToInches(result.botpose)
             smartDist = distFilter.estimate(pose3dToPose(pose)
                 .asVector.minus(RobotVars.goalPos).magnitude)
@@ -67,6 +68,11 @@ object LimeLight: Component {
     }
 
     override fun postUpdate() {
+        updateLL()
+        updateSmartDist()
+    }
+
+    override fun postWaitForStart() {
         updateLL()
         updateSmartDist()
 
