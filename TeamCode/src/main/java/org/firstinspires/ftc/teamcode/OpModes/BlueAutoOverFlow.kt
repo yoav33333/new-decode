@@ -5,57 +5,69 @@ import com.pedropathing.geometry.BezierLine
 import com.pedropathing.geometry.Pose
 import com.pedropathing.paths.PathChain
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
+import dev.nextftc.core.commands.CommandManager
 import dev.nextftc.core.commands.delays.Delay
 import dev.nextftc.core.commands.delays.WaitUntil
+import dev.nextftc.core.commands.groups.ParallelGroup
+import dev.nextftc.core.commands.groups.ParallelRaceGroup
 import dev.nextftc.core.commands.groups.SequentialGroup
 import dev.nextftc.core.commands.utility.InstantCommand
 import dev.nextftc.core.commands.utility.LambdaCommand
+import dev.nextftc.core.units.deg
 import dev.nextftc.extensions.pedro.PedroComponent.Companion.follower
+import dev.nextftc.extensions.pedro.TurnBy
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveVars
+import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeCommands
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeCommands.outtake
+import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeHardware.getVel
+import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeHardware.setPower
+import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeVars.intakePower
+import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeVars.outtakeThreshold
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.AllianceColor
+import org.firstinspires.ftc.teamcode.Subsystems.Robot.MyTelemetry
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.findPattern
+import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.intakeCommand
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.intakeCommandAuto
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.scanCommand
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.shootingCommand
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware.atTargetVelocity
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.resetingSeq
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.runIntakeSeqAuto
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.transferAll
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.isFull
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.resetSpindexer
+import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.reverseTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.runTransfer
+import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.stopTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.cachedVelocity
 //import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.turretSeq
 import org.firstinspires.ftc.teamcode.Util.FollowPath
+import org.firstinspires.ftc.teamcode.Util.Util.createPath
+import org.firstinspires.ftc.teamcode.Util.UtilCommands.CommandSeqNoReq
+import org.firstinspires.ftc.teamcode.Util.UtilCommands.ParallelDeadlineGroupKill
+import org.firstinspires.ftc.teamcode.Util.UtilCommands.RepeatCommand
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.UninteraptingCommand
 import java.lang.Math.toRadians
+import kotlin.math.abs
 //import org.firstinspires.ftc.teamcode.Util.FollowPath
 import kotlin.time.Duration.Companion.seconds
 
 @Autonomous
 @Configurable
-class BlueAutoFar9: MegiddoOpMode(AllianceColor.BLUE) {
+class BlueAutoOverFlow: MegiddoOpMode(AllianceColor.BLUE) {
 
-    @JvmField var startingPose = Pose(92.211, 8.254, toRadians(180.0)).mirror()
-    @JvmField var shootingPose = Pose(90.211, 15.254).mirror()
-    @JvmField var preIntakePose = Pose(101.169, 34.479).mirror()
-    @JvmField var endIntakePose = Pose(126.169, 34.479).mirror()
-    @JvmField var preIntakePose2 = Pose(101.169, 34.479+24).mirror()
-    @JvmField var endIntakePose2 = Pose(129.169, 34.479+29).mirror()
-    //    @JvmField var preIntakePose = Pose(98.169, 34.479).mirror()
-
-    @JvmField var intakePoseHP = Pose(130.944, 5.789).mirror()
-    //    @JvmField var endIntakePose = Pose(125.944, 34.789)
+    @JvmField var startingPose = Pose(93.211, 8.254, toRadians(180.0)).mirror()
+    @JvmField var shootingPose = Pose(93.211, 15.254).mirror()
+    @JvmField var intakePose = Pose(130.944, 5.789).mirror()
+//    @JvmField var endIntakePose = Pose(125.944, 34.789)
     @JvmField var finishPose = Pose(90.958, 38.408).mirror()
     var moveToShooting1 = PathChain()
-    var moveToShooting2 = PathChain()
-    var moveToIntakeHP = PathChain()
+    var moveToIntake = PathChain()
     var moveToShootingCycle = PathChain()
-    var moveToPreIntake = PathChain()
-    var moveToEndIntake = PathChain()
-    var moveToPreIntake2 = PathChain()
-    var moveToEndIntake2 = PathChain()
-    var moveToShooting3 = PathChain()
-    //    var moveToFinish = PathChain()
+//    var moveToPreIntake2 = PathChain()
+//    var moveToEndIntake2 = PathChain()
+//    var moveToShooting3 = PathChain()
+//    var moveToFinish = PathChain()
     init {
         DriveVars.startingPose = startingPose
     }
@@ -68,36 +80,12 @@ class BlueAutoFar9: MegiddoOpMode(AllianceColor.BLUE) {
             .addPath(BezierLine(startingPose, shootingPose))
             .setLinearHeadingInterpolation(toRadians(180-180.0), toRadians(180-180.0))
             .build()
-        moveToIntakeHP = follower.pathBuilder()
-            .addPath(BezierLine(shootingPose, intakePoseHP))
+        moveToIntake = follower.pathBuilder()
+            .addPath(BezierLine(shootingPose, intakePose))
             .setLinearHeadingInterpolation(toRadians(180-180.0), toRadians(180-180.0))
             .build()
         moveToShootingCycle = follower.pathBuilder()
-            .addPath(BezierLine(intakePoseHP, shootingPose))
-            .setConstantHeadingInterpolation(toRadians(180-180.0))
-            .build()
-        moveToPreIntake = follower.pathBuilder()
-            .addPath(BezierLine(shootingPose, preIntakePose))
-            .setConstantHeadingInterpolation(toRadians(180-180.0))
-            .build()
-        moveToEndIntake = follower.pathBuilder()
-            .addPath(BezierLine(preIntakePose, endIntakePose))
-            .setConstantHeadingInterpolation(toRadians(180-180.0))
-            .build()
-        moveToShooting2 = follower.pathBuilder()
-            .addPath(BezierLine(endIntakePose, startingPose))
-            .setConstantHeadingInterpolation(toRadians(180-180.0))
-            .build()
-        moveToPreIntake2 = follower.pathBuilder()
-            .addPath(BezierLine(shootingPose, preIntakePose2))
-            .setConstantHeadingInterpolation(toRadians(180-180.0))
-            .build()
-        moveToEndIntake2 = follower.pathBuilder()
-            .addPath(BezierLine(preIntakePose2, endIntakePose2))
-            .setConstantHeadingInterpolation(toRadians(180-180.0))
-            .build()
-        moveToShooting3 = follower.pathBuilder()
-            .addPath(BezierLine(endIntakePose2, startingPose))
+            .addPath(BezierLine(intakePose, shootingPose))
             .setConstantHeadingInterpolation(toRadians(180-180.0))
             .build()
         scan.setRequirements(emptySet())
@@ -114,39 +102,37 @@ class BlueAutoFar9: MegiddoOpMode(AllianceColor.BLUE) {
         FollowPath( moveToShooting1 ).and(findPattern(
             Delay(0.5).then(WaitUntil{ cachedVelocity < 15.0 })
         )),
-        shootingCommand,
-        FollowPath( moveToPreIntake ),
-        UninteraptingCommand(intakeCommandAuto),
-        Delay(0.2.seconds),
-        (FollowPath(
-            moveToEndIntake , holdEnd=false, maxPower = 0.5,
-        )),
-        FollowPath( moveToShooting2 ),
-        Delay(0.1),
-        outtake,
-        InstantCommand{intakeCommandAuto.cancel()},
-        shootingCommand,
-        FollowPath( moveToPreIntake2 ),
-        UninteraptingCommand(intakeCommandAuto),
-        Delay(0.2.seconds),
-        (FollowPath(
-            moveToEndIntake2 , holdEnd=false, maxPower = 0.5,
-        )),
-        FollowPath( moveToShooting3 ),
-        Delay(0.1),
-        outtake,
-        InstantCommand{intakeCommandAuto.cancel()},
-        shootingCommand,
-        UninteraptingCommand( intakeCommandAuto ),
-        FollowPath( moveToIntakeHP ),
-        Delay(0.1),
-        FollowPath( moveToShootingCycle ),
-        Delay(0.9),
-        outtake,
-        InstantCommand{intakeCommandAuto.cancel()},
-        shootingCommand,
+//        InstantCommand{intakeCommand.schedule()},
+//        Delay(0.1),
+        transferAll(
+            SequentialGroup(
+                WaitUntil { atTargetVelocity() },
+                runTransfer
+            )
+        ),
 
-        InstantCommand{follower.holdPoint(finishPose)}
+        RepeatCommand(
+            SequentialGroup(
+                UninteraptingCommand( intakeCommandAuto ),
+                FollowPath( moveToIntake ),
+                Delay(0.5),
+                FollowPath( moveToShootingCycle ),
+                Delay(0.2),
+                outtake,
+                InstantCommand{intakeCommandAuto.cancel()},
+                transferAll(
+                    SequentialGroup(
+                        WaitUntil { atTargetVelocity() },
+                        runTransfer
+                    )
+                ),
+
+            ),
+//            {time>25},
+            ),
+
+//    ),
+            InstantCommand{follower.holdPoint(finishPose)}
     )
     override fun onStartButtonPressed() {
 
@@ -161,6 +147,8 @@ class BlueAutoFar9: MegiddoOpMode(AllianceColor.BLUE) {
             }
         ).schedule()
     }
+
+
 
 
 }

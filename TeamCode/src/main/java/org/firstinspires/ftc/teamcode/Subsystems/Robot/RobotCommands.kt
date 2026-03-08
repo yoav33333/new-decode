@@ -106,6 +106,7 @@ object RobotCommands {
     val shootingCommand =
         ParallelGroup(
             SequentialGroup(
+                InstantCommand { intakeCommandAuto.cancel() },
                 InstantCommand { intakeCommand.cancel() },
                 stopIntake,
 //                WaitUntil { isEmpty() },
@@ -131,8 +132,8 @@ object RobotCommands {
     val shootingCommandAuto =
         ParallelDeadlineGroup(
             SequentialGroup(
-                InstantCommand { intakeCommand.cancel() },
-                stopIntake,
+                InstantCommand { intakeCommandAuto.cancel() },
+                InstantCommand { intakeCommand.cancel() },                stopIntake,
                 WaitUntil { isEmpty() },
                 Delay(0.5),
 //                InstantCommand { stopShooting() }

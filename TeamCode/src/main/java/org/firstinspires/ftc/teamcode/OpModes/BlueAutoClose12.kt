@@ -52,7 +52,7 @@ class BlueAutoClose12: MegiddoOpMode(AllianceColor.BLUE) {
     @JvmField var endIntakePose = Pose(125.634, 88.944-10).mirror()
     @JvmField var endIntakePose2 = Pose(113.634, 88.944-22).mirror()
     @JvmField var endIntakePose3 = Pose(116.634, 88.944-24-22).mirror()
-    @JvmField var endIntakePose4 = Pose(123.634, 88.944-20)
+    @JvmField var endIntakePose4 = Pose(123.634, 88.944-20).mirror()
     @JvmField var finishPose = Pose(119.775, 91.634).mirror()
     var moveToShooting1 = PathChain()
     var moveToPreIntake = PathChain()
@@ -161,10 +161,10 @@ class BlueAutoClose12: MegiddoOpMode(AllianceColor.BLUE) {
         InstantCommand{intakeCommandAuto.cancel()},
         outtake,
         shootingCommand,
+        UninteraptingCommand(intakeCommandAuto),
         FollowPath(moveToPreIntake2),
         IntakeCommands.stopIntake,
         ParallelGroup(
-            UninteraptingCommand(intakeCommandAuto),
             Delay(0.01.seconds).then(FollowPath(
                 moveToEndIntake2, holdEnd=false, maxPower = 0.4
             )),
@@ -173,10 +173,10 @@ class BlueAutoClose12: MegiddoOpMode(AllianceColor.BLUE) {
         InstantCommand{intakeCommandAuto.cancel()},
         outtake,
         shootingCommand,
+        UninteraptingCommand(intakeCommandAuto),
         FollowPath(moveToPreIntake3),
         IntakeCommands.stopIntake,
         ParallelGroup(
-            UninteraptingCommand(intakeCommandAuto),
             Delay(0.01.seconds).then(FollowPath(
                 moveToEndIntake3, holdEnd=false, maxPower = 0.4,
             )),

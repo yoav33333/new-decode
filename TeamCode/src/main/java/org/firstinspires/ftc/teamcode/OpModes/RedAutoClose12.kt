@@ -48,11 +48,11 @@ class RedAutoClose12: MegiddoOpMode(AllianceColor.RED) {
     @JvmField var preIntakePose2 = Pose(94.239, 88.887-22)
     @JvmField var gatePose = Pose(115.239, 88.887-10)
     @JvmField var preIntakePose3 = Pose(94.239, 88.887-24-22)
-//    @JvmField var preIntakePose4 = Pose(127.239, 88.887-24)
-    @JvmField var endIntakePose = Pose(125.634, 88.944-10)
-    @JvmField var endIntakePose2 = Pose(113.634, 88.944-22)
-    @JvmField var endIntakePose3 = Pose(116.634, 88.944-24-22)
-//    @JvmField var endIntakePose4 = Pose(123.634, 88.944-20)
+    @JvmField var preIntakePose4 = Pose(127.239, 13.0)
+    @JvmField var endIntakePose = Pose(120.634, 88.944-7)
+    @JvmField var endIntakePose2 = Pose(120.634, 88.944-30)
+    @JvmField var endIntakePose3 = Pose(120.634, 88.944-24-24)
+    @JvmField var endIntakePose4 = Pose(123.634, 13.0)
     @JvmField var finishPose = Pose(119.775, 91.634)
     var moveToShooting1 = PathChain()
     var moveToPreIntake = PathChain()
@@ -121,18 +121,18 @@ class RedAutoClose12: MegiddoOpMode(AllianceColor.RED) {
             .addPath(BezierLine(endIntakePose3, shootingPose))
             .setLinearHeadingInterpolation(Math.toRadians(180.0), Math.toRadians(180.0))
             .build()
-//        moveToPreIntake4 = follower.pathBuilder()
-//            .addPath(BezierLine(shootingPose, preIntakePose4))
-//            .setLinearHeadingInterpolation(Math.toRadians(180.0), Math.toRadians(215.0))
-//            .build()
-////        moveToEndIntake4 = follower.pathBuilder()
-////            .addPath(BezierLine(preIntakePose4, endIntakePose4))
-////            .setConstantHeadingInterpolation(Math.toRadians(180.0))
-////            .build()
-//        moveToShooting5 = follower.pathBuilder()
-//            .addPath(BezierLine(endIntakePose4, shootingPose))
-//            .setLinearHeadingInterpolation(Math.toRadians(180.0), Math.toRadians(180.0))
-//            .build()
+        moveToPreIntake4 = follower.pathBuilder()
+            .addPath(BezierLine(shootingPose, preIntakePose4))
+            .setLinearHeadingInterpolation(Math.toRadians(180.0), Math.toRadians(215.0))
+            .build()
+        moveToEndIntake4 = follower.pathBuilder()
+            .addPath(BezierLine(preIntakePose4, endIntakePose4))
+            .setConstantHeadingInterpolation(Math.toRadians(180.0))
+            .build()
+        moveToShooting5 = follower.pathBuilder()
+            .addPath(BezierLine(endIntakePose4, shootingPose))
+            .setLinearHeadingInterpolation(Math.toRadians(180.0), Math.toRadians(180.0))
+            .build()
         moveToFinish = follower.pathBuilder()
             .addPath(BezierLine(shootingPose, finishPose))
             .setLinearHeadingInterpolation(Math.toRadians(180.0), Math.toRadians(180.0))
@@ -154,37 +154,49 @@ class RedAutoClose12: MegiddoOpMode(AllianceColor.RED) {
         FollowPath(moveToPreIntake),
         Delay(0.2.seconds),
         (FollowPath(
-             moveToEndIntake , holdEnd=false, maxPower = 0.55,
+            moveToEndIntake , holdEnd=false, maxPower = 0.99,
         )),
 //        FollowPath( openGate),
         FollowPath( moveToShooting2 ),
         InstantCommand{intakeCommandAuto.cancel()},
         outtake,
         shootingCommand,
+        UninteraptingCommand(intakeCommandAuto),
         FollowPath(moveToPreIntake2),
         IntakeCommands.stopIntake,
         ParallelGroup(
-            UninteraptingCommand(intakeCommandAuto),
             Delay(0.01.seconds).then(FollowPath(
-                moveToEndIntake2, holdEnd=false, maxPower = 0.4
+                moveToEndIntake2, holdEnd=false, maxPower = 0.99
             )),
         ),
         FollowPath(moveToShooting3),
         InstantCommand{intakeCommandAuto.cancel()},
         outtake,
         shootingCommand,
+        UninteraptingCommand(intakeCommandAuto),
         FollowPath(moveToPreIntake3),
         IntakeCommands.stopIntake,
         ParallelGroup(
-            UninteraptingCommand(intakeCommandAuto),
             Delay(0.01.seconds).then(FollowPath(
-                moveToEndIntake3, holdEnd=false, maxPower = 0.4,
+                moveToEndIntake3, holdEnd=false, maxPower = 0.99,
             )),
         ),
         FollowPath(moveToShooting4),
         InstantCommand{intakeCommandAuto.cancel()},
         outtake,
         shootingCommand,
+//        UninteraptingCommand(intakeCommandAuto),
+//        FollowPath(moveToPreIntake4),
+//        IntakeCommands.stopIntake,
+//        ParallelGroup(
+//            Delay(0.01.seconds).then(FollowPath(
+//                moveToEndIntake4, holdEnd=false, maxPower = 0.99,
+//            )),
+//        ),
+//        FollowPath(moveToShooting5),
+//        InstantCommand{intakeCommandAuto.cancel()},
+//        outtake,
+//        shootingCommand,
         ParallelGroup(
             FollowPath(moveToFinish),
             RepeatCommand(InstantCommand{ MyTelemetry.addData("ewtdfghtyu87", "cd") })

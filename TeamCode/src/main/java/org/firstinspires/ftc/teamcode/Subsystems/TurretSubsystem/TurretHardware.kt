@@ -20,6 +20,8 @@ import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.targ
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferHardware.transferMotor
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.deltaVec
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.reducer
+import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.rotationPred
+import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.runTurret
 import org.firstinspires.ftc.teamcode.Util.LoopTimer.loopTime
 import org.firstinspires.ftc.teamcode.Util.Util.wrap360
 import kotlin.math.PI
@@ -95,16 +97,17 @@ object TurretHardware : Component {
     }
 
     fun update(targetOffset: Double) {
+        if (!runTurret) return
         // 1. Snapshot robot state to local variables
-        val robotHeadingRad = follower.heading.rad.value + (follower.angularVelocity * loopTime / 1000.0)
+        val robotHeadingRad = follower.heading.rad.value + (follower.angularVelocity * loopTime / 1000.0) + follower.angularVelocity * rotationPred
         val globalTargetAngleRad = deltaVec.theta - targetOffset
 
         // 2. Compute local target with Limelight adjustment
         // Only adjust Limelight offset if the robot is relatively stable
-        if (cachedVelocity < 5.0 && follower.velocity.magnitude < 1.0) {
+        if (cachedVelocity < 5.0 && follower.velocity.magnitude < 15.0) {
             offsetLL -= centerApriltag()
         }
-        else{
+        else if (follower.velocity.magnitude > 10.0){
             offsetLL *= reducer
         }
 
@@ -124,6 +127,7 @@ object TurretHardware : Component {
     }
 
     override fun preInit() {
+        runTurret = true
         lastSetPos = -1.0
         state = TurretState.TrackingAprilTags
         targetPosition = 180.0
@@ -138,6 +142,7 @@ object TurretHardware : Component {
         MyTelemetry.addData("Turret Deg", getAngle())
         MyTelemetry.addData("Turret Servo Pos", cachedServoPos)
         MyTelemetry.addData("Turret State", state)
+        MyTelemetry.addData("Turret run", runTurret)
         MyTelemetry.addData("Turret Global", getGlobalHeading())
     }
 }

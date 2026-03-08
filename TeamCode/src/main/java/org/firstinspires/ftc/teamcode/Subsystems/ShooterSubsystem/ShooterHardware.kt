@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.smartDist
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.MyTelemetry
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.Robot.normalizePower
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars
+import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.angleCorrectMul
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.controlledSpeed
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.deltaThreshold
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.dy
@@ -50,7 +51,7 @@ object ShooterHardware : Component {
     private var lastHoodPos = -1.0
     private val IO_THRESHOLD = 0.001 // Smallest change worth sending to hardware
 
-    private var currentVelocity = 0.0
+    var currentVelocity = 0.0
     private var hoodTarget = 0.0
 
     override fun postInit() {
@@ -85,7 +86,8 @@ object ShooterHardware : Component {
         }
     }
 
-    fun atTargetVelocity(): Boolean = abs(currentVelocity - targetVelocity) < deltaThreshold
+    fun atTargetVelocity(): Boolean = true
+//    fun atTargetVelocity(): Boolean = abs(currentVelocity - targetVelocity) < deltaThreshold
 
     /**
      * Logic calculation - No Hardware IO here
@@ -95,7 +97,7 @@ object ShooterHardware : Component {
         val distance = clamp(smartDist, 62.1, 162.0)
 
         targetVelocity = shootPowLUT.get(distance)
-        hoodTarget = hoodLUT.get(minPos + distance)
+        hoodTarget = hoodLUT.get(distance)
 
         // Motor Control Logic
         if (targetVelocity < 1.0) {
@@ -106,7 +108,7 @@ object ShooterHardware : Component {
             setPower(feedback + feedForward)
         }
 
-        setHoodPosition(hoodTarget)
+        setHoodPosition(hoodTarget+angleCorrectMul*(targetVelocity-currentVelocity))
         TurretHardware.update(0.0)
     }
 

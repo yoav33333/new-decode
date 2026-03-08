@@ -22,8 +22,10 @@ import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveVars.starti
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLight.updateLL
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.centerOfRotationOffset
+import org.firstinspires.ftc.teamcode.Subsystems.Robot.AllianceColor
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.MyTelemetry
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars
+import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.allianceColor
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.vectorFromTarget
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.getTargetAngle
 import org.firstinspires.ftc.teamcode.Util.DriftKalmanFilter

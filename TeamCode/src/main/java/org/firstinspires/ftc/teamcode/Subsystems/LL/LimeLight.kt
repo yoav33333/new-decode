@@ -60,7 +60,7 @@ object LimeLight: Component {
     }
 
     fun updateLL(){
-        ll.value.updateRobotOrientation(180+Math.toDegrees(deltaVec.theta-offset))
+//        ll.value.updateRobotOrientation(180+Math.toDegrees(deltaVec.theta-offset))
         result = ll.value.getLatestResult()
     }
     override fun postInit() {
@@ -93,9 +93,9 @@ object LimeLight: Component {
             var pose = pose3DMetersToInches(result.botpose)
             smartDist = distFilter.estimate(pose3dToPose(pose)
                 .asVector.minus(RobotVars.goalPos).magnitude)
-//            smartDist = distFilter.estimate(pose3dToPose(pose)
-//                .plus(Pose(follower.velocity.xComponent*smartDist*LLMul, follower.velocity.yComponent*smartDist*LLMul))
-//                .asVector.minus(RobotVars.goalPos).magnitude)
+            smartDist = distFilter.estimate(pose3dToPose(pose)
+                .plus(Pose(follower.velocity.xComponent*smartDist*LLMul, follower.velocity.yComponent*smartDist*LLMul))
+                .asVector.minus(RobotVars.goalPos).magnitude)
         }
     }
 

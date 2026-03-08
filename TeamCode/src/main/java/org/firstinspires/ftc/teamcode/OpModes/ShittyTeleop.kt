@@ -19,6 +19,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.intakeComma
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.shootingCommand
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.auto
+import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.randomizationOffset
 //import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.shootingCommand
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterCommands
 //import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterCommands.shoot
@@ -74,34 +75,14 @@ open class ShittyTeleop(color: AllianceColor): MegiddoOpMode(color) {
         //pre speed up
         Gamepads.gamepad1.dpadUp.whenBecomesTrue (resetIMU )
         Gamepads.gamepad1.dpadDown.whenBecomesTrue (resetPos )
-//        Gamepads.gamepad1.y.whenBecomesTrue (turretSeq().and(cancelShooting))
+        Gamepads.gamepad1.y.whenBecomesTrue {runTurret = !runTurret}
         Gamepads.gamepad1.a.whenBecomesTrue(toggleLock)
         Gamepads.gamepad1.x.whenBecomesTrue(cancelShooting)
         Gamepads.gamepad1.options.whenBecomesTrue(fixSpindexSeq)
         Gamepads.gamepad1.rightTrigger.atLeast(0.3)
-            .whenBecomesTrue(
-                SequentialGroup(
-                    WaitUntil{atTargetVelocity()},
-                    moveToTransferPositionLocking({ SpindexerSlotState.PURPLE }),
-                    ActiveDelay { (SpindexerVars.spinDelayShoot+smartDist*0.01).seconds},
-                    runTransfer,
-                    Delay(0.5),
-                    reverseTransfer,
-                    stopTransfer
-                )
-            )
+            .whenBecomesTrue{randomizationOffset-=1}
         Gamepads.gamepad1.leftTrigger.atLeast(0.3)
-            .whenBecomesTrue(
-                SequentialGroup(
-                    WaitUntil{atTargetVelocity()},
-                    moveToTransferPositionLocking({ SpindexerSlotState.GREEN }),
-                    ActiveDelay { (SpindexerVars.spinDelayShoot+smartDist*0.01).seconds},
-                    runTransfer,
-                    Delay(0.5),
-                    reverseTransfer,
-                    stopTransfer
-                )
-            )
+            .whenBecomesTrue{randomizationOffset+=1}
 
 
     }

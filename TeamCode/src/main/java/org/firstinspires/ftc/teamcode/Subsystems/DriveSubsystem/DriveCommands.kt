@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem
 
+import androidx.core.util.plus
 import dev.nextftc.core.commands.utility.InstantCommand
 import dev.nextftc.extensions.pedro.PedroDriverControlled
 import dev.nextftc.ftc.Gamepads
@@ -9,14 +10,15 @@ import org.firstinspires.ftc.teamcode.Subsystems.Robot.AllianceColor
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.resetPosBlue
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.resetPosRed
+import org.firstinspires.ftc.teamcode.Util.MyPedroDrive
 
 object DriveCommands {
-    val driverControlled = PedroDriverControlled(
+    val driverControlled = MyPedroDrive(
         Gamepads.gamepad1.leftStickY,
         Gamepads.gamepad1.leftStickX,
         -Gamepads.gamepad1.rightStickX,
         false
-    ).setRequirements(DriveHardware)
+    )
     val resetIMU = InstantCommand{
         follower.heading = 0.0
         if (isHolding) follower.holdPoint(follower.pose)
