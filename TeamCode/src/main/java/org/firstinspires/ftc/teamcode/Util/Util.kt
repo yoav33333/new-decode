@@ -2,12 +2,23 @@ package org.firstinspires.ftc.teamcode.Util
 
 import com.pedropathing.ftc.FTCCoordinates
 import com.pedropathing.ftc.InvertedFTCCoordinates
+import com.pedropathing.geometry.BezierCurve
 import com.pedropathing.geometry.BezierLine
 import com.pedropathing.geometry.PedroCoordinates
 import com.pedropathing.geometry.Pose
 import com.pedropathing.paths.PathChain
+import dev.nextftc.core.commands.delays.Delay
+import dev.nextftc.core.commands.delays.WaitUntil
+import dev.nextftc.core.commands.groups.SequentialGroup
+import dev.nextftc.core.commands.utility.InstantCommand
 import dev.nextftc.extensions.pedro.PedroComponent.Companion.follower
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D
+import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeCommands.outtake
+import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.intakeCommandAuto
+import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.shootingCommand
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.isFull
+import org.firstinspires.ftc.teamcode.Util.UtilCommands.UninteraptingCommand
+import kotlin.time.Duration.Companion.seconds
 
 object Util {
 
@@ -35,6 +46,33 @@ object Util {
 
     @JvmStatic fun mmToInches(mm: Double): Double {
         return mm / 25.4
+    }
+    fun Cycle(intakePath: PathChain, shootingPath: PathChain, delay: Double = 0.0): SequentialGroup = SequentialGroup(
+        UninteraptingCommand(intakeCommandAuto),
+        FollowPath(intakePath).raceWith(WaitUntil{ isFull()}),
+        Delay(delay.seconds).raceWith(WaitUntil{ isFull()}),
+        FollowPath(shootingPath),
+        InstantCommand{intakeCommandAuto.cancel()},
+        outtake,
+        shootingCommand,
+    )
+    fun createPath(pos1: Pose, pos2: Pose, tangent: Boolean = false, reversed:Boolean = false, vararg controlPoints: Pose): PathChain {
+        val pathBuilder = follower.pathBuilder()
+        if (controlPoints.isNotEmpty()) {
+            pathBuilder.addPath(BezierCurve(pos1, *controlPoints, pos2))
+        } else {
+            pathBuilder.addPath(BezierLine(pos1, pos2))
+        }
+        if (tangent){
+            pathBuilder.setTangentHeadingInterpolation()
+            if (reversed){
+                pathBuilder.setReversed()
+            }
+        }
+        else{
+            pathBuilder.setLinearHeadingInterpolation(pos1.heading, pos2.heading)
+        }
+        return pathBuilder.build()
     }
     fun angleWrap(radians: Double): Double {
         var radians = radians
