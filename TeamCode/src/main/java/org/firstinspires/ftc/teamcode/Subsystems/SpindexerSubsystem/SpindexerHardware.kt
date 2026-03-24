@@ -23,6 +23,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVar
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.offset
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.offsetEnc
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.purpleRange
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.seconderyOffset
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.state
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.stuckTimeStart
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.targetPosition
@@ -68,6 +69,9 @@ object SpindexerHardware : Component {
     // --- Logic Methods ---
     fun resetSpindexerEnc() {
         offsetEnc = -shooterMotor2.value.currentPosition
+    }
+    fun makeCurrentPosCorrect(){
+        offsetEnc = -cachedEncoderPos - ((currentSteps-2)*degreesPerSlot*2*8192/360)
     }
 
     fun isFull(): Boolean = tracker.isFull()
@@ -156,7 +160,7 @@ object SpindexerHardware : Component {
     }
 
     fun isAtTargetPosition(): Boolean {
-        return abs(getSpindexerPos() / 2 + 2 * SpindexerVars.degreesPerSlot+offset - targetPosition) < 15
+        return abs(getSpindexerPos() / 2 + 2 * degreesPerSlot +offset - targetPosition) < 15
     }
 
     fun isStuck(): Boolean = abs(cachedVelocity) < 2

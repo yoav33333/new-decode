@@ -62,7 +62,7 @@ object Robot: Component {
         val deltaVec = RobotVars.goalPos.minus(
             robotPose.asVector
                 .minus(rotatedOffset)
-                .plus(Vector(follower.velocity.magnitude * loopTime / 1000+follower.velocity.magnitude*moveMul*smartDist, follower.velocity.theta))
+//                .plus(Vector(follower.velocity.magnitude * loopTime / 1000+follower.velocity.magnitude*moveMul*smartDist, follower.velocity.theta))
                 .plus(Vector(follower.velocity.magnitude * loopTime / 1000, follower.velocity.theta))
                 .plus(Vector(follower.acceleration.magnitude * (loopTime / 1000).pow(2), follower.acceleration.theta))
         )

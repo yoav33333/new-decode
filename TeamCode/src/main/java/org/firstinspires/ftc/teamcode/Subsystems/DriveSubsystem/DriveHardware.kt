@@ -18,10 +18,13 @@ import dev.nextftc.extensions.pedro.PedroComponent.Companion.follower
 import dev.nextftc.ftc.ActiveOpMode.runtime
 import dev.nextftc.ftc.Gamepads
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveVars.startingPose
+import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveVars.trustLL
 //import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLight.rotationOffset
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLight.updateLL
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.centerOfRotationOffset
+import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.distFilter
+import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.smartDist
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.AllianceColor
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.MyTelemetry
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars
@@ -29,6 +32,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.allianceColor
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.vectorFromTarget
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.getTargetAngle
 import org.firstinspires.ftc.teamcode.Util.DriftKalmanFilter
+import org.firstinspires.ftc.teamcode.Util.LoopTimer.loopTime
 import org.firstinspires.ftc.teamcode.Util.Util.pose3DMetersToInches
 import org.firstinspires.ftc.teamcode.Util.Util.pose3dToPose
 import kotlin.math.abs
@@ -42,14 +46,20 @@ object DriveHardware : Component {
     fun setPoseEstimate(pose: Pose) { follower.pose = pose }
 
     override fun postInit() {
-        setPoseEstimate(startingPose)
+        if (getPoseEstimate().roughlyEquals(Pose(0.0,0.0,0.0), 1.0)){
+            setPoseEstimate(startingPose)
+        }
         Drawing.init()
     }
 
+    fun trustFusion(followerPose: Vector, llPose: Vector):Pose{
+        return Pose(followerPose.xComponent*(1-trustLL) + llPose.xComponent*trustLL,
+            followerPose.yComponent*(1-trustLL) + llPose.yComponent*trustLL)
+    }
     override fun postUpdate() {
-        val stickThreshold = 0.05
-        val velocityThreshold = 0.5
-        val angularThreshold = 0.05
+        val stickThreshold = 0.03
+        val velocityThreshold = 0.01
+        val angularThreshold = 0.03
 
         // Cache stick values to avoid repeated calls
         val lx = Gamepads.gamepad1.leftStickX.get()
@@ -79,6 +89,26 @@ object DriveHardware : Component {
             }
             MyTelemetry.addData("Drive State", "Teleop")
         }
+
+//        if (follower.velocity.magnitude<2 && follower.angularVelocity < 0.5){
+//            val result: LLResult? = LimeLightVars.result
+//            if (result != null && result.isValid()) {
+//                val rotatedOffset = centerOfRotationOffset.copy()
+//                rotatedOffset.rotateVector(follower.heading.rad.value)
+//                MyTelemetry.addData("id", result.fiducialResults[0].fiducialId)
+//                var pose = pose3DMetersToInches(result.botpose_MT2)
+//                setPoseEstimate(trustFusion(
+//                    follower.pose.asVector,
+//                    pose3dToPose(pose)
+//                        .asVector.plus(rotatedOffset))
+//                    .setHeading(follower.heading))
+//                if(isHolding){
+//                    follower.holdPoint(follower.pose)
+//                }
+//                Drawing.drawDebug(follower, pose3dToPose(pose))
+//            }
+//            return
+//        }
 
         Drawing.drawDebug(follower)
     }

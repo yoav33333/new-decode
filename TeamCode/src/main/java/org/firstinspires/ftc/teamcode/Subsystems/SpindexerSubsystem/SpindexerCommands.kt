@@ -158,15 +158,20 @@ object SpindexerCommands {
             moveToTransferPositionLocking({ RobotVars.randomization.value[floorMod(0 + randomizationOffset, 3)] }),
             WaitUntil { isAtTargetPosition() && (abs(currentVelocity - targetVelocity) < deltaThreshold) },
             startWhen,
-            WaitUntil { atTargetVelocity() && !hasBallInTransfer() },
+            WaitUntil { atTargetVelocity()},
             Delay(0.055),
 
             moveToTransferPositionLocking({ RobotVars.randomization.value[floorMod(1 + randomizationOffset, 3)] }),
-            WaitUntil { isAtTargetPosition() && !hasBallInTransfer() && atTargetVelocity() },
+            WaitUntil { isAtTargetPosition() &&  atTargetVelocity() },
             Delay(0.055),
 
-            moveToTransferPositionLocking({ RobotVars.randomization.value[floorMod(2 + randomizationOffset, 3)] }),
-            WaitUntil { isAtTargetPosition() && !hasBallInTransfer() },
+            moveToTransferPositionLocking {
+                RobotVars.randomization.value[floorMod(
+                    2 + randomizationOffset,
+                    3
+                )]
+            },
+            WaitUntil { isAtTargetPosition()},
             Delay(0.5.seconds),
         )
 }

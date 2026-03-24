@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Pedro;
 
+import static org.firstinspires.ftc.teamcode.Pedro.FollowerGen.getFollowerGen;
 import static org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveVars.measurementVariance;
 import static org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveVars.processVariance;
 //import static org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.nominaVoltage;
@@ -9,16 +10,15 @@ import static java.lang.Math.PI;
 
 import com.pedropathing.control.FilteredPIDFCoefficients;
 import com.pedropathing.control.PIDFCoefficients;
+import com.pedropathing.control.PredictiveBrakingCoefficients;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.ftc.FollowerBuilder;
 import com.pedropathing.ftc.drivetrains.MecanumConstants;
 import com.pedropathing.ftc.localization.Encoder;
 import com.pedropathing.ftc.localization.constants.PinpointConstants;
-import com.pedropathing.ftc.localization.constants.ThreeWheelIMUConstants;
 import com.pedropathing.ftc.localization.constants.TwoWheelConstants;
 import com.pedropathing.ftc.localization.localizers.TwoWheelLocalizer;
-import com.pedropathing.localization.Localizer;
 import com.pedropathing.paths.PathConstraints;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
@@ -35,20 +35,23 @@ import kotlin.Lazy;
 public class Constants {
 
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(10)
+//            .mass(11)
             .forwardZeroPowerAcceleration(-36.9823349580575)
             .lateralZeroPowerAcceleration(-74.28974372367291)
-            .useSecondaryTranslationalPIDF(false)
-            .useSecondaryHeadingPIDF(false)
-            .useSecondaryDrivePIDF(false)
-            .centripetalScaling(0.0004)
+//            .useSecondaryTranslationalPIDF(false)
+//            .useSecondaryHeadingPIDF(false)
+//            .useSecondaryDrivePIDF(false)
+//            .centripetalScaling(0.0004)
             .automaticHoldEnd(true)
-            .turnHeadingErrorThreshold(0.01)
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.13, 0, 0.02, 0.045))
-            .headingPIDFCoefficients(new PIDFCoefficients(0.85, 0, 0.08, 0.06))
-            .drivePIDFCoefficients(
-                    new FilteredPIDFCoefficients(0.015, 0, 0.0035, 0.95, 0.05)
-            );
+            .turnHeadingErrorThreshold(0.015)
+//            .translationalPIDFCoefficients(new PIDFCoefficients(0.155, 0, 0.023, 0.047))
+            .headingPIDFCoefficients(new PIDFCoefficients(0.95, 0, 0.08, 0.06))
+            .centripetalScaling(0.0)
+//            .drivePIDFCoefficients(
+//                    new FilteredPIDFCoefficients(0.0155, 0, 0.0035, 0.95, 0.05)
+//            );
+            .predictiveBrakingCoefficients(new PredictiveBrakingCoefficients(0.12, 0.15473948077988786, 0.0018226819067833184));
+//            .forwardZeroPowerAcceleration(0.2);
 
     public static MecanumConstants driveConstants = new MecanumConstants()
             .leftFrontMotorName("lf")
@@ -109,15 +112,17 @@ public class Constants {
     }
 
     public static PathConstraints pathConstraints = new PathConstraints(
-            0.99,
+            0.91,
             10,
-            1.75,
+            2.5,
             1
     );
-//    public static Localizer loc(){
-////        return new MyPinpointLoc(ActiveOpMode.hardwareMap(), ppConstants);
-//    }
+
+//    public static
     public static Follower createFollower(HardwareMap hardwareMap) {
+        return getFollowerGen().getValue();
+    }
+    public static Follower generateFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .mecanumDrivetrain(driveConstants)
 //                .setLocalizer(loc())

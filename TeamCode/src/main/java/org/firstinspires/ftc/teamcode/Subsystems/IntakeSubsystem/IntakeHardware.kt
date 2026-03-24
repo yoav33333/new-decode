@@ -11,7 +11,7 @@ object IntakeHardware: Component {
         intakeMotor.value.power = power
     }
     fun getVel(): Double{
-        return intakeMotor.value.velocity
+        return 200.0
     }
 
     override fun postUpdate() {

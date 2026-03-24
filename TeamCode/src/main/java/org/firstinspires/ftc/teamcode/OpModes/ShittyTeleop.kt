@@ -32,6 +32,8 @@ import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCom
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.runIntakeCycle
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.getVel
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.isAtTargetPosition
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.makeCurrentPosCorrect
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.resetSpindexerEnc
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.tracker
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.state
@@ -67,7 +69,11 @@ open class ShittyTeleop(color: AllianceColor): MegiddoOpMode(color) {
         Gamepads.gamepad2.leftStickButton.whenBecomesTrue{tracker = SpindexerTracker()}
         Gamepads.gamepad2.dpadDown.whenBecomesTrue((IntakeCommands.intake))
             .whenBecomesFalse(IntakeCommands.stopIntake)
-
+        Gamepads.gamepad2.x.whenBecomesTrue { makeCurrentPosCorrect() }
+        Gamepads.gamepad2.rightTrigger.atLeast(0.3)
+            .whenBecomesTrue{randomizationOffset-=1}
+        Gamepads.gamepad2.leftTrigger.atLeast(0.3)
+            .whenBecomesTrue{randomizationOffset+=1}
 
         //Driver controls
         Gamepads.gamepad1.rightBumper.whenBecomesTrue (intakeCommand )
@@ -79,10 +85,7 @@ open class ShittyTeleop(color: AllianceColor): MegiddoOpMode(color) {
         Gamepads.gamepad1.a.whenBecomesTrue(toggleLock)
         Gamepads.gamepad1.x.whenBecomesTrue(cancelShooting)
         Gamepads.gamepad1.options.whenBecomesTrue(fixSpindexSeq)
-        Gamepads.gamepad1.rightTrigger.atLeast(0.3)
-            .whenBecomesTrue{randomizationOffset-=1}
-        Gamepads.gamepad1.leftTrigger.atLeast(0.3)
-            .whenBecomesTrue{randomizationOffset+=1}
+
 
 
     }

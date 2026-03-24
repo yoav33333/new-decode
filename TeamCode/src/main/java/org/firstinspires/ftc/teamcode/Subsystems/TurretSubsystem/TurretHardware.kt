@@ -10,6 +10,7 @@ import dev.nextftc.hardware.impl.ServoEx
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.MyTelemetry
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveHardware
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.result
+import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.smartDist
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.offset
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.offsetLL
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.p
@@ -73,7 +74,7 @@ object TurretHardware : Component {
 
         MyTelemetry.addData("tx", res.tx)
         // Convert tx to radians and apply gain p
-        return Math.toRadians(res.tx * p)
+        return Math.toRadians(res.tx/smartDist * p)
     }
 
     // --- GETTERS (Using Cached Data) ---

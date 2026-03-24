@@ -6,7 +6,7 @@ import org.firstinspires.ftc.teamcode.Pedro.FusionLocalizer
 
 @Configurable
 object DriveVars {
-    var trustLL = 0.25
+    var trustLL = 0.01
 
     // Inside your Follower/Localizer initialization:
     @JvmField var P: DoubleArray = doubleArrayOf(0.1, 0.1, 0.1) // Initial uncertainty

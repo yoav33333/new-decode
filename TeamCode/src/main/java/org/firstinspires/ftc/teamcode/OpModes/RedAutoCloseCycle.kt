@@ -42,42 +42,33 @@ import kotlin.time.Duration.Companion.seconds
 
 @Autonomous
 @Configurable
-class RedAutoClose15: MegiddoOpMode(AllianceColor.RED) {
+class RedAutoCloseCycle: MegiddoOpMode(AllianceColor.RED) {
 
     @JvmField var startingPose = Pose(116.704, 127.789,Math.toRadians(216.0))
     @JvmField var shootingPose = Pose(56.0, 83.408, Math.toRadians(180+180.0)).mirror()
     @JvmField var intakeMidCon1 = Pose(41.0, 78.5).mirror()
     @JvmField var intakeMidCon2 = Pose(43.814, 57.2).mirror()
-    @JvmField var intakeMid = Pose(19.699, 56.865).mirror()
+    @JvmField var intakeMid = Pose(15.699, 56.865).mirror()
     @JvmField var backMidCon1 = Pose(35.181, 58.297).mirror()
     @JvmField var backMidCon2 = Pose(35.428, 74.068).mirror()
     @JvmField var intakeGateCon1 = Pose(38.942, 65.652).mirror()
 //    @JvmField var intakeGateCon2 = Pose(32.164, 52.541).mirror()
 //    @JvmField var intakeGateCon3 = Pose(30.767, 46.573).mirror()
 //    @JvmField var intakeGateCon4 = Pose(23.324, 55.268).mirror()
-    @JvmField var intakeGate = Pose(18.027, 59.944,Math.toRadians(330.0)).mirror()
+    @JvmField var intakeGate = Pose(14.527, 58.344,Math.toRadians(335.0)).mirror()
     @JvmField var backGateCon1 = Pose(30.406, 59.837).mirror()
     @JvmField var backGateCon2 = Pose(42.038, 68.590).mirror()
     @JvmField var backGateCon3 = Pose(39.692, 72.233).mirror()
     @JvmField var intakeCloseCon1 = Pose(41.521, 82.352).mirror()
     @JvmField var intakeCloseCon2 = Pose(37.359, 85.758).mirror()
-    @JvmField var intakeClose = Pose(24.028, 83.620, 0.0).mirror()
-//    @JvmField var backCloseCon1 = Pose(26.120, 83.655).mirror()
-//    @JvmField var backCloseCon2 = Pose(49.944, 73.521).mirror()
-    @JvmField var intakeFarCon1 = Pose(51.324, 71.739).mirror()
-    @JvmField var intakeFarCon2 = Pose(53.901, 42.211).mirror()
-//    @JvmField var intakeFarCon3 = Pose(60.958, 32.704).mirror()
-    @JvmField var intakeFar = Pose(20.254, 40.338, Math.toRadians(60.0)).mirror()
-    @JvmField var backFarCon1 = Pose(23.676, 33.824).mirror()
-//    @JvmField var backFarCon2 = Pose(60.592, 82.901).mirror()
-
-
+    @JvmField var intakeClose = Pose(22.028, 83.620, 0.0).mirror()
 
     @JvmField var finishPose = Pose(119.775, 91.634)
     var moveToShooting1 = PathChain()
     var moveToIntakeMid = PathChain()
     var moveToShooting2 = PathChain()
     var moveToIntakeGate = PathChain()
+    var moveToIntakeGate2 = PathChain()
     var moveToShooting3 = PathChain()
     var moveToIntakeClose = PathChain()
     var moveToShooting4 = PathChain()
@@ -97,10 +88,12 @@ class RedAutoClose15: MegiddoOpMode(AllianceColor.RED) {
         moveToShooting2 = createPath(intakeMid, shootingPose, tangent = true, reversed = false, backMidCon1, backMidCon2)
         moveToIntakeGate = createPath(moveToShooting2.endPose(), intakeGate, tangent = false, reversed = false, intakeGateCon1)
         moveToShooting3 = createPath(intakeGate, shootingPose, tangent = true, reversed = false, backGateCon1, backGateCon2, backGateCon3)
-        moveToIntakeClose = createPath(shootingPose, intakeClose, tangent = true, reversed = true, intakeCloseCon1, intakeCloseCon2)
-        moveToShooting4 = createPath(intakeClose, shootingPose.setHeading(Math.toRadians(90.0)), tangent = false)
-        moveToIntakeFar = createPath(shootingPose, intakeFar, tangent = true, reversed = true, intakeFarCon1, intakeFarCon2)
-        moveToShooting5 = createPath(intakeFar, shootingPose, tangent = false)
+        moveToIntakeClose = createPath(shootingPose, intakeClose, tangent = false)
+        moveToShooting4 = createPath(intakeClose, shootingPose, tangent = false)
+        moveToIntakeGate2 = createPath(moveToShooting4.endPose(), intakeGate, tangent = false, reversed = false, intakeGateCon1)
+        moveToShooting5 = createPath(intakeGate, shootingPose, tangent = true, reversed = false, backGateCon1, backGateCon2, backGateCon3)
+//        moveToIntakeFar = createPath(shootingPose, intakeFar, tangent = true, reversed = true, intakeFarCon1, intakeFarCon2)
+//        moveToShooting5 = createPath(intakeFar, shootingPose, tangent = false)
 //        moveToFinish = createPath(shootingPose, finishPose)
         scan.setRequirements(emptySet())
         scan.schedule()
@@ -109,13 +102,17 @@ class RedAutoClose15: MegiddoOpMode(AllianceColor.RED) {
     fun auto(): SequentialGroup = SequentialGroup(
 
         FollowPath(moveToShooting1).and(findPattern(
-            Delay(0.3).then(WaitUntil{ cachedVelocity < 15.0 }))
+            Delay(0.3).then(WaitUntil{ cachedVelocity < 10.0 }))
         ),
         shootingCommand,
         Cycle(moveToIntakeMid, moveToShooting2),
-        Cycle(moveToIntakeGate, moveToShooting3, 2.0),
+        Cycle(moveToIntakeGate, moveToShooting3, 0.9),
+        Cycle(moveToIntakeGate2, moveToShooting5, 1.0),
         Cycle(moveToIntakeClose, moveToShooting4),
-        Cycle(moveToIntakeFar, moveToShooting5),
+//        Cycle(moveToIntakeGate2, moveToShooting5, 1.5),
+//        Cycle(moveToIntakeGate2, moveToShooting5, 1.5),
+//        Cycle(moveToIntakeClose, moveToShooting4),
+//        Cycle(moveToIntakeFar, moveToShooting5),
 //        ParallelGroup(
 //            FollowPath(moveToFinish),
 //            RepeatCommand(InstantCommand{ MyTelemetry.addData("ewtdfghtyu87", "cd") })
@@ -127,7 +124,7 @@ class RedAutoClose15: MegiddoOpMode(AllianceColor.RED) {
         auto.setRequirements(this)
         auto.schedule()
         SequentialGroup(
-            Delay(28.5.seconds),
+            Delay(29.seconds),
             InstantCommand{
                 LambdaCommand().setRequirements(this).schedule()
                 shootingCommand.cancel()
