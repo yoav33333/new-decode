@@ -4,37 +4,18 @@ import com.bylazar.configurables.annotations.Configurable
 import com.bylazar.field.PanelsField.field
 import com.bylazar.field.PanelsField.presets
 import com.bylazar.field.Style
-import com.bylazar.gamepad.Gamepad
 import com.pedropathing.follower.Follower
 import com.pedropathing.geometry.Pose
 import com.pedropathing.math.Vector
 import com.pedropathing.paths.Path
-import com.pedropathing.paths.PathChain
 import com.pedropathing.util.PoseHistory
-import com.qualcomm.hardware.limelightvision.LLResult
 import dev.nextftc.core.components.Component
-import dev.nextftc.core.units.rad
 import dev.nextftc.extensions.pedro.PedroComponent.Companion.follower
-import dev.nextftc.ftc.ActiveOpMode.runtime
 import dev.nextftc.ftc.Gamepads
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveVars.startingPose
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveVars.trustLL
 //import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLight.rotationOffset
-import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLight.updateLL
-import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars
-import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.centerOfRotationOffset
-import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.distFilter
-import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.smartDist
-import org.firstinspires.ftc.teamcode.Subsystems.Robot.AllianceColor
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.MyTelemetry
-import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars
-import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.allianceColor
-import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.vectorFromTarget
-import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.getTargetAngle
-import org.firstinspires.ftc.teamcode.Util.DriftKalmanFilter
-import org.firstinspires.ftc.teamcode.Util.LoopTimer.loopTime
-import org.firstinspires.ftc.teamcode.Util.Util.pose3DMetersToInches
-import org.firstinspires.ftc.teamcode.Util.Util.pose3dToPose
 import kotlin.math.abs
 
 @Configurable
@@ -89,27 +70,6 @@ object DriveHardware : Component {
             }
             MyTelemetry.addData("Drive State", "Teleop")
         }
-
-//        if (follower.velocity.magnitude<2 && follower.angularVelocity < 0.5){
-//            val result: LLResult? = LimeLightVars.result
-//            if (result != null && result.isValid()) {
-//                val rotatedOffset = centerOfRotationOffset.copy()
-//                rotatedOffset.rotateVector(follower.heading.rad.value)
-//                MyTelemetry.addData("id", result.fiducialResults[0].fiducialId)
-//                var pose = pose3DMetersToInches(result.botpose_MT2)
-//                setPoseEstimate(trustFusion(
-//                    follower.pose.asVector,
-//                    pose3dToPose(pose)
-//                        .asVector.plus(rotatedOffset))
-//                    .setHeading(follower.heading))
-//                if(isHolding){
-//                    follower.holdPoint(follower.pose)
-//                }
-//                Drawing.drawDebug(follower, pose3dToPose(pose))
-//            }
-//            return
-//        }
-
         Drawing.drawDebug(follower)
     }
 }

@@ -41,7 +41,6 @@ import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferComma
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.runTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferCommands.stopTransfer
 //import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.lockOnGoal
-import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.moveToAngle
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.toggleLock
 //import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.turretSeq
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.runTurret

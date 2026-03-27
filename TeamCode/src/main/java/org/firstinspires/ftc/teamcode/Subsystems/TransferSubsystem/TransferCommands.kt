@@ -8,14 +8,6 @@ import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferVars.
 
 object TransferCommands {
     val runTransfer = InstantCommand { setPower(transferPower) }
-    val runTransferSmart = LambdaCommand()
-        .setUpdate {
-            if (atTargetVelocity())
-            setPower(transferPower)
-            else
-                setPower(0.0)
-        }.setRequirements(
-        TransferHardware)
     val reverseTransfer = InstantCommand { setPower(-transferPower) }
     val stopTransfer = InstantCommand { setPower(0.0) }
 }

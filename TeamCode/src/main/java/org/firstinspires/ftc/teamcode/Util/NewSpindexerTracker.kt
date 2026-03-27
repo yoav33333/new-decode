@@ -65,6 +65,12 @@ class NewSpindexerTracker {
         currentPos -= bestSteps
         return currentPos
     }
+    fun rotate(steps: Int): Int{
+        arr.rotateRight(steps)
+        currentPos -= steps
+        currentPos = clamp(currentPos, minPos, maxPos)
+        return currentPos
+    }
     fun shoot(): Int{
         arr.fill(SpindexerSlotState.EMPTY)
         currentPos = maxPos

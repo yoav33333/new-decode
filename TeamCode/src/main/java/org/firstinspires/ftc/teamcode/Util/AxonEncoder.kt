@@ -4,11 +4,9 @@ import com.qualcomm.robotcore.hardware.AnalogInput
 import dev.nextftc.ftc.ActiveOpMode.hardwareMap
 
 class AxonEncoder(name: String) {
-//    init {
     val encoder = hardwareMap.get(AnalogInput::class.java, name)
-//    }
+
     fun getVoltage(): Double {
-//        val encoder = hardwareMap.get(AnalogInput::class.java, "axonEncoder")
         return encoder.voltage
     }
     fun getPosition(): Double {

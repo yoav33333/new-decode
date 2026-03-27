@@ -11,11 +11,9 @@ import java.util.Objects
 object MyTelemetry : Component {
     val joined by lazy { JoinedTelemetry(PanelsTelemetry.ftcTelemetry, ActiveOpMode.telemetry) }
     override fun postUpdate() {
-        joined.addData("Loop Time", loopTime)
         joined.update()    }
 
     override fun postWaitForStart() {
-        joined.addData("Loop Time", loopTime)
         joined.update()
     }
 

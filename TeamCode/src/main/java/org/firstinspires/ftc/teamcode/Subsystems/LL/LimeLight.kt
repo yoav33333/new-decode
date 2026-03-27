@@ -13,16 +13,14 @@ import com.qualcomm.hardware.limelightvision.Limelight3A
 import dev.nextftc.core.components.Component
 import dev.nextftc.extensions.pedro.PedroComponent.Companion.follower
 import dev.nextftc.ftc.ActiveOpMode.hardwareMap
-import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.LLMul
+import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.GPP
+import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.PGP
+import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.PPG
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.bluePipeline
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.centerOfRotationOffset
 //import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveHardware.filter
-import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.dist
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.distFilter
-import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.goalHeightInches
-import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.limelightLensHeightInches
-import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.limelightMountAngleDegrees
-import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.offsetFromAxis
+
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.patternPipeline
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.redPipeline
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.result
@@ -78,24 +76,20 @@ object LimeLight: Component {
 
     fun getPattern(): Randomization{
         return when(getId()){
-            21 -> Randomization.GPP
-            22 -> Randomization.PGP
-            23 -> Randomization.PPG
+            GPP -> Randomization.GPP
+            PGP -> Randomization.PGP
+            PPG -> Randomization.PPG
             else -> randomization
         }
     }
 
     fun updateSmartDist(){
         val result: LLResult? = LimeLightVars.result
-//        MyTelemetry.addData("dist from tag", updateDistFormTag())
         if (result != null && result.isValid()) {
             MyTelemetry.addData("id", result.fiducialResults[0].fiducialId)
             var pose = pose3DMetersToInches(result.botpose)
             smartDist = distFilter.estimate(pose3dToPose(pose)
                 .asVector.minus(RobotVars.goalPos).magnitude)
-//            smartDist = distFilter.estimate(pose3dToPose(pose)
-//                .plus(Pose(follower.velocity.xComponent*smartDist*LLMul, follower.velocity.yComponent*smartDist*LLMul))
-//                .asVector.minus(RobotVars.goalPos).magnitude)
         }
     }
 

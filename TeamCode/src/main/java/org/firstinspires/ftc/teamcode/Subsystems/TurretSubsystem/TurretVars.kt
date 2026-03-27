@@ -10,11 +10,7 @@ object TurretVars {
     @JvmField var p = -35.0
     @JvmField var rotationPred = 0.07
     @JvmField var runTurret = true
-    @JvmField var distP = 0.05
-    @JvmField var encoderMul = 8192*360
-    @JvmField var Kv = 0.5
     @JvmField var offset = .0
-    @JvmField var moveMul = .00
     @JvmField var offsetLL = .0
 
     @JvmField var reducer = 0.95
@@ -22,8 +18,6 @@ object TurretVars {
 
     @JvmField var state = TurretState.Disabled
     @JvmField var targetPosition = 0.0
-    @JvmField var posCoefficients: PIDCoefficients = PIDCoefficients(0.0135, 0.0, 0.0009)
-    @JvmField var angleControl: BasicPID = BasicPID(posCoefficients)
 //310/360*255=219.583
 }
 enum class TurretState{

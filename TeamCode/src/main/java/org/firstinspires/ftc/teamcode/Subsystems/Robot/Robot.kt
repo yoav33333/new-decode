@@ -17,7 +17,6 @@ import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.goalPosBlue
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.goalPosRed
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.nominalVoltage
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.randomization
-import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.moveMul
 import org.firstinspires.ftc.teamcode.Util.LoopTimer.loopTime
 import kotlin.collections.forEach
 import kotlin.math.pow

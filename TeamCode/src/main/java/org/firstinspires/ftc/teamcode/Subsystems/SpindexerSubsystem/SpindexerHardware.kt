@@ -3,9 +3,6 @@ package org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem
 import com.ThermalEquilibrium.homeostasis.Utils.Timer
 import com.bylazar.configurables.annotations.Configurable
 import com.qualcomm.hardware.rev.RevColorSensorV3
-import com.qualcomm.robotcore.hardware.ColorRangeSensor
-import com.qualcomm.robotcore.hardware.DigitalChannel
-import dev.nextftc.bindings.button
 import dev.nextftc.core.components.Component
 import dev.nextftc.ftc.ActiveOpMode.hardwareMap
 import dev.nextftc.hardware.impl.ServoEx
@@ -13,31 +10,22 @@ import org.firstinspires.ftc.teamcode.Subsystems.Robot.MyTelemetry
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware.shooterMotor2
 //import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.fixSpindex
-import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.fixSpindexSeq
-import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.resetingSeq
-import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.tracker
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.MulEnc
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.degreesPerSlot
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.greenRange
-import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.intakeSlot
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.startIntakingStep
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.offset
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.offsetEnc
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.purpleRange
-import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.seconderyOffset
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.state
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.stuckTimeStart
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.targetPosition
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.wasStuck
 import org.firstinspires.ftc.teamcode.Util.AxonEncoder
 import org.firstinspires.ftc.teamcode.Util.FilteredColorSensor
-import org.firstinspires.ftc.teamcode.Util.InputChannel
 import org.firstinspires.ftc.teamcode.Util.NewSpindexerTracker
-import org.firstinspires.ftc.teamcode.Util.SpindexerTracker
-import org.firstinspires.ftc.teamcode.Util.Util
 import org.firstinspires.ftc.teamcode.Util.Util.wrap360
 import kotlin.math.abs
-import kotlin.math.max
-import kotlin.time.Duration.Companion.seconds
 
 @Configurable
 object SpindexerHardware : Component {
@@ -138,33 +126,25 @@ object SpindexerHardware : Component {
         return true
     }
 
-//    fun moveEmptyToIntakePosition(): Boolean = moveStateToPosition(SpindexerSlotState.EMPTY, SpindexerVars.intakeSlot)
-
-//    fun moveColorToTransferPosition(color: SpindexerSlotState): Boolean {
-//        return if (moveStateToPosition(color, SpindexerVars.transferSlot)) {
-//            tracker[SpindexerVars.transferSlot] = SpindexerSlotState.EMPTY
-//            true
-//        } else false
-//    }
 
     fun rotate(steps: Int) {
         val newStepPosition = currentSteps + steps
         if (newStepPosition > 5 || newStepPosition < 0) return
 
         currentSteps = newStepPosition
-//        tracker.move(steps)
+        tracker.rotate(steps)
         targetPosition = currentSteps * SpindexerVars.degreesPerSlot + SpindexerVars.offset
     }
 
     fun resetSpindexer() {
-        currentSteps = 2
+        currentSteps = startIntakingStep
         tracker.init()
         targetPosition = currentSteps * SpindexerVars.degreesPerSlot + SpindexerVars.offset
         setPosition(angleToServoPos(targetPosition))
     }
 
     fun isAtTargetPosition(): Boolean {
-        return abs(getSpindexerPos() / 2 + 2 * degreesPerSlot +offset - targetPosition) < 15
+        return abs(getSpindexerPos() / 2 + startIntakingStep * degreesPerSlot +offset - targetPosition) < 15
     }
 
     fun isStuck(): Boolean = abs(cachedVelocity) < 2
@@ -208,8 +188,8 @@ object SpindexerHardware : Component {
         MyTelemetry.addData("Target/Step", "%.1f / %d".format(targetPosition, currentSteps))
         MyTelemetry.addData("Stats", "Full: ${tracker.isFull()} | Ball: ${hasBallInTransfer()}")
         MyTelemetry.addData("at target", isAtTargetPosition())
-        MyTelemetry.addData("offset ", getSpindexerPos() / 2 + 2 * SpindexerVars.degreesPerSlot +offset - targetPosition)
-        MyTelemetry.addData("move Spin ", getSpindexerPos() / 2 + 2 * SpindexerVars.degreesPerSlot+offset)
+        MyTelemetry.addData("offset ", getSpindexerPos() / 2 + startIntakingStep * SpindexerVars.degreesPerSlot +offset - targetPosition)
+        MyTelemetry.addData("move Spin ", getSpindexerPos() / 2 + startIntakingStep * SpindexerVars.degreesPerSlot+offset)
         MyTelemetry.addData("spin state ", tracker.toString())
     }
 

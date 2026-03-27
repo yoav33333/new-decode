@@ -7,35 +7,22 @@ import org.firstinspires.ftc.teamcode.Util.HSVRange
 
 @Configurable
 object SpindexerVars {
-//    @JvmField var p = 0.1
-//    @JvmField var i = 0.1
-//    @JvmField var d = 0.0
-//    @JvmField var kv = 0.0
-//    @JvmField var gain = 0.2
-//    @JvmField var kv = 0.0
+
     @JvmField var targetPosition = 0.0
+    @JvmField var startIntakingStep = 5
     @JvmField var stuckTimeStart = 0.0
     @JvmField var wasStuck = false
     @JvmField var steps = 0
     @JvmField var maxRotation = 355.0
     @JvmField var degreesPerSlot = 66.5
-    @JvmField var seconderyOffset = 0.0
-    @JvmField var intakeSlot = 2
-    @JvmField var transferSlot = 0
-    @JvmField var spinDelayShoot = 0.25
-    @JvmField var spinDelayIntake = 0.00
     @JvmField var offset = 6.5
     @JvmField var offsetEnc = 0.0
     @JvmField var MulEnc = 1.1
     @JvmField var purpleRange = HSVRange(170.0,1000.0,0.0,1000.0,0.0,1000.0)
     @JvmField var greenRange = HSVRange(80.0,170.0,0.0,1000.0,0.0,1000.0)
-//    @JvmField var distThreshold = 30
     @JvmField var defaultColor = SpindexerSlotState.PURPLE
     @JvmField var state = State.RUN
 
-//    @JvmField var coefficients= PIDCoefficients(0.5, 0.0, 0.0)
-//    @JvmField var pid = BasicPID(coefficients)
-//    @JvmField var controller = AngleController(pid)
 }
 
 enum class State{

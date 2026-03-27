@@ -20,11 +20,8 @@ import kotlin.math.abs
 import kotlin.time.Duration.Companion.seconds
 
 object TurretCommands {
-    fun moveToAngle(angle: Double) = InstantCommand{setAngle(angle)}
-        .setRequirements(TurretHardware)
+
     fun moveToAngler(angle: Double) = InstantCommand{setAngle(angle)}
-//        .setRequirements(TurretHardware)
-    fun centerAprilTags() = InstantCommand{state = TurretState.TrackingAprilTags}
 
     val toggleLock = InstantCommand{
         if (state == TurretState.Disabled){
