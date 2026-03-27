@@ -22,7 +22,6 @@ import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLight.setTarget
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware.atTargetVelocity
 //import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware.stopShooting
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.runIntakeSeq
-import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.runIntakeSeqAuto
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.transferAll
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.isEmpty
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.isFull
@@ -90,7 +89,7 @@ object RobotCommands {
     val scanCommand =
         SequentialGroup(
             Delay(0.1),
-            RepeatCommand(runIntakeSeqAuto) { isFull() },
+            RepeatCommand(runIntakeSeq) { isFull() },
         )
     fun findPattern(stopWhen: Command) =
         SequentialGroup(

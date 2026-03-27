@@ -67,58 +67,16 @@ object SpindexerCommands {
 //        .setRequirements(SpindexerHardware)
     val checkColorAndUpdate = LambdaCommand()
         .setIsDone { checkIntakeColorAndUpdate() }
-    val checkColorAndUpdateAuto = LambdaCommand()
-        .setIsDone { checkIntakeColorAndUpdateAuto() }
 
-
-    val runIntakeCycle =
+    val runIntakeSeq=
         SequentialGroup(
-//            WaitUntil{isAtTargetPosition()},
             WaitUntil{isAtTargetPosition()},
             checkColorAndUpdate,
-//            ActiveDelay{spinDelayIntake.seconds},
             moveToIntakePosition,
-
-//            Delay(0.05.seconds)\\\\
         )
-    val runIntakeCycleAuto =
-        SequentialGroup(
 
-            WaitUntil{isAtTargetPosition()},
-            checkColorAndUpdateAuto,
-//            ActiveDelay{spinDelayIntake.seconds},
-            moveToIntakePosition,
-//            IfElseCommand({ IntakeHardware.getVel()<400 }
-//                ,outtake, intake),
-//            smartIntake,
-//            Delay(0.3),
-            //            Delay(0.05.seconds)\\\\
-        )
-    val runIntakeSeq=
-//        ParallelDeadlineGroupKill(
-//            WaitUntil{isFull()},
-            runIntakeCycle
-    val runIntakeSeqAuto=
-//        ParallelDeadlineGroupKill(
-//            WaitUntil{isFull()},
-        runIntakeCycle
-
-//    //        ).setRequirements(SpindexerHardware)
-//    val fixSpindex = lazy{
-////        SequentialGroup(
-////            Delay(0.1),
-//            InstantCommand{
-////                if (!isAtTargetPosition() && isStuck()){
-//                    fixSpindexSeq.value.schedule()
-////                }
-//            }
-////        )
-//    }
     val fixSpindexSeq =
         SequentialGroup(
-//            Delay(0.1),
-//            IfElseCommand(
-//                { !isAtTargetPosition() && abs(getVel()) < 5 },
             SequentialGroup(
                     InstantCommand {
                         state = State.FIX
@@ -134,24 +92,20 @@ object SpindexerCommands {
                     InstantCommand {
                         state = State.RUN
                     }),
-//                NullCommand()
             ).setRequirements(this)
-//        )
-//    }
+
     val resetingSeq = SequentialGroup(
         InstantCommand{
             resetSpindexer()
             state = State.RESET},
-//        WaitUntil{getSpindexerVel()>10},
         Delay(4.5),
-//        WaitUntil{abs(getSpindexerVel())>100}.raceWith(Delay(0.5)),
         WaitUntil{timeStuck()>1.2},
         InstantCommand{
             resetSpindexerEnc()
             state = State.RUN
         }
-
     )
+
     fun transferAll(startWhen: Command) =
         SequentialGroup(
             moveToTransferPositionLocking({ RobotVars.randomization.value[floorMod(0 + randomizationOffset, 3)] }),

@@ -17,7 +17,6 @@ import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCom
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.tracker
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.MulEnc
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.degreesPerSlot
-import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.delayMul
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.greenRange
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.intakeSlot
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.offset
@@ -57,7 +56,7 @@ object SpindexerHardware : Component {
     private var lastCommandedServoPos = -1.0 // Initialize with impossible value
     private val SERVO_EPSILON = 0.001 // Minimum change required to trigger a write
 
-    @JvmField var currentSteps = 2
+    @JvmField var currentSteps = 0
 
     // --- Optimized Getters (Using Caches) ---
     fun getSpindexerPos(): Double = -(offsetEnc + cachedEncoderPos) / 8192 * 360
@@ -126,7 +125,6 @@ object SpindexerHardware : Component {
 
     fun moveStateToPosition(color: SpindexerSlotState, pos: Int): Boolean {
         val steps = tracker.stepsToState(color, pos) ?: return false
-        delayMul = max(1.0, steps / 1.5)
         rotate(steps)
         colorSensor1.value.resetFilter()
         colorSensor2.value.resetFilter()

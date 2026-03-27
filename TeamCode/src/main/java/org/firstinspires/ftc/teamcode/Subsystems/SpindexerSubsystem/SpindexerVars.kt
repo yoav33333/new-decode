@@ -24,7 +24,6 @@ object SpindexerVars {
     @JvmField var transferSlot = 0
     @JvmField var spinDelayShoot = 0.25
     @JvmField var spinDelayIntake = 0.00
-    @JvmField var delayMul = 1.0
     @JvmField var offset = 6.5
     @JvmField var offsetEnc = 0.0
     @JvmField var MulEnc = 1.1
