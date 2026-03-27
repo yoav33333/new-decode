@@ -42,6 +42,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferComma
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.cachedVelocity
 //import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.turretSeq
 import org.firstinspires.ftc.teamcode.Util.FollowPath
+import org.firstinspires.ftc.teamcode.Util.Util.Cycle
 import org.firstinspires.ftc.teamcode.Util.Util.createPath
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.CommandSeqNoReq
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.ParallelDeadlineGroupKill
@@ -54,101 +55,27 @@ import kotlin.time.Duration.Companion.seconds
 
 @Autonomous
 @Configurable
-class RedAutoOverFlow: MegiddoOpMode(AllianceColor.RED) {
-
-    @JvmField var startingPose = Pose(89.211, 8.254,Math.toRadians(180.0))
-    @JvmField var shootingPose = Pose(89.211, 15.254)
-    @JvmField var intakePose = Pose(130.944, 5.789)
-//    @JvmField var endIntakePose = Pose(125.944, 34.789)
-    @JvmField var finishPose = Pose(90.958, 38.408)
+class RedAutoOverFlow: AutoBase(AllianceColor.RED) {
+    override var startingPose = Pose(89.211, 8.254,Math.toRadians(180.0))
+    @JvmField var shootingPose = Pose(89.211, 15.254,Math.toRadians(180.0))
+    @JvmField var intakePose = Pose(135.944, 5.789,Math.toRadians(180.0))
+    override  var finishPose = Pose(90.958, 38.408,Math.toRadians(180.0))
     var moveToShooting1 = PathChain()
     var moveToIntake = PathChain()
     var moveToShootingCycle = PathChain()
-//    var moveToPreIntake2 = PathChain()
-//    var moveToEndIntake2 = PathChain()
-//    var moveToShooting3 = PathChain()
-//    var moveToFinish = PathChain()
-    init {
-        DriveVars.startingPose = startingPose
-    }
-    val scan = SequentialGroup(
-        resetingSeq,
-        scanCommand.raceWith(WaitUntil{ isFull() })
-    )
-    override fun onInit(){
-        moveToShooting1 = follower.pathBuilder()
-            .addPath(BezierLine(startingPose, shootingPose))
-            .setLinearHeadingInterpolation(Math.toRadians(180.0), Math.toRadians(180.0))
-            .build()
-        moveToIntake = follower.pathBuilder()
-            .addPath(BezierLine(shootingPose, intakePose))
-            .setLinearHeadingInterpolation(Math.toRadians(180.0), Math.toRadians(180.0))
-            .build()
-        moveToShootingCycle = follower.pathBuilder()
-            .addPath(BezierLine(intakePose, shootingPose))
-            .setConstantHeadingInterpolation(Math.toRadians(180.0))
-            .build()
-        scan.setRequirements(emptySet())
-//        = mutableSetOf()
-        scan.schedule()
-//        findPattern(
-//            Delay(0.5)
-//                .then(WaitUntil{ cachedVelocity < 15.0 }
-//                    .then(Delay(0.5))))
-//            .schedule()
+    override fun initializePaths(){
+        moveToShooting1 = createPath(startingPose, shootingPose)
+        moveToIntake = createPath(shootingPose, intakePose)
+        moveToShootingCycle = createPath(intakePose, shootingPose)
     }
 
-    fun auto(): SequentialGroup = SequentialGroup(
+    override fun auto(): SequentialGroup = SequentialGroup(
         FollowPath( moveToShooting1 ).and(findPattern(
             Delay(0.5).then(WaitUntil{ cachedVelocity < 15.0 })
         )),
-//        InstantCommand{intakeCommand.schedule()},
-//        Delay(0.1),
-        transferAll(
-            SequentialGroup(
-                WaitUntil { atTargetVelocity() },
-                runTransfer
-            )
-        ),
-
+        shootingCommand,
         RepeatCommand(
-            SequentialGroup(
-                UninteraptingCommand( intakeCommandAuto ),
-                FollowPath( moveToIntake ),
-                Delay(0.5),
-                FollowPath( moveToShootingCycle ),
-                Delay(0.2),
-                outtake,
-                InstantCommand{intakeCommandAuto.cancel()},
-                transferAll(
-                    SequentialGroup(
-                        WaitUntil { atTargetVelocity() },
-                        runTransfer
-                    )
-                ),
-
-            ),
-//            {time>25},
-            ),
-
-//    ),
-            InstantCommand{follower.holdPoint(finishPose)}
+            Cycle(moveToIntake, moveToShootingCycle, 0.8)
+        ),
     )
-    override fun onStartButtonPressed() {
-
-        val auto = auto()
-        auto.setRequirements(this)
-        auto.schedule()
-        SequentialGroup(
-            Delay(27.seconds),
-            InstantCommand{
-                LambdaCommand().setRequirements(this).schedule()
-                follower.holdPoint(finishPose)
-            }
-        ).schedule()
-    }
-
-
-
-
 }

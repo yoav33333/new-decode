@@ -89,7 +89,6 @@ object RobotCommands {
 
     val scanCommand =
         SequentialGroup(
-//                smartIntake,
             Delay(0.1),
             RepeatCommand(runIntakeSeqAuto) { isFull() },
         )
@@ -109,47 +108,22 @@ object RobotCommands {
                 InstantCommand { intakeCommandAuto.cancel() },
                 InstantCommand { intakeCommand.cancel() },
                 stopIntake,
-//                WaitUntil { isEmpty() },
-//                Delay(0.5),
-//                InstantCommand { stopShooting() }
             ),
             SequentialGroup(
                 stopTransfer,
-//                shoot,
                 transferAll(
                     SequentialGroup(
                         runTransfer
                     )
                 ),
-            UninteraptingCommand(
-
-//                InstantCommand { stopShooting() },
-                SequentialGroup (reverseTransfer,
-                Delay(0.2),
-                stopTransfer,)
-            ))
-        )
-    val shootingCommandAuto =
-        ParallelDeadlineGroup(
-            SequentialGroup(
-                InstantCommand { intakeCommandAuto.cancel() },
-                InstantCommand { intakeCommand.cancel() },                stopIntake,
-                WaitUntil { isEmpty() },
-                Delay(0.5),
-//                InstantCommand { stopShooting() }
-            ),
-            SequentialGroup(
-                stopTransfer,
-//                shoot,
-                transferAll(
-                    SequentialGroup(
-                        runTransfer
+                UninteraptingCommand(
+                    SequentialGroup (
+                        Delay(0.2),
+                        reverseTransfer,
+                        Delay(0.2),
+                        stopTransfer,
                     )
-                ),
-//                InstantCommand { stopShooting() },
-                reverseTransfer,
-                Delay(0.2),
-                stopTransfer,
+                )
             )
         )
     val cancelShooting = SequentialGroup(

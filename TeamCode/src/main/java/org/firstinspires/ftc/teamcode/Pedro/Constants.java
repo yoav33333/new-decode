@@ -1,10 +1,11 @@
 package org.firstinspires.ftc.teamcode.Pedro;
 
-import static org.firstinspires.ftc.teamcode.Pedro.FollowerGen.getFollowerGen;
+import static org.firstinspires.ftc.teamcode.Pedro.FollowerGen.followerGen;
 import static org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveVars.measurementVariance;
 import static org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveVars.processVariance;
 //import static org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.nominaVoltage;
 import static org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.nominalVoltage;
+import static org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.opModeType;
 import static org.firstinspires.ftc.teamcode.Util.Util.mmToInches;
 import static java.lang.Math.PI;
 
@@ -27,6 +28,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveVars;
+import org.firstinspires.ftc.teamcode.Subsystems.Robot.OpModeType;
 
 
 import dev.nextftc.ftc.ActiveOpMode;
@@ -117,10 +119,13 @@ public class Constants {
             2.5,
             1
     );
-
+    public static Follower follower;
 //    public static
     public static Follower createFollower(HardwareMap hardwareMap) {
-        return getFollowerGen().getValue();
+        if (follower == null || opModeType == OpModeType.AUTO){
+            follower = generateFollower(hardwareMap);
+        }
+        return follower;
     }
     public static Follower generateFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)

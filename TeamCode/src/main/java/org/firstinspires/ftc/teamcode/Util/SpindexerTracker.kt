@@ -1,12 +1,9 @@
 package org.firstinspires.ftc.teamcode.Util
 
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerSlotState
 import kotlin.math.abs
 
-public enum class SpindexerSlotState {
-    EMPTY,
-    PURPLE,
-    GREEN,
-}
+
 
 class SpindexerTracker {
     // HARDWARE CONSTANTS

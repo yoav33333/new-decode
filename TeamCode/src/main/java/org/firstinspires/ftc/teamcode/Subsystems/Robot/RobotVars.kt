@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.Subsystems.Robot
 import com.bylazar.configurables.annotations.Configurable
 import com.pedropathing.geometry.Pose
 import com.pedropathing.math.Vector
-import org.firstinspires.ftc.teamcode.Util.SpindexerSlotState
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerSlotState
 import org.firstinspires.ftc.teamcode.Util.Util.mmToInches
 @Configurable
 object RobotVars {
@@ -20,11 +20,16 @@ object RobotVars {
     @JvmField var allianceColor = AllianceColor.RED
     @JvmField var randomization = Randomization.PPG
     @JvmField var randomizationOffset = 0
+    @JvmField var opModeType = OpModeType.TELE
 }
 
 enum class AllianceColor {
     RED,
     BLUE
+}
+enum class OpModeType{
+    AUTO,
+    TELE
 }
 enum class Randomization(val value: Array<SpindexerSlotState>){
     PPG(arrayOf(SpindexerSlotState.PURPLE, SpindexerSlotState.PURPLE, SpindexerSlotState.GREEN)),

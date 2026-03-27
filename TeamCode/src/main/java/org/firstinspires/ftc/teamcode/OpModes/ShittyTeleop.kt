@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveCommands.re
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem.IntakeCommands
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLightVars.smartDist
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.AllianceColor
+import org.firstinspires.ftc.teamcode.Subsystems.Robot.OpModeType
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.cancelShooting
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.intakeCommand
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.shootingCommand
@@ -47,7 +48,6 @@ import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.
 //import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretCommands.turretSeq
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretVars.runTurret
 import org.firstinspires.ftc.teamcode.Util.ActiveDelay
-import org.firstinspires.ftc.teamcode.Util.SpindexerSlotState
 //import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.setTargetPositionFromDegrees
 import org.firstinspires.ftc.teamcode.Util.SpindexerTracker
 import org.firstinspires.ftc.teamcode.Util.UtilCommands.LoopingCommand
@@ -56,7 +56,7 @@ import kotlin.math.abs
 import kotlin.time.Duration.Companion.seconds
 
 
-open class ShittyTeleop(color: AllianceColor): MegiddoOpMode(color) {
+open class ShittyTeleop(color: AllianceColor): MegiddoOpMode(color, OpModeType.TELE) {
     init {
         auto = false
         //Operator controls(Fail safes)
@@ -94,7 +94,7 @@ open class ShittyTeleop(color: AllianceColor): MegiddoOpMode(color) {
     }
 
     override fun onInit() {
-        resetingSeq.schedule()
+//        resetingSeq.schedule()
 //        turretSeq().schedule()
 
 //        moveToAngle(270.0).schedule()

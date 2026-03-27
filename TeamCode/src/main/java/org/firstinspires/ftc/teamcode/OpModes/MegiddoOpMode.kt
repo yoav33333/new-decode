@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveHardware
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveVars.startingPose
 import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLight
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.AllianceColor
+import org.firstinspires.ftc.teamcode.Subsystems.Robot.OpModeType
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.Photon
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.Robot
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars
@@ -25,10 +26,10 @@ import org.firstinspires.ftc.teamcode.Subsystems.TransferSubsystem.TransferHardw
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware
 import org.firstinspires.ftc.teamcode.Util.LoopTimer
 
-open class MegiddoOpMode(allianceColor: AllianceColor): NextFTCOpMode() {
+open class MegiddoOpMode(allianceColor: AllianceColor, opModeType: OpModeType): NextFTCOpMode() {
     init {
         RobotVars.allianceColor = allianceColor
-
+        RobotVars.opModeType = opModeType
         addComponents(
             BindingsComponent,
             BulkReadComponent,

@@ -31,7 +31,6 @@ import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVar
 import org.firstinspires.ftc.teamcode.Util.AxonEncoder
 import org.firstinspires.ftc.teamcode.Util.FilteredColorSensor
 import org.firstinspires.ftc.teamcode.Util.InputChannel
-import org.firstinspires.ftc.teamcode.Util.SpindexerSlotState
 import org.firstinspires.ftc.teamcode.Util.SpindexerTracker
 import org.firstinspires.ftc.teamcode.Util.Util
 import org.firstinspires.ftc.teamcode.Util.Util.wrap360

@@ -36,7 +36,6 @@ import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVar
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.targetPosition
 import org.firstinspires.ftc.teamcode.Subsystems.TurretSubsystem.TurretHardware.cachedVelocity
 import org.firstinspires.ftc.teamcode.Util.ActiveDelay
-import org.firstinspires.ftc.teamcode.Util.SpindexerSlotState
 import java.lang.Math.floorMod
 import kotlin.math.abs
 import kotlin.time.Duration.Companion.seconds
@@ -172,6 +171,6 @@ object SpindexerCommands {
                 )]
             },
             WaitUntil { isAtTargetPosition()},
-            Delay(0.5.seconds),
+            Delay(0.2.seconds),
         )
 }

@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem
 import com.bylazar.configurables.annotations.Configurable
 //import org.firstinspires.ftc.teamcode.Util.ColorRange
 import org.firstinspires.ftc.teamcode.Util.HSVRange
-import org.firstinspires.ftc.teamcode.Util.SpindexerSlotState
 
 
 @Configurable
@@ -44,4 +43,9 @@ enum class State{
     RESET,
     RUN,
     FIX
+}
+public enum class SpindexerSlotState {
+    EMPTY,
+    PURPLE,
+    GREEN,
 }
