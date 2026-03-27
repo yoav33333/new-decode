@@ -17,17 +17,17 @@ import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.de
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterVars.targetVelocity
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.angleToServoPos
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.checkIntakeColorAndUpdate
-import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.checkIntakeColorAndUpdateAuto
-//import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.checkIntakeColorAndUpdateAuto
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.currentSteps
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.getSpindexerVel
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.getVel
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.hasBallInTransfer
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.isAtTargetPosition
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.isStuck
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.preShoot
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.resetSpindexer
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.resetSpindexerEnc
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.setPosition
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.shoot
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.timeStuck
 //import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.timeStuck
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.tracker
@@ -43,28 +43,7 @@ import kotlin.time.Duration.Companion.seconds
 object SpindexerCommands {
     fun rotate(steps: Int) =
         InstantCommand{ SpindexerHardware.rotate(steps) }
-    val moveToIntakePosition =
-        InstantCommand{ SpindexerHardware.moveEmptyToIntakePosition() }
-    fun moveToTransferPosition(color: SpindexerSlotState) =
-        InstantCommand{ SpindexerHardware.moveColorToTransferPosition(color) }
 
-
-    fun moveToTransferPositionLocking(color: ()->SpindexerSlotState) = LambdaCommand()
-        .setStart{
-            if(!SpindexerHardware.moveColorToTransferPosition(color())){
-                when(color()){
-                SpindexerSlotState.GREEN-> SpindexerHardware.moveColorToTransferPosition(
-                    SpindexerSlotState.PURPLE
-                )
-                SpindexerSlotState.PURPLE-> SpindexerHardware.moveColorToTransferPosition(
-                    SpindexerSlotState.GREEN
-                )
-                else -> {}
-                }
-            }
-        }
-//        .setIsDone { SpindexerHardware.isAtTargetPosition()  }
-//        .setRequirements(SpindexerHardware)
     val checkColorAndUpdate = LambdaCommand()
         .setIsDone { checkIntakeColorAndUpdate() }
 
@@ -72,7 +51,6 @@ object SpindexerCommands {
         SequentialGroup(
             WaitUntil{isAtTargetPosition()},
             checkColorAndUpdate,
-            moveToIntakePosition,
         )
 
     val fixSpindexSeq =
@@ -108,22 +86,11 @@ object SpindexerCommands {
 
     fun transferAll(startWhen: Command) =
         SequentialGroup(
-            moveToTransferPositionLocking({ RobotVars.randomization.value[floorMod(0 + randomizationOffset, 3)] }),
+            InstantCommand{preShoot()},
             WaitUntil { isAtTargetPosition() && (abs(currentVelocity - targetVelocity) < deltaThreshold) },
             startWhen,
-            WaitUntil { atTargetVelocity()},
-            Delay(0.055),
-
-            moveToTransferPositionLocking({ RobotVars.randomization.value[floorMod(1 + randomizationOffset, 3)] }),
-            WaitUntil { isAtTargetPosition() &&  atTargetVelocity() },
-            Delay(0.055),
-
-            moveToTransferPositionLocking {
-                RobotVars.randomization.value[floorMod(
-                    2 + randomizationOffset,
-                    3
-                )]
-            },
+            InstantCommand{shoot()},
+            Delay(0.2.seconds),
             WaitUntil { isAtTargetPosition()},
             Delay(0.2.seconds),
         )

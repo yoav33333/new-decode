@@ -43,8 +43,8 @@ enum class State{
     RUN,
     FIX
 }
-public enum class SpindexerSlotState {
-    EMPTY,
-    PURPLE,
-    GREEN,
+public enum class SpindexerSlotState(s: String) {
+    EMPTY("E"),
+    PURPLE("P"),
+    GREEN("G"),
 }

@@ -10,6 +10,7 @@ import dev.nextftc.core.components.Component
 import dev.nextftc.ftc.ActiveOpMode.hardwareMap
 import dev.nextftc.hardware.impl.ServoEx
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.MyTelemetry
+import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware.shooterMotor2
 //import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.fixSpindex
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.fixSpindexSeq
@@ -30,6 +31,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVar
 import org.firstinspires.ftc.teamcode.Util.AxonEncoder
 import org.firstinspires.ftc.teamcode.Util.FilteredColorSensor
 import org.firstinspires.ftc.teamcode.Util.InputChannel
+import org.firstinspires.ftc.teamcode.Util.NewSpindexerTracker
 import org.firstinspires.ftc.teamcode.Util.SpindexerTracker
 import org.firstinspires.ftc.teamcode.Util.Util
 import org.firstinspires.ftc.teamcode.Util.Util.wrap360
@@ -47,7 +49,7 @@ object SpindexerHardware : Component {
     @JvmField var colorSensor2 = lazy { FilteredColorSensor(hardwareMap.get(RevColorSensorV3::class.java, "Rcolor")) }
 
     val timer = Timer()
-    var tracker = SpindexerTracker()
+    var tracker = NewSpindexerTracker()
 
     // --- I/O Caching Variables ---
     private var cachedEncoderPos = 0.0
@@ -95,15 +97,13 @@ object SpindexerHardware : Component {
     fun checkIntakeColorAndUpdate(): Boolean {
         val color = getColorInIntake()
         return if (color != SpindexerSlotState.EMPTY) {
-            tracker.set(intakeSlot, color)
+            tracker.insert(color)
+            update()
+            if (isFull()){
+                preShoot()
+            }
             true
         } else false
-    }
-
-    fun checkIntakeColorAndUpdateAuto(): Boolean {
-        val color = getColorInIntake()
-        tracker[intakeSlot] = if (color != SpindexerSlotState.EMPTY) color else SpindexerSlotState.PURPLE
-        return color != SpindexerSlotState.EMPTY
     }
 
     /**
@@ -122,36 +122,43 @@ object SpindexerHardware : Component {
     fun getPosition(): Double {
         return wrap360(-spindexerEncoder.value.getPosition() * MulEnc + SpindexerVars.offsetEnc)
     }
-
-    fun moveStateToPosition(color: SpindexerSlotState, pos: Int): Boolean {
-        val steps = tracker.stepsToState(color, pos) ?: return false
+    fun preShoot(){
+        tracker.preShoot(RobotVars.randomization)
+        update()
+    }
+    fun shoot(){
+        tracker.shoot()
+        update()
+    }
+    fun update(): Boolean {
+        val steps = tracker.getCurrentPos()
         rotate(steps)
         colorSensor1.value.resetFilter()
         colorSensor2.value.resetFilter()
         return true
     }
 
-    fun moveEmptyToIntakePosition(): Boolean = moveStateToPosition(SpindexerSlotState.EMPTY, SpindexerVars.intakeSlot)
+//    fun moveEmptyToIntakePosition(): Boolean = moveStateToPosition(SpindexerSlotState.EMPTY, SpindexerVars.intakeSlot)
 
-    fun moveColorToTransferPosition(color: SpindexerSlotState): Boolean {
-        return if (moveStateToPosition(color, SpindexerVars.transferSlot)) {
-            tracker[SpindexerVars.transferSlot] = SpindexerSlotState.EMPTY
-            true
-        } else false
-    }
+//    fun moveColorToTransferPosition(color: SpindexerSlotState): Boolean {
+//        return if (moveStateToPosition(color, SpindexerVars.transferSlot)) {
+//            tracker[SpindexerVars.transferSlot] = SpindexerSlotState.EMPTY
+//            true
+//        } else false
+//    }
 
     fun rotate(steps: Int) {
         val newStepPosition = currentSteps + steps
-        if (newStepPosition > 4 || newStepPosition < 2) return
+        if (newStepPosition > 5 || newStepPosition < 0) return
 
         currentSteps = newStepPosition
-        tracker.move(steps)
+//        tracker.move(steps)
         targetPosition = currentSteps * SpindexerVars.degreesPerSlot + SpindexerVars.offset
     }
 
     fun resetSpindexer() {
         currentSteps = 2
-        tracker.setPose(currentSteps)
+        tracker.init()
         targetPosition = currentSteps * SpindexerVars.degreesPerSlot + SpindexerVars.offset
         setPosition(angleToServoPos(targetPosition))
     }

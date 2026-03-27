@@ -27,10 +27,8 @@ import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterCommand
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware.atTargetVelocity
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.fixSpindexSeq
 //import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.fixSpindex
-import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.moveToTransferPositionLocking
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.resetingSeq
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.rotate
-import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.runIntakeCycle
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.getVel
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.isAtTargetPosition
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.makeCurrentPosCorrect
@@ -66,7 +64,7 @@ open class ShittyTeleop(color: AllianceColor): MegiddoOpMode(color, OpModeType.T
             .whenBecomesTrue(rotate(-1))
         Gamepads.gamepad2.dpadUp.whenBecomesTrue (runTransfer )
             .whenBecomesFalse(stopTransfer )
-        Gamepads.gamepad2.leftStickButton.whenBecomesTrue{tracker = SpindexerTracker()}
+        Gamepads.gamepad2.leftStickButton.whenBecomesTrue{tracker.init()}
         Gamepads.gamepad2.dpadDown.whenBecomesTrue((IntakeCommands.intake))
             .whenBecomesFalse(IntakeCommands.stopIntake)
         Gamepads.gamepad2.x.whenBecomesTrue { makeCurrentPosCorrect() }

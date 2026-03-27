@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Robot.Photon
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.intakeCommand
 //import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotCommands.shootingCommand
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.rotate
-import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.runIntakeCycle
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.runIntakeSeq
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.transferAll
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerHardware.getColorInIntake
@@ -32,8 +32,8 @@ class PhotonTest: TunerOpMode(SpindexerHardware, Photon, PedroComponent(Constant
         Gamepads.gamepad2.leftBumper
             .whenBecomesTrue(rotate(-1))
         Gamepads.gamepad2.a.whenBecomesTrue (intakeCommand )
-        Gamepads.gamepad2.b.whenBecomesTrue (runIntakeCycle )
-        Gamepads.gamepad2.leftStickButton.whenBecomesTrue{tracker = SpindexerTracker()}
+        Gamepads.gamepad2.b.whenBecomesTrue (runIntakeSeq )
+        Gamepads.gamepad2.leftStickButton.whenBecomesTrue{tracker.init()}
         Gamepads.gamepad2.dpadDown.whenBecomesTrue(
             ParallelGroup(
                 runTransfer,
