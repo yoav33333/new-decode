@@ -115,6 +115,6 @@ object ShooterHardware : Component {
         // Telemetry is also IO, but usually handled by a separate thread or bulk-buffered
         MyTelemetry.addData("Shooter velocity", currentVelocity)
         MyTelemetry.addData("Shooter target", targetVelocity)
-        MyTelemetry.addData("Hood Servo Pos", lastHoodPos)
+//        MyTelemetry.addData("Hood Servo Pos", lastHoodPos)
     }
 }

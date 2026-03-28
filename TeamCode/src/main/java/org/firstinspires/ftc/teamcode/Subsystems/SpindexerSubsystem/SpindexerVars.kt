@@ -17,7 +17,7 @@ object SpindexerVars {
     @JvmField var degreesPerSlot = 66.5
     @JvmField var offset = 6.5
     @JvmField var offsetEnc = 0.0
-    @JvmField var MulEnc = 1.1
+    @JvmField var mulEnc = 1.1
     @JvmField var purpleRange = HSVRange(170.0,1000.0,0.0,1000.0,0.0,1000.0)
     @JvmField var greenRange = HSVRange(80.0,170.0,0.0,1000.0,0.0,1000.0)
     @JvmField var defaultColor = SpindexerSlotState.PURPLE

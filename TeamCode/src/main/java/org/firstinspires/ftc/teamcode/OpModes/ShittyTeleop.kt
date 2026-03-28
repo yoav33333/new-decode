@@ -91,7 +91,7 @@ open class ShittyTeleop(color: AllianceColor): MegiddoOpMode(color, OpModeType.T
     }
 
     override fun onInit() {
-//        resetingSeq.schedule()
+        resetingSeq.schedule()
 //        turretSeq().schedule()
 
 //        moveToAngle(270.0).schedule()

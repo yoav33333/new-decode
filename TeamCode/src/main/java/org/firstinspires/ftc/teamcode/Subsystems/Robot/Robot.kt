@@ -28,7 +28,7 @@ object Robot: Component {
 
     fun getVoltage(): Double {
         val currentTime = System.currentTimeMillis()
-        if (currentTime - lastVoltageUpdateTime >= 1000) {
+        if (currentTime - lastVoltageUpdateTime >= 200) {
             cachedVoltage = controlHub.value.getInputVoltage(VoltageUnit.VOLTS)
             lastVoltageUpdateTime = currentTime
         }

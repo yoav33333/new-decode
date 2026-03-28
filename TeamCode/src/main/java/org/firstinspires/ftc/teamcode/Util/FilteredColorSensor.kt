@@ -11,9 +11,9 @@ class HSV(var h: Double, var s: Double, var v: Double){
     }
 }
 class FilteredColorSensor(val colorSensor: RevColorSensorV3)  {
-    var hGain = 0.99
-    var sGain = 0.99
-    var vGain = 0.99
+    var hGain = 0.1
+    var sGain = 0.1
+    var vGain = 0.1
     @JvmField public var filterH = MyLowPassFilter(hGain)
     @JvmField public var filterS = MyLowPassFilter(sGain)
     @JvmField public var filterV = MyLowPassFilter(vGain)

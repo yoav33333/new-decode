@@ -74,7 +74,7 @@ object TurretHardware : Component {
 
         MyTelemetry.addData("tx", res.tx)
         // Convert tx to radians and apply gain p
-        return Math.toRadians(res.tx/smartDist * p)
+        return Math.toRadians(res.tx * p)
     }
 
     // --- GETTERS (Using Cached Data) ---
@@ -140,10 +140,10 @@ object TurretHardware : Component {
 
     override fun postUpdate() {
         // Telemetry uses cached values to avoid extra IO hits
-        MyTelemetry.addData("Turret Deg", getAngle())
-        MyTelemetry.addData("Turret Servo Pos", cachedServoPos)
-        MyTelemetry.addData("Turret State", state)
-        MyTelemetry.addData("Turret run", runTurret)
-        MyTelemetry.addData("Turret Global", getGlobalHeading())
+//        MyTelemetry.addData("Turret Deg", getAngle())
+//        MyTelemetry.addData("Turret Servo Pos", cachedServoPos)
+//        MyTelemetry.addData("Turret State", state)
+//        MyTelemetry.addData("Turret run", runTurret)
+//        MyTelemetry.addData("Turret Global", getGlobalHeading())
     }
 }

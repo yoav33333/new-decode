@@ -53,7 +53,7 @@ object RobotCommands {
             ),
             InstantCommand{
                 SequentialGroup(
-                    InstantCommand { resetSpindexer() },
+//                    InstantCommand { resetSpindexer() },
                     InstantCommand { smartIntake.cancel() },
                     outtake,
                     Delay(.5.seconds),
@@ -77,7 +77,6 @@ object RobotCommands {
             ),
             InstantCommand{
                 SequentialGroup(
-                    InstantCommand { resetSpindexer() },
                     InstantCommand { smartIntake.cancel() },
                     outtake,
                     Delay(.5.seconds),

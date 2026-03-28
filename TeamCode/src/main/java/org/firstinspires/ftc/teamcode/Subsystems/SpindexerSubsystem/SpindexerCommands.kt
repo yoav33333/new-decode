@@ -89,8 +89,8 @@ object SpindexerCommands {
             WaitUntil { isAtTargetPosition() && (abs(currentVelocity - targetVelocity) < deltaThreshold) },
             startWhen,
             InstantCommand{shoot()},
-            Delay(0.2.seconds),
+            Delay(0.1.seconds),
             WaitUntil { isAtTargetPosition()},
-            Delay(0.2.seconds),
+            Delay(0.05.seconds),
         )
 }

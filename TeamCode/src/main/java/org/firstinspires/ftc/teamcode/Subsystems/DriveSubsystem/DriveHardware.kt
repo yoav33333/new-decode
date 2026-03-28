@@ -16,6 +16,8 @@ import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveVars.starti
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem.DriveVars.trustLL
 //import org.firstinspires.ftc.teamcode.Subsystems.LL.LimeLight.rotationOffset
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.MyTelemetry
+import org.firstinspires.ftc.teamcode.Subsystems.Robot.OpModeType
+import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars.opModeType
 import kotlin.math.abs
 
 @Configurable
@@ -38,37 +40,39 @@ object DriveHardware : Component {
             followerPose.yComponent*(1-trustLL) + llPose.yComponent*trustLL)
     }
     override fun postUpdate() {
-        val stickThreshold = 0.03
-        val velocityThreshold = 0.01
-        val angularThreshold = 0.03
+        if (opModeType == OpModeType.TELE){
+            val stickThreshold = 0.03
+            val velocityThreshold = 0.01
+            val angularThreshold = 0.03
 
-        // Cache stick values to avoid repeated calls
-        val lx = Gamepads.gamepad1.leftStickX.get()
-        val ly = Gamepads.gamepad1.leftStickY.get()
-        val rx = Gamepads.gamepad1.rightStickX.get()
+            // Cache stick values to avoid repeated calls
+            val lx = Gamepads.gamepad1.leftStickX.get()
+            val ly = Gamepads.gamepad1.leftStickY.get()
+            val rx = Gamepads.gamepad1.rightStickX.get()
 
-        val sticksAtRest = abs(lx) < stickThreshold &&
-                abs(ly) < stickThreshold &&
-                abs(rx) < stickThreshold
+            val sticksAtRest = abs(lx) < stickThreshold &&
+                    abs(ly) < stickThreshold &&
+                    abs(rx) < stickThreshold
 
-        if (sticksAtRest) {
-            val vel = follower.velocity
-            val robotStopped = vel.magnitude < velocityThreshold &&
-                    abs(follower.angularVelocity) < angularThreshold
+            if (sticksAtRest) {
+                val vel = follower.velocity
+                val robotStopped = vel.magnitude < velocityThreshold &&
+                        abs(follower.angularVelocity) < angularThreshold
 
-            if (robotStopped && !isHolding) {
-                follower.holdPoint(follower.pose)
-                isHolding = true
+                if (robotStopped && !isHolding) {
+                    follower.holdPoint(follower.pose)
+                    isHolding = true
+                }
+//            MyTelemetry.addData("Drive State", if (isHolding) "Holding" else "Decelerating")
+            } else {
+                // Only reset if we were previously holding or Pedro is running a path
+                if (isHolding || follower.isBusy) {
+                    follower.breakFollowing()
+                    follower.startTeleopDrive()
+                    isHolding = false
+                }
+//            MyTelemetry.addData("Drive State", "Teleop")
             }
-            MyTelemetry.addData("Drive State", if (isHolding) "Holding" else "Decelerating")
-        } else {
-            // Only reset if we were previously holding or Pedro is running a path
-            if (isHolding || follower.isBusy) {
-                follower.breakFollowing()
-                follower.startTeleopDrive()
-                isHolding = false
-            }
-            MyTelemetry.addData("Drive State", "Teleop")
         }
         Drawing.drawDebug(follower)
     }

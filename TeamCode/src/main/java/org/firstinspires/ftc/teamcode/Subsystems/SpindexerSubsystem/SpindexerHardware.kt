@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Robot.MyTelemetry
 import org.firstinspires.ftc.teamcode.Subsystems.Robot.RobotVars
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem.ShooterHardware.shooterMotor2
 //import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerCommands.fixSpindex
-import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.MulEnc
+import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.mulEnc
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.degreesPerSlot
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.greenRange
 import org.firstinspires.ftc.teamcode.Subsystems.SpindexerSubsystem.SpindexerVars.startIntakingStep
@@ -59,7 +59,7 @@ object SpindexerHardware : Component {
         offsetEnc = -shooterMotor2.value.currentPosition
     }
     fun makeCurrentPosCorrect(){
-        offsetEnc = -cachedEncoderPos - ((currentSteps-2)*degreesPerSlot*2*8192/360)
+        offsetEnc = -cachedEncoderPos - ((currentSteps-5)*degreesPerSlot*2*8192/360/mulEnc)
     }
 
     fun isFull(): Boolean = tracker.isFull()
@@ -87,9 +87,9 @@ object SpindexerHardware : Component {
         return if (color != SpindexerSlotState.EMPTY) {
             tracker.insert(color)
             update()
-            if (isFull()){
-                preShoot()
-            }
+//            if (isFull()){
+//                preShoot()
+//            }
             true
         } else false
     }
@@ -108,7 +108,7 @@ object SpindexerHardware : Component {
     fun getTargetPosition(): Double = lastCommandedServoPos
 
     fun getPosition(): Double {
-        return wrap360(-spindexerEncoder.value.getPosition() * MulEnc + SpindexerVars.offsetEnc)
+        return wrap360(-spindexerEncoder.value.getPosition() * mulEnc + SpindexerVars.offsetEnc)
     }
     fun preShoot(){
         tracker.preShoot(RobotVars.randomization)
@@ -120,7 +120,7 @@ object SpindexerHardware : Component {
     }
     fun update(): Boolean {
         val steps = tracker.getCurrentPos()
-        rotate(steps)
+        setStep(steps)
         colorSensor1.value.resetFilter()
         colorSensor2.value.resetFilter()
         return true
@@ -135,6 +135,14 @@ object SpindexerHardware : Component {
         tracker.rotate(steps)
         targetPosition = currentSteps * SpindexerVars.degreesPerSlot + SpindexerVars.offset
     }
+    fun setStep(steps: Int) {
+        val newStepPosition = steps
+        if (newStepPosition > 5 || newStepPosition < 0) return
+
+        currentSteps = newStepPosition
+//        tracker.rotate(steps)
+        targetPosition = currentSteps * SpindexerVars.degreesPerSlot + SpindexerVars.offset
+    }
 
     fun resetSpindexer() {
         currentSteps = startIntakingStep
@@ -144,7 +152,7 @@ object SpindexerHardware : Component {
     }
 
     fun isAtTargetPosition(): Boolean {
-        return abs(getSpindexerPos() / 2 + startIntakingStep * degreesPerSlot +offset - targetPosition) < 15
+        return abs(getSpindexerPos() / 2*mulEnc + startIntakingStep * degreesPerSlot +offset - targetPosition) < 15
     }
 
     fun isStuck(): Boolean = abs(cachedVelocity) < 2
@@ -188,8 +196,8 @@ object SpindexerHardware : Component {
         MyTelemetry.addData("Target/Step", "%.1f / %d".format(targetPosition, currentSteps))
         MyTelemetry.addData("Stats", "Full: ${tracker.isFull()} | Ball: ${hasBallInTransfer()}")
         MyTelemetry.addData("at target", isAtTargetPosition())
-        MyTelemetry.addData("offset ", getSpindexerPos() / 2 + startIntakingStep * SpindexerVars.degreesPerSlot +offset - targetPosition)
-        MyTelemetry.addData("move Spin ", getSpindexerPos() / 2 + startIntakingStep * SpindexerVars.degreesPerSlot+offset)
+        MyTelemetry.addData("offset ", getSpindexerPos()*mulEnc / 2 + startIntakingStep * SpindexerVars.degreesPerSlot +offset - targetPosition)
+        MyTelemetry.addData("move Spin ", getSpindexerPos()*mulEnc / 2 + startIntakingStep * SpindexerVars.degreesPerSlot+offset)
         MyTelemetry.addData("spin state ", tracker.toString())
     }
 

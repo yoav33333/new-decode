@@ -53,7 +53,7 @@ class NewSpindexerTracker {
         for (i in 0..<spindexerSlots){
             var score = 0
             for (j in 0..<pattern.value.size){
-                score += if (arr[j] == pattern.value[floorMod(j+i+2, spindexerSlots)]) 1 else 0
+                score += if (arr[j] == pattern.value[floorMod(j+i+1, spindexerSlots)]) 1 else 0
             }
             if (score > bestScore){
                 bestSteps = i

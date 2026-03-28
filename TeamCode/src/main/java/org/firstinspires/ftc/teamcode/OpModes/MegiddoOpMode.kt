@@ -31,12 +31,12 @@ open class MegiddoOpMode(allianceColor: AllianceColor, opModeType: OpModeType): 
         RobotVars.allianceColor = allianceColor
         RobotVars.opModeType = opModeType
         addComponents(
+            PedroComponent(Constants::createFollower),
             BindingsComponent,
             BulkReadComponent,
             LoopTimer,
 //            Photon,
             MyTelemetry,
-            PedroComponent(Constants::createFollower),
             LimeLight,
             IntakeHardware,
             TransferHardware,

@@ -31,7 +31,6 @@ open class AutoBase(allianceColor: AllianceColor) : MegiddoOpMode(allianceColor,
     open val finishPose = Pose()
     open fun auto(): SequentialGroup = SequentialGroup()
     init {
-        DriveVars.startingPose = startingPose
     }
     val scan = SequentialGroup(
         resetingSeq,
@@ -39,6 +38,7 @@ open class AutoBase(allianceColor: AllianceColor) : MegiddoOpMode(allianceColor,
     )
     open fun initializePaths(){}
     override fun onInit(){
+        DriveVars.startingPose = startingPose
         initializePaths()
         scan.setRequirements(emptySet())
         scan.schedule()
@@ -49,13 +49,18 @@ open class AutoBase(allianceColor: AllianceColor) : MegiddoOpMode(allianceColor,
         auto.setRequirements(this)
         auto.schedule()
         SequentialGroup(
-            Delay(29.seconds),
+            Delay(29.5.seconds),
             InstantCommand{
                 LambdaCommand().setRequirements(this).schedule()
                 shootingCommand.cancel()
                 follower.holdPoint(finishPose)
             }
         ).schedule()
+    }
+
+    override fun onStop() {
+        follower.breakFollowing()
+        follower.startTeleopDrive()
     }
 
 }

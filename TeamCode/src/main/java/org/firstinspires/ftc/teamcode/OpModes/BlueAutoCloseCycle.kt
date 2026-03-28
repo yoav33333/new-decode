@@ -51,16 +51,16 @@ class BlueAutoCloseCycle: AutoBase(AllianceColor.BLUE) {
     @JvmField var intakeMid = Pose(11.699, 56.865)
     @JvmField var backMidCon1 = Pose(35.181, 58.297)
     @JvmField var backMidCon2 = Pose(35.428, 74.068)
-    @JvmField var intakeGateCon1 = Pose(38.942, 65.652)
-    @JvmField var intakeGate = Pose(14.527, 58.344,Math.toRadians(335.0))
+    @JvmField var intakeGateCon1 = Pose(49.942, 55.652)
+    @JvmField var intakeGate = Pose(14.527, 61.544,Math.toRadians(335.0))
     @JvmField var backGateCon1 = Pose(30.406, 59.837)
     @JvmField var backGateCon2 = Pose(42.038, 68.590)
     @JvmField var backGateCon3 = Pose(39.692, 72.233)
     @JvmField var intakeCloseCon1 = Pose(41.521, 82.352)
     @JvmField var intakeCloseCon2 = Pose(37.359, 85.758)
-    @JvmField var intakeClose = Pose(22.028, 83.620, 0.0)
+    @JvmField var intakeClose = Pose(21.028, 83.620, 0.0)
 
-    override var finishPose = Pose(119.775, 91.634).mirror()
+    override var finishPose = Pose(60.0, 110.408, Math.toRadians(180+180.0))
     var moveToShooting1 = PathChain()
     var moveToIntakeMid = PathChain()
     var moveToShooting2 = PathChain()
@@ -79,8 +79,8 @@ class BlueAutoCloseCycle: AutoBase(AllianceColor.BLUE) {
         moveToIntakeGate = createPath(moveToShooting2.endPose(), intakeGate, tangent = false, reversed = false, intakeGateCon1)
         moveToShooting3 = createPath(intakeGate, shootingPose, tangent = true, reversed = false, backGateCon1, backGateCon2, backGateCon3)
         moveToIntakeClose = createPath(shootingPose, intakeClose, tangent = false)
-        moveToShooting4 = createPath(intakeClose, shootingPose, tangent = false)
-        moveToIntakeGate2 = createPath(moveToShooting4.endPose(), intakeGate, tangent = false, reversed = false, intakeGateCon1)
+        moveToShooting4 = createPath(intakeClose, finishPose, tangent = false)
+        moveToIntakeGate2 = createPath(moveToShooting4.endPose(), intakeGate.plus(Pose(1.0,-0.5)), tangent = false, reversed = false, intakeGateCon1)
         moveToShooting5 = createPath(intakeGate, shootingPose, tangent = true, reversed = false, backGateCon1, backGateCon2, backGateCon3)
     }
 
@@ -90,7 +90,8 @@ class BlueAutoCloseCycle: AutoBase(AllianceColor.BLUE) {
         ),
         shootingCommand,
         Cycle(moveToIntakeMid, moveToShooting2),
-        Cycle(moveToIntakeGate, moveToShooting3, 0.9),
+        Cycle(moveToIntakeGate, moveToShooting3, 1.0),
+        Cycle(moveToIntakeGate2, moveToShooting5, 1.0),
         Cycle(moveToIntakeGate2, moveToShooting5, 1.0),
         Cycle(moveToIntakeClose, moveToShooting4),
     )

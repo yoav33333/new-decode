@@ -49,7 +49,7 @@ class SpinsexerTuner: TunerOpMode(SpindexerHardware, IntakeHardware) {
     }
 
     override fun onInit() {
-//        resetingSeq.schedule()
+        resetingSeq.schedule()
 //        spindexerServo.value.position = 0.5
     }
     override fun onUpdate() {
